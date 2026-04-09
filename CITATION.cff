@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+title: Virtual Company Simulator for Career Planner
+message: If you use this software, please cite it using the metadata below.
+type: software
+version: 0.1.0
+license: MIT
+abstract: >
+  SoftwareX submission artifact for the Career Planner virtual-company
+  simulator, including the FastAPI simulation backend, Vue reviewer demo,
+  experiment scripts, and baseline reproducibility outputs.
+authors:
+  - family-names: Xue
+    given-names: Joker
+  - name: Career Planner Team
+repository-code: https://github.com/Joker-Xue/softwarex-virtual-company-simulator
+keywords:
+  - virtual company
+  - agent simulation
+  - career planning
+  - mbti
+  - softwarex
+preferred-citation:
+  type: software
+  authors:
+    - family-names: Xue
+      given-names: Joker
+    - name: Career Planner Team
+  title: Virtual Company Simulator for Career Planner
+  version: 0.1.0
+  year: 2026
+  notes: SoftwareX submission artifact and reproducibility package.

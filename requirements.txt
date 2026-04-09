@@ -1,0 +1,52 @@
+# Web框架
+fastapi>=0.129.0
+uvicorn>=0.35.0
+
+# 数据库
+sqlalchemy>=2.0.0
+asyncpg>=0.31.0
+alembic>=1.18.0
+
+# 认证与安全
+python-jose[cryptography]>=3.4.0
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.20
+cryptography>=42.0
+
+# 配置与验证
+pydantic-settings>=2.13.0
+email-validator>=2.0.0
+python-dotenv>=1.2.0
+
+# 文件解析
+PyPDF2>=3.0.0
+python-docx>=1.2.0
+PyMuPDF>=1.25.0
+
+# AI与向量检索
+langchain>=1.2.0
+faiss-cpu>=1.13.0
+sentence-transformers>=5.0.0
+
+# 缓存
+redis>=6.0.0
+
+# PDF导出
+weasyprint>=64.0
+reportlab>=4.0.0
+
+# HTTP客户端
+httpx>=0.28.0
+
+# 中文拼音排序
+pypinyin>=0.55.0
+
+# 科学计算与监控
+scipy>=1.14.0
+scikit-learn>=1.6.0
+numpy>=2.0.0
+prometheus-client>=0.22.0
+
+# 测试
+pytest>=8.0.0
+pytest-asyncio>=0.25.0

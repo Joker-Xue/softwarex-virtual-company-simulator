@@ -1,0 +1,87 @@
+{
+  "ok": true,
+  "runtime": {
+    "fingerprint": "8c18c62d94522f86",
+    "parts": {
+      "get_anchor_spot": "539d42e56921",
+      "get_after_work_spot": "ab54df266e40",
+      "get_task_target_spot": "9f8c2afadee9",
+      "reset_npc_positions": "6a0c4a17e3b9",
+      "rebuild_npcs": "f7fc6b40a676"
+    },
+    "behavior_versions": {
+      "npc_behavior_rule": "npc-behavior-v3",
+      "after_work_policy": "after-work-deterministic-v2",
+      "anchor_policy": "anchor-management-only-v2"
+    },
+    "pid": 73428
+  },
+  "distribution": {
+    "online_total": 16,
+    "by_floor": {
+      "1": 2,
+      "2": 11,
+      "3": 3
+    },
+    "online_by_floor": {
+      "1": 2,
+      "2": 11,
+      "3": 3
+    },
+    "by_department": {
+      "engineering": 3,
+      "finance": 2,
+      "hr": 2,
+      "management": 3,
+      "marketing": 2,
+      "operations": 2,
+      "product": 2
+    },
+    "by_floor_department": {
+      "1F-hr": 2,
+      "2F-engineering": 3,
+      "2F-finance": 2,
+      "2F-marketing": 2,
+      "2F-operations": 2,
+      "2F-product": 2,
+      "3F-management": 3
+    },
+    "hotspots": [
+      {
+        "x": 150,
+        "y": 1790,
+        "count": 2,
+        "ratio": 0.125
+      },
+      {
+        "x": 450,
+        "y": 1790,
+        "count": 1,
+        "ratio": 0.0625
+      },
+      {
+        "x": 144,
+        "y": 952,
+        "count": 1,
+        "ratio": 0.0625
+      },
+      {
+        "x": 51,
+        "y": 877,
+        "count": 1,
+        "ratio": 0.0625
+      },
+      {
+        "x": 97,
+        "y": 877,
+        "count": 1,
+        "ratio": 0.0625
+      }
+    ]
+  },
+  "gates": {
+    "floor2_online_gt_0": true,
+    "top1_hotspot_ratio_lt_0_40": true,
+    "top1_hotspot_ratio": 0.125
+  }
+}

@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: vcsim-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-career_planner}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-career_planner_2026}
+      POSTGRES_DB: ${DB_NAME:-career_planner}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: vcsim-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redisdata:/data
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vcsim-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${DB_USER:-career_planner}:${DB_PASSWORD:-career_planner_2026}@db:5432/${DB_NAME:-career_planner}
+      REDIS_URL: redis://redis:6379/0
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.deepseek.com/v1}
+      LLM_MODEL: ${LLM_MODEL:-deepseek-chat}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      SECRET_KEY: ${SECRET_KEY:-change-me}
+      ENCRYPTION_KEY_V1: ${ENCRYPTION_KEY_V1}
+      TIANAPI_KEY: ${TIANAPI_KEY}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  pgdata:
+  redisdata:

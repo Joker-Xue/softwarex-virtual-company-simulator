@@ -1,0 +1,4 @@
+condition,mean_entropy,mean_kl_divergence,distinctiveness_reduction_pct,entropy_drop_pct
+full,1.496782,0.05693,,
+no_mbti,1.539521,0.019738,65.33,
+no_event,1.470151,0.049644,,1.78

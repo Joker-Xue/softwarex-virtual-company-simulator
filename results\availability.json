@@ -1,0 +1,22 @@
+{
+  "environment": {
+    "timestamp_utc": "2026-04-09T12:54:21.519353+00:00",
+    "python": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0"
+  },
+  "mode": "asgi",
+  "base_url": "http://test",
+  "rounds": 9992,
+  "duration_seconds": 60,
+  "paths": [
+    "/openapi.json",
+    "/api/simulation/status",
+    "/api/simulation/diagnostics"
+  ],
+  "probe_total": 29976,
+  "probe_success": 29976,
+  "probe_fail": 0,
+  "availability_pct": 100.0,
+  "elapsed_seconds": 60.12,
+  "failure_breakdown": []
+}

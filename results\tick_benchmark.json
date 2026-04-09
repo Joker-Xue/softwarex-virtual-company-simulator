@@ -1,0 +1,15 @@
+{
+  "environment": {
+    "timestamp_utc": "2026-04-09T12:54:46.078673+00:00",
+    "python": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0"
+  },
+  "warmup_count": 10,
+  "tick_count": 50,
+  "warmup_mean_ms": 129.78,
+  "mean_ms": 129.08,
+  "median_ms": 118.55,
+  "p95_ms": 160.18,
+  "min_ms": 98.56,
+  "max_ms": 161.76
+}

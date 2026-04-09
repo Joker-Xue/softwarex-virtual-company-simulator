@@ -1,0 +1,118 @@
+{
+  "rebuild_status_code": 200,
+  "diagnostics_status_code": 200,
+  "rebuild": {
+    "ok": true,
+    "report": {
+      "deleted_npc_profiles": 16,
+      "deleted_npc_users": 16,
+      "created_npc_profiles": 16,
+      "repositioned_profiles": 31,
+      "distribution": {
+        "online_total": 16,
+        "by_floor": {
+          "1": 2,
+          "2": 11,
+          "3": 3
+        },
+        "online_by_floor": {
+          "1": 2,
+          "2": 11,
+          "3": 3
+        },
+        "by_department": {
+          "engineering": 3,
+          "finance": 2,
+          "hr": 2,
+          "management": 3,
+          "marketing": 2,
+          "operations": 2,
+          "product": 2
+        },
+        "by_floor_department": {
+          "1F-hr": 2,
+          "2F-engineering": 3,
+          "2F-finance": 2,
+          "2F-marketing": 2,
+          "2F-operations": 2,
+          "2F-product": 2,
+          "3F-management": 3
+        },
+        "hotspots": [
+          {
+            "x": 150,
+            "y": 1790,
+            "count": 2,
+            "ratio": 0.125
+          },
+          {
+            "x": 450,
+            "y": 1790,
+            "count": 1,
+            "ratio": 0.0625
+          },
+          {
+            "x": 144,
+            "y": 952,
+            "count": 1,
+            "ratio": 0.0625
+          },
+          {
+            "x": 51,
+            "y": 877,
+            "count": 1,
+            "ratio": 0.0625
+          },
+          {
+            "x": 97,
+            "y": 877,
+            "count": 1,
+            "ratio": 0.0625
+          }
+        ]
+      }
+    }
+  },
+  "diagnostics_gates": {
+    "floor2_online_gt_0": true,
+    "top1_hotspot_ratio_lt_0_40": true,
+    "top1_hotspot_ratio": 0.125
+  },
+  "distribution_by_floor": {
+    "1": 2,
+    "2": 11,
+    "3": 3
+  },
+  "top_hotspots": [
+    {
+      "x": 150,
+      "y": 1790,
+      "count": 2,
+      "ratio": 0.125
+    },
+    {
+      "x": 450,
+      "y": 1790,
+      "count": 1,
+      "ratio": 0.0625
+    },
+    {
+      "x": 144,
+      "y": 952,
+      "count": 1,
+      "ratio": 0.0625
+    },
+    {
+      "x": 51,
+      "y": 877,
+      "count": 1,
+      "ratio": 0.0625
+    },
+    {
+      "x": 97,
+      "y": 877,
+      "count": 1,
+      "ratio": 0.0625
+    }
+  ]
+}
