@@ -1,6 +1,8 @@
-# Virtual Company Simulator for Career Planner
+﻿# Virtual Company Simulator for Career Planner
 
 This repository stage contains the virtual-company simulator and reproducibility assets prepared for a SoftwareX submission. The artifact focuses on an AI-driven office world in which MBTI-shaped agents work, socialize, join company events, and evolve through a shared simulation loop exposed through a FastAPI backend and a Vue 3 frontend.
+
+The formal SoftwareX submission release for this public artifact is `v1.0.0`.
 
 The public SoftwareX package should be curated from the simulator boundary documented in `docs/softwarex_submission_boundary.md`. This staging branch still lives inside the private monorepo so that the simulator can be stabilized, documented, and exported cleanly.
 
