@@ -91,6 +91,13 @@ async def create_profile(
     except Exception:
         pass
 
+    # 为新角色自动生成初始任务
+    try:
+        from app.engine.task_generator import generate_tasks_for_agent
+        await generate_tasks_for_agent(profile, db)
+    except Exception:
+        pass
+
     return AgentProfileOut(**_fill_career_title(profile))
 
 
