@@ -21,7 +21,7 @@ const effectiveMultipliers = computed(() => personalityTrace.value?.effective_mu
 const activeTab = ref('info')
 
 // ── 日程相关 ──
-// 当前时间（每分钟更新一次，用于高亮当前日程项）
+// 当前时间（每分钟更新一次，用于高亮当前日程items）
 const currentTime = ref(getCurrentTimeStr())
 let timeTimer: ReturnType<typeof setInterval> | null = null
 
@@ -41,12 +41,12 @@ onUnmounted(() => {
   if (timeTimer) clearInterval(timeTimer)
 })
 
-// 日程数据
+// 日程Stats
 const schedule = computed(() => {
   return displayAgent.value?.daily_schedule || []
 })
 
-// 判断某个日程项是否为当前活动时间段
+// 判断某个日程items是否为当前Events时间段
 function isCurrentBlock(index: number): boolean {
   if (!schedule.value.length) return false
   const now = currentTime.value
@@ -59,7 +59,7 @@ function isCurrentBlock(index: number): boolean {
   return false
 }
 
-// 活动名称到颜色的映射
+// Events名称到颜色的映射
 function getActivityColor(activity: string): string {
   const colorMap: Record<string, string> = {
     '工作': '#6366f1',
@@ -98,7 +98,7 @@ const MEMORY_TYPE_COLORS: Record<string, string> = {
 
 const MEMORY_TYPE_LABELS: Record<string, string> = {
   interaction: '互动',
-  task: '任务',
+  task: 'Tasks',
   observation: '观察',
   career: '职业',
   social: '社交',
@@ -113,9 +113,9 @@ async function addFriend() {
   if (!store.selectedAgent) return
   try {
     await store.sendFriendRequest(store.selectedAgent.id)
-    ElMessage.success('好友申请已发送')
+    ElMessage.success('Friends申请已Send')
   } catch (e: any) {
-    ElMessage.error(e?.response?.data?.detail || '发送失败，请稍后重试')
+    ElMessage.error(e?.response?.data?.detail || 'Send失败，请稍后重试')
   }
 }
 
@@ -196,7 +196,7 @@ async function fetchSalaryInfo() {
 
 <template>
   <div class="profile-card" v-if="displayAgent">
-    <div v-if="!isMe" class="back-btn" @click="clearSelection">&larr; 返回我的角色</div>
+    <div v-if="!isMe" class="back-btn" @click="clearSelection">&larr; 返回我的Profile</div>
 
     <div class="card-header">
       <div class="avatar" :style="{ background: AVATAR_COLORS[displayAgent.avatar_key] || '#6366f1', boxShadow: '0 0 12px ' + (AVATAR_COLORS[displayAgent.avatar_key] || '#6366f1') }">
@@ -238,7 +238,7 @@ async function fetchSalaryInfo() {
         <div class="influence-title">{{ store.myProfile?.mbti }} 性格影响</div>
         <div class="influence-grid">
           <div class="inf-item">
-            <span class="inf-label">工作速度</span>
+            <span class="inf-label">Work Speed</span>
             <span class="inf-value" :class="{ boosted: effectiveMultipliers.work_speed > 1 }">{{ effectiveMultipliers.work_speed?.toFixed(2) }}x</span>
           </div>
           <div class="inf-item">
@@ -250,7 +250,7 @@ async function fetchSalaryInfo() {
             <span class="inf-value" :class="{ boosted: effectiveMultipliers.xp_bonus > 1 }">{{ effectiveMultipliers.xp_bonus?.toFixed(2) }}x</span>
           </div>
           <div class="inf-item">
-            <span class="inf-label">职业倾向</span>
+            <span class="inf-label">Career Tendency</span>
             <span class="inf-value career">{{ effectiveMultipliers.career_tendency === 'technical' ? '技术' : '管理' }}</span>
           </div>
         </div>
@@ -260,7 +260,7 @@ async function fetchSalaryInfo() {
       <div class="level-progress" v-if="isMe && store.nextLevel">
         <div class="progress-label">
           下一级: {{ store.nextLevel.title }}
-          (任务 {{ store.myProfile!.tasks_completed }}/{{ store.nextLevel.tasksRequired }}，
+          (Tasks {{ store.myProfile!.tasks_completed }}/{{ store.nextLevel.tasksRequired }}，
           XP {{ store.myProfile!.xp }}/{{ store.nextLevel.xpRequired }})
         </div>
         <el-progress
@@ -278,7 +278,7 @@ async function fetchSalaryInfo() {
 
       <!-- 操作按钮 -->
       <div v-if="!isMe" class="action-btns">
-        <button class="cyber-btn" @click="addFriend">加好友</button>
+        <button class="cyber-btn" @click="addFriend">加Friends</button>
         <button class="cyber-btn cyber-btn-violet" @click="emit('open-chat', displayAgent!.id)">发消息</button>
       </div>
     </template>

@@ -188,11 +188,11 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
   const roomMap = ref<CompanyRoom[]>([])
   const personalityTrace = ref<any>(null)
   const taskStatus = ref<any>(null)
-  // 私聊AI正在输入状态
+  // 私聊AITyping状态
   const aiTyping = ref(false)
   // 频道实时消息推送（组件监听此值处理新消息）
   const lastChannelMessage = ref<{ group_id: string; message: any } | null>(null)
-  // 好友申请通过通知
+  // Friends申请通过通知
   const friendAcceptedNotif = ref<{ nickname: string } | null>(null)
 
   // Computed
@@ -219,7 +219,7 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
     return agentFloor === floor
   }
 
-  /** 当前楼层在线的角色（在该层某个房间内 或 坐标在走廊区域内的角色） */
+  /** 当前楼层在线的Profile（在该层某个房间内 或 坐标在走廊区域内的Profile） */
   const currentFloorAgents = computed<AgentProfile[]>(() => {
     return onlineAgents.value.filter(a => isAgentOnFloor(a, currentFloor.value))
   })
@@ -265,7 +265,7 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
   }
 
   async function moveAgent(x: number, y: number) {
-    // 将画布坐标编码为楼层偏移pos_y，再通过WebSocket发送
+    // 将画布坐标编码为楼层偏移pos_y，再通过WebSocketSend
     const encodedY = y + (currentFloor.value - 1) * FLOOR_Y_OFFSET
     const ws = getAgentWS()
     ws.move(x, encodedY)
@@ -312,7 +312,7 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
 
   async function completeTask(taskId: number) {
     const { data } = await request.post(`/api/task/${taskId}/complete`)
-    // 更新本地任务状态
+    // 更新本地Tasks状态
     const idx = tasks.value.findIndex(t => t.id === taskId)
     if (idx >= 0) tasks.value[idx].status = 'completed'
     // 更新profile
@@ -378,15 +378,15 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
       content,
     })
     chatMessages.value.push(data)
-    // 也通过WS发送
+    // 也通过WSSend
     const ws = getAgentWS()
     ws.chat(receiverId, content)
-    // 如果对方是AI角色，显示"正在输入"状态（后端会通过WS推送回复）
+    // 如果对方是AIProfile，显示"Typing"状态（后端会通过WS推送回复）
     const targetFriend = friends.value.find(
       f => (f.from_id === myProfile.value?.id ? f.to_id : f.from_id) === receiverId
     )
     if (data.msg_type !== 'ai_generated') {
-      // 检查目标是否是AI角色（通过在线agents列表）
+      // 检查目标是否是AIProfile（通过在线agents列表）
       const targetAgent = onlineAgents.value.find(a => a.id === receiverId)
       if (targetAgent?.ai_enabled) {
         aiTyping.value = true
@@ -472,7 +472,7 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
     })
 
     ws.on('new_message', (data: any) => {
-      // 收到消息时清除"正在输入"状态
+      // 收到消息时清除"Typing"状态
       aiTyping.value = false
       if (data.from === chatTarget.value) {
         chatMessages.value.push({
@@ -499,7 +499,7 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
     })
 
     ws.on('friend_accepted', (data: any) => {
-      // NPC 通过好友申请：自动刷新好友列表和发出的申请状态
+      // NPC 通过Friends申请：自动RefreshFriends列表和发出的申请状态
       friendAcceptedNotif.value = { nickname: data.nickname || 'NPC' }
       fetchFriends()
       fetchSentRequests()

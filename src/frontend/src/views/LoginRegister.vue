@@ -13,7 +13,7 @@ const password = ref('')
 
 async function handleLogin() {
   if (!username.value || !password.value) {
-    ElMessage.warning('请填写用户名和密码')
+    ElMessage.warning('Please enter username and password')
     return
   }
   loading.value = true
@@ -24,10 +24,10 @@ async function handleLogin() {
     const { data } = await request.post('/api/auth/login', params)
     localStorage.setItem('token', data.access_token)
     localStorage.setItem('user', JSON.stringify(data.user))
-    ElMessage.success('登录成功')
+    ElMessage.success('Login successful')
     router.push('/agent-world')
   } catch (e: any) {
-    ElMessage.error(e.response?.data?.detail || '登录失败')
+    ElMessage.error(e.response?.data?.detail || 'Login failed')
   } finally {
     loading.value = false
   }
@@ -35,7 +35,7 @@ async function handleLogin() {
 
 async function handleRegister() {
   if (!username.value || !email.value || !password.value) {
-    ElMessage.warning('请填写所有必填项')
+    ElMessage.warning('Please fill in all required fields')
     return
   }
   loading.value = true
@@ -47,10 +47,10 @@ async function handleRegister() {
     })
     localStorage.setItem('token', data.access_token)
     localStorage.setItem('user', JSON.stringify(data.user))
-    ElMessage.success('注册成功')
+    ElMessage.success('Registration successful')
     router.push('/agent-world')
   } catch (e: any) {
-    ElMessage.error(e.response?.data?.detail || '注册失败')
+    ElMessage.error(e.response?.data?.detail || 'Registration failed')
   } finally {
     loading.value = false
   }

@@ -25,33 +25,33 @@ watch(() => store.selectedAgent, (agent) => {
   <div class="agent-panel">
     <div class="panel-tabs">
       <button :class="{ active: activeTab === 'profile' }" @click="activeTab = 'profile'">
-        角色
+        Profile
       </button>
       <button :class="{ active: activeTab === 'tasks' }" @click="activeTab = 'tasks'">
-        任务
+        Tasks
       </button>
       <button :class="{ active: activeTab === 'friends' }" @click="activeTab = 'friends'">
-        好友
+        Friends
         <span v-if="store.pendingRequests.length" class="badge">
           <span class="pulse-dot pulse-dot-rose"></span>
           {{ store.pendingRequests.length }}
         </span>
       </button>
       <button :class="{ active: activeTab === 'chat' }" @click="activeTab = 'chat'">
-        聊天
+        Chat
         <span v-if="store.unreadCount" class="badge">
           <span class="pulse-dot pulse-dot-rose"></span>
           {{ store.unreadCount }}
         </span>
       </button>
       <button :class="{ active: activeTab === 'events' }" @click="activeTab = 'events'">
-        活动
+        Events
       </button>
       <button :class="{ active: activeTab === 'analytics' }" @click="activeTab = 'analytics'">
-        数据
+        Stats
       </button>
       <button class="tab-btn" :class="{ active: activeTab === 'trace' }" @click="activeTab = 'trace'">
-        <span>🧬</span> 轨迹
+        <span>🧬</span> Trace
       </button>
     </div>
 

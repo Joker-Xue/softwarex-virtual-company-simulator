@@ -424,11 +424,11 @@ function drawStatic() {
 
   // ── Spot legend (bottom-right corner) ──
   const legendItems: Array<{ label: string; color: string }> = [
-    { label: '高管锚点', color: SPOT_COLORS.anchor },
-    { label: '工位',     color: SPOT_COLORS.work },
-    { label: '访客席',   color: SPOT_COLORS.visitor },
-    { label: '休息区',   color: SPOT_COLORS.rest },
-    { label: '会议椅',   color: SPOT_COLORS.meeting },
+    { label: 'Executive', color: SPOT_COLORS.anchor },
+    { label: 'Workstation',     color: SPOT_COLORS.work },
+    { label: 'Visitor',   color: SPOT_COLORS.visitor },
+    { label: 'Rest Area',   color: SPOT_COLORS.rest },
+    { label: 'Meeting',   color: SPOT_COLORS.meeting },
   ]
   const legendX = w - 72
   const legendStartY = h - 6 - legendItems.length * 14
@@ -517,7 +517,7 @@ function draw() {
     }
   }
 
-  // ---- 绘制在线角色 (sprite版) ----
+  // ---- 绘制在线Profile (sprite版) ----
   const allAgents = [...store.onlineAgents]
   if (store.myProfile) {
     const myIdx = allAgents.findIndex(a => a.id === store.myProfile!.id)
@@ -533,7 +533,7 @@ function draw() {
     // ── 楼层过滤：pos_y 包含楼层偏移，解码出所在楼层 ──
     const agentFloor = Math.floor(agent.pos_y / FLOOR_Y_OFFSET) + 1
     if (agentFloor !== store.currentFloor) {
-      // 该角色不在当前楼层，清理其动画状态并跳过渲染
+      // 该Profile不在当前楼层，清理其动画状态并跳过渲染
       displayPositions.delete(id)
       prevPositions.delete(id)
       walkFrames.delete(id)
@@ -647,7 +647,7 @@ function handleClick(e: MouseEvent) {
   const x = Math.round((e.clientX - rect.left) * scaleX)
   const y = Math.round((e.clientY - rect.top) * scaleY)
 
-  // 检查是否点击了其他角色 (use display positions for accurate hit-test)
+  // 检查是否点击了其他Profile (use display positions for accurate hit-test)
   const allAgents = store.onlineAgents
   for (const agent of allAgents) {
     if (agent.id === store.myProfile.id) continue

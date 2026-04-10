@@ -333,7 +333,7 @@ async function onCanvasClick(evt: MouseEvent) {
       const result = await store.interactInsideRoom(props.room.id, objectKey)
       statusText.value = result.reason
       if (result.success) {
-        ElMessage.success(`操作成功：任务+${result.task_delta}，XP+${result.xp_delta}`)
+        ElMessage.success(`Success：Tasks+${result.task_delta}，XP+${result.xp_delta}`)
         await Promise.all([store.fetchTasks(), loadInteractions()])
       } else {
         ElMessage.warning(result.reason)
@@ -346,7 +346,7 @@ async function onCanvasClick(evt: MouseEvent) {
     await store.moveInsideRoom(props.room.id, p.roomX, p.roomY)
     statusText.value = '已移动到最近可交互点位'
   } catch (e: any) {
-    statusText.value = e?.response?.data?.message || '操作失败'
+    statusText.value = e?.response?.data?.message || 'Failed'
     ElMessage.error(statusText.value)
   } finally {
     loading.value = false

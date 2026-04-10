@@ -1,5 +1,5 @@
 /**
- * 公司地图配置数据
+ * 公司地图配置Stats
  * Canvas尺寸: 600 x 600 (缩放后显示)
  * 多楼层: 每层 600x600，3个房间横向排列
  */
@@ -205,11 +205,11 @@ export const ACTION_LABELS: Record<string, string> = {
  * 语义化座位定义（与 app/engine/named_spots.py 完全对齐）
  * spot_type:
  *   anchor   - 高管锚定位（CEO/总监专属）
- *   work     - 普通工位
- *   visitor  - 访客席（在高管办公室前）
- *   rest     - 休息区（咖啡厅/大厅）
+ *   work     - 普通Workstation
+ *   visitor  - Visitor（在高管办公室前）
+ *   rest     - Rest Area（咖啡厅/大厅）
  *   meeting  - 会议室座椅
- *   reception- 大厅前台
+ *   reception- 大厅Reception
  */
 export type SpotType = 'anchor' | 'work' | 'visitor' | 'rest' | 'meeting' | 'reception'
 
@@ -224,11 +224,11 @@ export interface NamedSpot {
 /** 座位类型对应的视觉颜色 */
 export const SPOT_COLORS: Record<SpotType, string> = {
   anchor:    '#f59e0b',  // 金黄 — 高管专属
-  work:      '#22d3ee',  // 青色 — 工位
-  visitor:   '#a78bfa',  // 紫色 — 访客席
-  rest:      '#fb923c',  // 橙色 — 休息区
-  meeting:   '#4ade80',  // 绿色 — 会议椅
-  reception: '#f472b6',  // 粉色 — 前台
+  work:      '#22d3ee',  // 青色 — Workstation
+  visitor:   '#a78bfa',  // 紫色 — Visitor
+  rest:      '#fb923c',  // 橙色 — Rest Area
+  meeting:   '#4ade80',  // 绿色 — Meeting
+  reception: '#f472b6',  // 粉色 — Reception
 }
 
 export const NAMED_SPOTS: Record<string, NamedSpot> = {

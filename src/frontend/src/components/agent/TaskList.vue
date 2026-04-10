@@ -39,7 +39,7 @@ function formatDuration(s: number) {
   return Math.round(s / 60) + 'm ' + Math.round(s % 60) + 's'
 }
 
-/** 解析任务描述中的地点/联系人元数据 */
+/** 解析Tasks描述中的地点/联系人元Stats */
 function parseTaskMeta(description: string): { location: string; contact: string } {
   if (!description) return { location: '', contact: '' }
   const m = description.match(/^\[地点:([^|]+)\|联系:([^\]]+)\]/)
@@ -54,7 +54,7 @@ function parseTaskMeta(description: string): { location: string; contact: string
     <div v-if="currentTask" class="current-task cyber-card scan-lines">
       <div class="section-header">
         <span class="header-dot" style="background: var(--accent-cyan)"></span>
-        <span class="header-text">当前任务</span>
+        <span class="header-text">Current Task</span>
         <span class="task-type-badge">{{ currentTask.task_type || 'project' }}</span>
       </div>
       <div class="task-name">{{ currentTask.name }}</div>
@@ -86,7 +86,7 @@ function parseTaskMeta(description: string): { location: string; contact: string
       <!-- Speed Factors -->
       <div class="speed-factors" v-if="currentTask.speed_factors">
         <span class="factor-tag" v-for="(v, k) in currentTask.speed_factors" :key="k">
-          {{ k === 'work_speed' ? '工作速度' : k === 'tag_affinity' ? '标签匹配' : k === 'base_time' ? '基础时间' : '最终耗时' }}
+          {{ k === 'work_speed' ? 'Work Speed' : k === 'tag_affinity' ? '标签匹配' : k === 'base_time' ? '基础时间' : '最终耗时' }}
           <strong>{{ v }}</strong>
         </span>
       </div>
@@ -101,20 +101,20 @@ function parseTaskMeta(description: string): { location: string; contact: string
     <div v-else class="no-task cyber-card">
       <div class="section-header">
         <span class="header-dot" style="background: var(--text-muted)"></span>
-        <span class="header-text">当前任务</span>
+        <span class="header-text">Current Task</span>
       </div>
-      <p class="empty-text">AI正在选择下一个任务...</p>
+      <p class="empty-text">AI selecting next task...</p>
     </div>
 
     <!-- Task Queue -->
     <div class="queue-section">
       <div class="section-header">
         <span class="header-dot" style="background: var(--accent-violet)"></span>
-        <span class="header-text">任务队列</span>
-        <span class="queue-count">{{ taskQueue.length }}/3 项</span>
+        <span class="header-text">Task Queue</span>
+        <span class="queue-count">{{ taskQueue.length }}/3 items</span>
       </div>
 
-      <div v-if="taskQueue.length === 0" class="empty-text">暂无待处理任务</div>
+      <div v-if="taskQueue.length === 0" class="empty-text">No pending tasks</div>
 
       <div v-for="(task, i) in taskQueue" :key="task.task_id" class="queue-item" :style="{ animationDelay: Number(i) * 0.05 + 's' }">
         <div class="queue-left">
@@ -141,8 +141,8 @@ function parseTaskMeta(description: string): { location: string; contact: string
     <div class="completed-section" v-if="completedTasks.length">
       <div class="section-header">
         <span class="header-dot" style="background: var(--accent-emerald)"></span>
-        <span class="header-text">已完成</span>
-        <span class="queue-count">{{ completedTasks.length }} 项</span>
+        <span class="header-text">Done</span>
+        <span class="queue-count">{{ completedTasks.length }} items</span>
       </div>
       <div v-for="task in completedTasks" :key="task.id" class="completed-item">
         <span class="check-icon">&#x2713;</span>

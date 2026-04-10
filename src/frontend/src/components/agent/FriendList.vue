@@ -17,8 +17,8 @@ onMounted(() => {
 watch(() => store.friendAcceptedNotif, (notif) => {
   if (notif) {
     ElNotification({
-      title: '好友申请已通过',
-      message: `${notif.nickname} 通过了你的好友申请`,
+      title: 'Friends申请已通过',
+      message: `${notif.nickname} 通过了你的Friends申请`,
       type: 'success',
       duration: 4000,
       position: 'top-right',
@@ -37,7 +37,7 @@ async function accept(id: number) {
     await store.acceptFriend(id)
     ElMessage.success('已接受')
     store.fetchReceivedHistory()
-  } catch { ElMessage.error('操作失败') }
+  } catch { ElMessage.error('Failed') }
 }
 
 async function reject(id: number) {
@@ -45,7 +45,7 @@ async function reject(id: number) {
     await store.rejectFriend(id)
     ElMessage.success('已拒绝')
     store.fetchReceivedHistory()
-  } catch { ElMessage.error('操作失败') }
+  } catch { ElMessage.error('Failed') }
 }
 
 function compatColor(label: string): string {
@@ -84,7 +84,7 @@ const STATUS_TEXT: Record<string, string> = {
     <!-- 顶部导航 -->
     <div class="top-nav">
       <button class="nav-btn" :class="{ active: activeView === 'friends' }" @click="activeView = 'friends'">
-        好友列表
+        Friends列表
         <span v-if="store.friends.length" class="count-badge">{{ store.friends.length }}</span>
       </button>
       <button class="nav-btn" :class="{ active: activeView === 'requests' }" @click="switchToRequests">
@@ -95,11 +95,11 @@ const STATUS_TEXT: Record<string, string> = {
       </button>
     </div>
 
-    <!-- ── 好友列表视图 ── -->
+    <!-- ── Friends列表视图 ── -->
     <template v-if="activeView === 'friends'">
-      <!-- 待处理请求（收到的） -->
+      <!-- Pending请求（收到的） -->
       <div v-if="store.pendingRequests.length" class="section">
-        <div class="section-title">待处理请求 ({{ store.pendingRequests.length }})</div>
+        <div class="section-title">Pending请求 ({{ store.pendingRequests.length }})</div>
         <div v-for="req in store.pendingRequests" :key="req.id" class="friend-item pending">
           <div class="friend-avatar" :style="{ background: AVATAR_COLORS[req.avatar_key] || '#6366f1', boxShadow: '0 0 10px ' + (AVATAR_COLORS[req.avatar_key] || '#6366f1') }">
             {{ req.nickname?.[0] || '?' }}
@@ -113,10 +113,10 @@ const STATUS_TEXT: Record<string, string> = {
         </div>
       </div>
 
-      <!-- 好友列表 -->
+      <!-- Friends列表 -->
       <div class="section">
-        <div class="section-title">好友 ({{ store.friends.length }})</div>
-        <div v-if="store.friends.length === 0" class="empty">还没有好友，在地图上点击其他角色添加吧</div>
+        <div class="section-title">Friends ({{ store.friends.length }})</div>
+        <div v-if="store.friends.length === 0" class="empty">还没有Friends，在地图上点击其他Profile添加吧</div>
         <div
           v-for="f in store.friends" :key="f.id"
           class="friend-item"
@@ -145,7 +145,7 @@ const STATUS_TEXT: Record<string, string> = {
             <el-tooltip v-if="f.compatibility_label" :content="`兼容性: ${(f.compatibility_score * 100).toFixed(0)}% (${f.friend_mbti})`" placement="top">
               <span class="cyber-badge cyber-badge-cyan compat-tag">{{ f.compatibility_label }}</span>
             </el-tooltip>
-            <button class="cyber-btn cyber-btn-sm">聊天</button>
+            <button class="cyber-btn cyber-btn-sm">Chat</button>
           </div>
         </div>
       </div>
@@ -156,7 +156,7 @@ const STATUS_TEXT: Record<string, string> = {
       <!-- 我发出的申请 -->
       <div class="section">
         <div class="section-title">我发出的申请 ({{ store.sentRequests.length }})</div>
-        <div v-if="store.sentRequests.length === 0" class="empty">暂无发出的申请</div>
+        <div v-if="store.sentRequests.length === 0" class="empty">No sent requests</div>
         <div v-for="req in store.sentRequests" :key="req.id" class="req-item">
           <div class="friend-avatar" :style="{ background: AVATAR_COLORS[req.avatar_key] || '#6366f1', boxShadow: '0 0 8px ' + (AVATAR_COLORS[req.avatar_key] || '#6366f1') }">
             {{ req.nickname?.[0] || '?' }}
@@ -177,7 +177,7 @@ const STATUS_TEXT: Record<string, string> = {
       <!-- 收到的申请 -->
       <div class="section">
         <div class="section-title">收到的申请 ({{ store.receivedHistory.length }})</div>
-        <div v-if="store.receivedHistory.length === 0" class="empty">暂无收到的申请</div>
+        <div v-if="store.receivedHistory.length === 0" class="empty">No received requests</div>
         <div v-for="req in store.receivedHistory" :key="req.id" class="req-item">
           <div class="friend-avatar" :style="{ background: AVATAR_COLORS[req.avatar_key] || '#6366f1', boxShadow: '0 0 8px ' + (AVATAR_COLORS[req.avatar_key] || '#6366f1') }">
             {{ req.nickname?.[0] || '?' }}
@@ -186,7 +186,7 @@ const STATUS_TEXT: Record<string, string> = {
             <div class="req-name">{{ req.nickname }}</div>
             <div class="req-time">{{ timeAgo(req.created_at) }}</div>
           </div>
-          <!-- 待处理：显示接受/拒绝 -->
+          <!-- Pending：显示接受/拒绝 -->
           <template v-if="req.status === 'pending'">
             <button class="cyber-btn cyber-btn-sm cyber-btn-emerald" @click="accept(req.id)">接受</button>
             <button class="cyber-btn cyber-btn-sm cyber-btn-rose" @click="reject(req.id)">拒绝</button>

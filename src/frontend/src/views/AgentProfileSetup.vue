@@ -48,7 +48,7 @@ const mbtiDescriptions: Record<string, string> = {
   ESFP: '表演者 - 自发热情的娱乐者',
 }
 
-// MBTI性格影响预览数据
+// MBTI性格影响预览Stats
 interface MbtiImpact {
   workStyle: string
   socialStyle: string
@@ -57,22 +57,22 @@ interface MbtiImpact {
 }
 
 const mbtiImpacts: Record<string, MbtiImpact> = {
-  INTJ: { workStyle: '独立思考，追求完美方案', socialStyle: '少而精，深度交流', careerTendency: '技术路线', specialBonus: '高难度任务XP +15%' },
-  INTP: { workStyle: '逻辑驱动，热衷创新', socialStyle: '话题驱动型社交', careerTendency: '技术路线', specialBonus: '工作效率 +26%' },
-  ENTJ: { workStyle: '目标导向，高效执行', socialStyle: '主导型社交，影响力强', careerTendency: '管理路线', specialBonus: '任务XP +5%' },
-  ENTP: { workStyle: '跳跃思维，善于创新', socialStyle: '广泛社交，辩论爱好者', careerTendency: '技术路线', specialBonus: '社交亲密度 +30%' },
-  INFJ: { workStyle: '洞察驱动，追求意义', socialStyle: '选择性社交，高质量', careerTendency: '管理路线', specialBonus: '工作效率 +15%' },
-  INFP: { workStyle: '理想主义，创意优先', socialStyle: '温和共情型社交', careerTendency: '管理路线', specialBonus: '社交亲密度 +20%' },
-  ENFJ: { workStyle: '团队协作，激励他人', socialStyle: '天生的社交组织者', careerTendency: '管理路线', specialBonus: '社交亲密度 +56%' },
-  ENFP: { workStyle: '灵感驱动，多项目并行', socialStyle: '热情洋溢的社交达人', careerTendency: '管理路线', specialBonus: '社交亲密度 +56%' },
-  ISTJ: { workStyle: '严谨有序，按流程办事', socialStyle: '守信可靠的合作者', careerTendency: '技术路线', specialBonus: '工作效率 +27%' },
-  ISFJ: { workStyle: '细致入微，关注细节', socialStyle: '温暖守护型社交', careerTendency: '管理路线', specialBonus: '工作效率 +15%' },
-  ESTJ: { workStyle: '结果导向，管理力强', socialStyle: '直接高效的沟通风格', careerTendency: '技术路线', specialBonus: '工作效率 +15%' },
-  ESFJ: { workStyle: '协调合作，关注团队', socialStyle: '社区核心型社交', careerTendency: '管理路线', specialBonus: '社交亲密度 +56%' },
-  ISTP: { workStyle: '实操派，解决实际问题', socialStyle: '行动导向型社交', careerTendency: '技术路线', specialBonus: '工作效率 +27%' },
-  ISFP: { workStyle: '感性创作，艺术导向', socialStyle: '安静的观察者', careerTendency: '管理路线', specialBonus: '工作效率 +15%' },
-  ESTP: { workStyle: '行动派，敢于冒险', socialStyle: '活力四射的社交者', careerTendency: '技术路线', specialBonus: '社交亲密度 +30%' },
-  ESFP: { workStyle: '活泼多变，氛围担当', socialStyle: '团队开心果', careerTendency: '管理路线', specialBonus: '社交亲密度 +56%' },
+  INTJ: { workStyle: '独立思考，追求完美方案', socialStyle: '少而精，深度交流', careerTendency: 'Technical', specialBonus: '高难度TasksXP +15%' },
+  INTP: { workStyle: '逻辑驱动，热衷创新', socialStyle: '话题驱动型社交', careerTendency: 'Technical', specialBonus: '工作效率 +26%' },
+  ENTJ: { workStyle: '目标导向，高效执行', socialStyle: '主导型社交，影响力强', careerTendency: 'Management', specialBonus: 'TasksXP +5%' },
+  ENTP: { workStyle: '跳跃思维，善于创新', socialStyle: '广泛社交，辩论爱好者', careerTendency: 'Technical', specialBonus: '社交亲密度 +30%' },
+  INFJ: { workStyle: '洞察驱动，追求意义', socialStyle: '选择性社交，高质量', careerTendency: 'Management', specialBonus: '工作效率 +15%' },
+  INFP: { workStyle: '理想主义，创意优先', socialStyle: '温和共情型社交', careerTendency: 'Management', specialBonus: '社交亲密度 +20%' },
+  ENFJ: { workStyle: '团队协作，激励他人', socialStyle: '天生的社交组织者', careerTendency: 'Management', specialBonus: '社交亲密度 +56%' },
+  ENFP: { workStyle: '灵感驱动，多items目并行', socialStyle: '热情洋溢的社交达人', careerTendency: 'Management', specialBonus: '社交亲密度 +56%' },
+  ISTJ: { workStyle: '严谨有序，按流程办事', socialStyle: '守信可靠的合作者', careerTendency: 'Technical', specialBonus: '工作效率 +27%' },
+  ISFJ: { workStyle: '细致入微，关注细节', socialStyle: '温暖守护型社交', careerTendency: 'Management', specialBonus: '工作效率 +15%' },
+  ESTJ: { workStyle: '结果导向，管理力强', socialStyle: '直接高效的沟通风格', careerTendency: 'Technical', specialBonus: '工作效率 +15%' },
+  ESFJ: { workStyle: '协调合作，关注团队', socialStyle: '社区核心型社交', careerTendency: 'Management', specialBonus: '社交亲密度 +56%' },
+  ISTP: { workStyle: '实操派，解决实际问题', socialStyle: '行动导向型社交', careerTendency: 'Technical', specialBonus: '工作效率 +27%' },
+  ISFP: { workStyle: '感性创作，艺术导向', socialStyle: '安静的观察者', careerTendency: 'Management', specialBonus: '工作效率 +15%' },
+  ESTP: { workStyle: '行动派，敢于冒险', socialStyle: '活力四射的社交者', careerTendency: 'Technical', specialBonus: '社交亲密度 +30%' },
+  ESFP: { workStyle: '活泼多变，氛围担当', socialStyle: '团队开心果', careerTendency: 'Management', specialBonus: '社交亲密度 +56%' },
 }
 
 const currentImpact = computed(() => selectedMbti.value ? mbtiImpacts[selectedMbti.value] : null)
@@ -109,7 +109,7 @@ async function handleSubmit() {
     const detail = e?.response?.data?.detail || e?.response?.data?.message || e?.message || '未知错误'
     console.error('Create Character失败:', e?.response?.status, detail, e)
     if (detail.includes('已创建')) {
-      ElMessage.info('角色已存在，正在进入公司...')
+      ElMessage.info('Profile已存在，正在进入公司...')
       router.push('/agent-world')
     } else {
       ElMessage.error('Creation failed: ' + detail)
@@ -140,14 +140,14 @@ function enterCompany() {
         <span class="banner-icon">🧬</span>
         <div class="banner-text">
           <strong>性格决定命运</strong>
-          <span>你选择的MBTI将决定角色在公司中的一切表现 —— 工作效率、社交方式、晋升路线全部由性格驱动，AI将完全基于你的性格设定自主运行。</span>
+          <span>你选择的MBTI将决定Profile在公司中的一切表现 —— Work efficiency, social style, and career path are all personality-driven.</span>
         </div>
       </div>
 
       <!-- Nickname -->
       <div class="form-section">
         <label class="form-label">Nickname</label>
-        <el-input v-model="nickname" placeholder="输入你的角色Nickname" maxlength="50" show-word-limit class="cyber-input" />
+        <el-input v-model="nickname" placeholder="输入你的ProfileNickname" maxlength="50" show-word-limit class="cyber-input" />
       </div>
 
       <!-- Department选择 -->
@@ -219,8 +219,8 @@ function enterCompany() {
           </div>
           <div class="impact-dimensions">
             <div class="dim-item"><span class="dim-letter" :class="{ active: selectedMbti[0] === 'E' }">E 外向</span><span class="dim-vs">vs</span><span class="dim-letter" :class="{ active: selectedMbti[0] === 'I' }">I 内向</span><span class="dim-effect">{{ selectedMbti[0] === 'E' ? '社交频率高，亲密度增长快' : '专注工作，效率更高' }}</span></div>
-            <div class="dim-item"><span class="dim-letter" :class="{ active: selectedMbti[1] === 'S' }">S 实感</span><span class="dim-vs">vs</span><span class="dim-letter" :class="{ active: selectedMbti[1] === 'N' }">N 直觉</span><span class="dim-effect">{{ selectedMbti[1] === 'S' ? '常规任务完成快' : '高难度任务XP加成' }}</span></div>
-            <div class="dim-item"><span class="dim-letter" :class="{ active: selectedMbti[2] === 'T' }">T 思考</span><span class="dim-vs">vs</span><span class="dim-letter" :class="{ active: selectedMbti[2] === 'F' }">F 情感</span><span class="dim-effect">{{ selectedMbti[2] === 'T' ? '任务XP加成，倾向技术路线' : '社交加成，倾向管理路线' }}</span></div>
+            <div class="dim-item"><span class="dim-letter" :class="{ active: selectedMbti[1] === 'S' }">S 实感</span><span class="dim-vs">vs</span><span class="dim-letter" :class="{ active: selectedMbti[1] === 'N' }">N 直觉</span><span class="dim-effect">{{ selectedMbti[1] === 'S' ? '常规Tasks完成快' : '高难度TasksXP加成' }}</span></div>
+            <div class="dim-item"><span class="dim-letter" :class="{ active: selectedMbti[2] === 'T' }">T 思考</span><span class="dim-vs">vs</span><span class="dim-letter" :class="{ active: selectedMbti[2] === 'F' }">F 情感</span><span class="dim-effect">{{ selectedMbti[2] === 'T' ? 'TasksXP加成，倾向Technical' : '社交加成，倾向Management' }}</span></div>
             <div class="dim-item"><span class="dim-letter" :class="{ active: selectedMbti[3] === 'J' }">J 判断</span><span class="dim-vs">vs</span><span class="dim-letter" :class="{ active: selectedMbti[3] === 'P' }">P 感知</span><span class="dim-effect">{{ selectedMbti[3] === 'J' ? '日程严格，工作占比高' : '行为随机，灵活发展' }}</span></div>
           </div>
         </div>
@@ -286,35 +286,35 @@ function enterCompany() {
                 <span class="gi-icon">🧬</span>
                 <div class="gi-text">
                   <strong>性格驱动一切</strong>
-                  <span>你设定的MBTI性格将全面决定角色行为 —— 工作效率、社交选择、任务偏好、晋升路线，全部由AI根据你的性格自主决策。</span>
+                  <span>你设定的MBTI性格将全面决定Profile行为 —— All decisions are made autonomously by AI based on your personality.</span>
                 </div>
               </div>
               <div class="guide-item">
                 <span class="gi-icon">🤖</span>
                 <div class="gi-text">
                   <strong>AI全自动运行</strong>
-                  <span>你的角色将自主工作、社交、参加活动、完成任务并获得经验。你只需观察AI如何基于你的性格做出每一个决定。</span>
+                  <span>你的Profile将自主工作、社交、参加Events、完成Tasks并获得经验。你只需观察AI如何基于你的性格做出每一个决定。</span>
                 </div>
               </div>
               <div class="guide-item">
                 <span class="gi-icon">📈</span>
                 <div class="gi-text">
                   <strong>从实习生到CEO</strong>
-                  <span>起步于实习生，通过完成任务积累经验自动晋升。到达Lv.4时AI会根据你的T/F维度自动选择技术或管理路线。</span>
+                  <span>起步于实习生，通过完成Tasks积累经验自动晋升。到达Lv.4时AI会根据你的T/F维度自动选择技术或Management。</span>
                 </div>
               </div>
               <div class="guide-item">
                 <span class="gi-icon">📊</span>
                 <div class="gi-text">
-                  <strong>透明决策轨迹</strong>
-                  <span>每一个决策都附带MBTI因素分解。打开「轨迹」面板，实时查看AI为什么选择了这个行为、这个任务、这个活动。</span>
+                  <strong>透明决策Trace</strong>
+                  <span>每一个决策都附带MBTI因素分解。打开「Trace」面板，实时查看AI为什么选择了这个行为、这个Tasks、这个Events。</span>
                 </div>
               </div>
               <div class="guide-item">
                 <span class="gi-icon">⚡</span>
                 <div class="gi-text">
                   <strong>加速观察</strong>
-                  <span>觉得太慢？顶栏模拟速度可切换1x/2x/5x，加速观察你的角色在公司中的成长轨迹！</span>
+                  <span>觉得太慢？顶栏模拟速度可切换1x/2x/5x，加速观察你的Profile在公司中的成长Trace！</span>
                 </div>
               </div>
             </div>

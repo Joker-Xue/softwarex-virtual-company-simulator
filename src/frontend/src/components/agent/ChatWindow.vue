@@ -109,7 +109,7 @@ function currentGroupName() {
             class="unread-dot"
           >{{ store.unreadPerSender[f.from_id === store.myProfile?.id ? f.to_id : f.from_id] }}</span>
         </div>
-        <p v-if="store.friends.length === 0" class="hint">暂无好友</p>
+        <p v-if="store.friends.length === 0" class="hint">暂无Friends</p>
       </template>
       <template v-else>
         <div v-for="g in groups" :key="g.group_id" class="chat-friend-item group-item" @click="selectGroup(g.group_id)">
@@ -117,11 +117,11 @@ function currentGroupName() {
           <span class="friend-name">{{ g.name }}</span>
           <span v-if="g.message_count" class="msg-count">{{ g.message_count }}条</span>
         </div>
-        <p v-if="groups.length === 0" class="hint">暂无频道</p>
+        <p v-if="groups.length === 0" class="hint">No channels</p>
       </template>
     </div>
 
-    <!-- 聊天视图 -->
+    <!-- Chat视图 -->
     <template v-else>
       <div class="chat-header">
         <span class="back" @click="goBack">&larr; 返回</span>
@@ -162,13 +162,13 @@ function currentGroupName() {
         </template>
 
         <div v-if="!groupLoading && (chatMode === 'private' ? store.chatMessages : groupMessages).length === 0"
-          class="hint" style="padding:32px 0">暂无消息</div>
+          class="hint" style="padding:32px 0">No messages</div>
       </div>
 
       <div v-if="activeGroupId === 'announcement'" class="readonly-hint">📢 公告频道由AI自动维护，仅可查看</div>
       <div v-else class="chat-input">
-        <el-input v-model="input" placeholder="输入消息..." @keyup.enter="send" size="default" />
-        <button class="cyber-btn" @click="send" :disabled="!input.trim()">发送</button>
+        <el-input v-model="input" placeholder="Type a message..." @keyup.enter="send" size="default" />
+        <button class="cyber-btn" @click="send" :disabled="!input.trim()">Send</button>
       </div>
     </template>
   </div>

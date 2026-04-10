@@ -113,12 +113,12 @@ function getCountdown(iso: string): string {
 }
 
 function getStatusLabel(is_active: string): string {
-  return { upcoming: '即将开始', ongoing: '进行中', finished: '已结束', active: '进行中' }[is_active] || is_active
+  return { upcoming: '即将开始', ongoing: 'Active', finished: '已结束', active: 'Active' }[is_active] || is_active
 }
 
 const typeLabels: Record<string, string> = {
   tea_break: '下午茶', team_building: '团建', birthday: '生日会',
-  holiday: '节日活动', milestone: '里程碑', dept_award: '部门奖',
+  holiday: '节日Events', milestone: 'Milestone', dept_award: 'Dept Award',
   emergency: '紧急动员', welcome: '新人欢迎', tech_talk: '技术分享',
   training: '培训', workshop: '研讨会',
 }
@@ -134,11 +134,11 @@ const typeColors: Record<string, string> = {
   <div class="event-panel">
     <div class="section-header">
       <span class="header-dot" style="background: var(--accent-violet)"></span>
-      <span class="header-text">AI活动决策</span>
-      <span class="event-count">{{ events.length }} 项</span>
+      <span class="header-text">AIEvents决策</span>
+      <span class="event-count">{{ events.length }} items</span>
     </div>
 
-    <div v-if="events.length === 0" class="empty-text">暂无活动</div>
+    <div v-if="events.length === 0" class="empty-text">暂无Events</div>
 
     <div v-for="event in events" :key="event.id" class="event-card cyber-card"
       :class="{ 'card-ongoing': event.is_active === 'ongoing' || event.is_active === 'active', 'card-finished': event.is_active === 'finished' }">

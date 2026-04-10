@@ -63,7 +63,7 @@ function timeAgo(ts: string) {
     <!-- Effective Multipliers -->
     <div class="multipliers-bar">
       <div class="mult-item">
-        <span class="mult-label">工作速度</span>
+        <span class="mult-label">Work Speed</span>
         <span class="mult-value" :class="{ boosted: multipliers.work_speed > 1 }">{{ multipliers.work_speed?.toFixed(2) }}x</span>
       </div>
       <div class="mult-item">
@@ -75,14 +75,14 @@ function timeAgo(ts: string) {
         <span class="mult-value" :class="{ boosted: multipliers.xp_bonus > 1 }">{{ multipliers.xp_bonus?.toFixed(2) }}x</span>
       </div>
       <div class="mult-item">
-        <span class="mult-label">职业倾向</span>
-        <span class="mult-value career">{{ multipliers.career_tendency === 'technical' ? '技术路线' : '管理路线' }}</span>
+        <span class="mult-label">Career Tendency</span>
+        <span class="mult-value career">{{ multipliers.career_tendency === 'technical' ? 'Technical' : 'Management' }}</span>
       </div>
     </div>
 
     <!-- Action Weight Bars -->
     <div class="weight-section">
-      <div class="section-title">行为概率分布</div>
+      <div class="section-title">Action Probability分布</div>
       <div v-for="item in actionWeights" :key="item.action" class="weight-row">
         <span class="weight-label">{{ item.label }}</span>
         <div class="weight-track">
@@ -96,8 +96,8 @@ function timeAgo(ts: string) {
     <div class="tendency-section">
       <div class="tend-row"><span class="tend-label">最可能行为</span><span class="tend-value">{{ tendency.most_likely_action }}</span></div>
       <div class="tend-row"><span class="tend-label">最不可能</span><span class="tend-value dim">{{ tendency.least_likely_action }}</span></div>
-      <div class="tend-row"><span class="tend-label">偏好任务</span><span class="tend-value">{{ (tendency.preferred_task_tags || []).join(', ') }}</span></div>
-      <div class="tend-row"><span class="tend-label">活动参与率</span><span class="tend-value">{{ ((tendency.event_join_rate || 0) * 100).toFixed(0) }}%</span></div>
+      <div class="tend-row"><span class="tend-label">偏好Tasks</span><span class="tend-value">{{ (tendency.preferred_task_tags || []).join(', ') }}</span></div>
+      <div class="tend-row"><span class="tend-label">Events参与率</span><span class="tend-value">{{ ((tendency.event_join_rate || 0) * 100).toFixed(0) }}%</span></div>
     </div>
 
     <!-- Decision Timeline -->
@@ -109,7 +109,7 @@ function timeAgo(ts: string) {
           <div class="tl-content">
             <div class="tl-header">
               <span class="tl-type" :style="{ color: decisionColor(d.type) }">
-                {{ d.type === 'action_decision' ? '行为决策' : d.type === 'task_assign' ? '任务分配' : d.type === 'task_complete' ? '任务完成' : d.type === 'social' ? '社交互动' : d.type === 'schedule_decision' ? '日程执行' : d.type }}
+                {{ d.type === 'action_decision' ? '行为决策' : d.type === 'task_assign' ? 'Tasks分配' : d.type === 'task_complete' ? 'Tasks完成' : d.type === 'social' ? '社交互动' : d.type === 'schedule_decision' ? '日程执行' : d.type }}
               </span>
               <span class="tl-time">{{ timeAgo(d.tick_ts) }}</span>
             </div>
@@ -136,7 +136,7 @@ function timeAgo(ts: string) {
       </div>
     </div>
   </div>
-  <div v-else class="trace-panel loading-text">加载性格轨迹数据中...</div>
+  <div v-else class="trace-panel loading-text">加载性格TraceStats中...</div>
 </template>
 
 <style scoped>
