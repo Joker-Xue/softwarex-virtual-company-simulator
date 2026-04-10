@@ -30,37 +30,37 @@ export const CANVAS_HEIGHT = 600
 export const FLOOR_Y_OFFSET = 700
 
 export const FLOOR_LABELS: Record<number, string> = {
-  1: '1F 大厅层',
-  2: '2F 办公层',
-  3: '3F 管理层',
+  1: '1F Lobby',
+  2: '2F Office',
+  3: '3F Management',
 }
 
 export const ROOMS: RoomConfig[] = [
   // ── 1F 大厅层 ──
-  { id: 1, name: '大厅', type: 'lounge', department: 'general',
+  { id: 1, name: 'Lobby', type: 'lounge', department: 'general',
     x: 20, y: 60, width: 260, height: 220, color: '#eef2ff', labelColor: '#374151', floor: 1 },
-  { id: 2, name: '咖啡厅', type: 'cafeteria', department: 'general',
+  { id: 2, name: 'Cafeteria', type: 'cafeteria', department: 'general',
     x: 320, y: 60, width: 260, height: 220, color: '#fff7ed', labelColor: '#9a3412', floor: 1 },
-  { id: 3, name: 'HR部门', type: 'office', department: 'hr',
+  { id: 3, name: 'HR Dept', type: 'office', department: 'hr',
     x: 20, y: 340, width: 560, height: 220, color: '#faf5ff', labelColor: '#6b21a8', floor: 1 },
   // ── 2F 办公层 ──
   // 左列(全高): 工程部 | 中列: 市场部(上)/产品部(下) | 右列: 财务部(上)/运营部(下)
-  { id: 4, name: '工程部', type: 'office', department: 'engineering',
+  { id: 4, name: 'Engineering', type: 'office', department: 'engineering',
     x: 20, y: 60, width: 155, height: 280, color: '#eef2ff', labelColor: '#3730a3', floor: 2 },
-  { id: 5, name: '市场部', type: 'office', department: 'marketing',
+  { id: 5, name: 'Marketing', type: 'office', department: 'marketing',
     x: 185, y: 60, width: 175, height: 130, color: '#fdf2f8', labelColor: '#9d174d', floor: 2 },
-  { id: 6, name: '产品部', type: 'office', department: 'product',
+  { id: 6, name: 'Product', type: 'office', department: 'product',
     x: 185, y: 200, width: 175, height: 140, color: '#f0fdf4', labelColor: '#166534', floor: 2 },
-  { id: 7, name: '财务部', type: 'office', department: 'finance',
+  { id: 7, name: 'Finance', type: 'office', department: 'finance',
     x: 370, y: 60, width: 170, height: 130, color: '#ecfdf5', labelColor: '#065f46', floor: 2 },
-  { id: 8, name: '运营部', type: 'office', department: 'operations',
+  { id: 8, name: 'Operations', type: 'office', department: 'operations',
     x: 370, y: 200, width: 170, height: 140, color: '#fff7ed', labelColor: '#9a3412', floor: 2 },
   // ── 3F 管理层 ──
-  { id: 9, name: '会议室', type: 'meeting', department: 'general',
+  { id: 9, name: 'Meeting Room', type: 'meeting', department: 'general',
     x: 20, y: 60, width: 560, height: 160, color: '#eff6ff', labelColor: '#1e40af', floor: 3 },
-  { id: 10, name: '总监办公室', type: 'office', department: 'management',
+  { id: 10, name: 'Director Office', type: 'office', department: 'management',
     x: 20, y: 280, width: 260, height: 260, color: '#fffbeb', labelColor: '#92400e', floor: 3 },
-  { id: 11, name: 'CEO办公室', type: 'ceo_office', department: 'management',
+  { id: 11, name: 'CEO Office', type: 'ceo_office', department: 'management',
     x: 320, y: 280, width: 260, height: 260, color: '#fefce8', labelColor: '#854d0e', floor: 3 },
 ]
 
@@ -127,54 +127,54 @@ export function getRoomsByFloor(floor: number): RoomConfig[] {
 }
 
 export const CAREER_LEVELS: Record<number, { title: string; tasksRequired: number; xpRequired: number }> = {
-  0: { title: '实习生', tasksRequired: 0, xpRequired: 0 },
-  1: { title: '初级员工', tasksRequired: 5, xpRequired: 100 },
-  2: { title: '中级员工', tasksRequired: 15, xpRequired: 350 },
-  3: { title: '高级员工', tasksRequired: 30, xpRequired: 800 },
-  4: { title: '经理', tasksRequired: 50, xpRequired: 1500 },
-  5: { title: '总监', tasksRequired: 80, xpRequired: 3000 },
+  0: { title: 'Intern', tasksRequired: 0, xpRequired: 0 },
+  1: { title: 'Junior', tasksRequired: 5, xpRequired: 100 },
+  2: { title: 'Mid-level', tasksRequired: 15, xpRequired: 350 },
+  3: { title: 'Senior', tasksRequired: 30, xpRequired: 800 },
+  4: { title: 'Manager', tasksRequired: 50, xpRequired: 1500 },
+  5: { title: 'Director', tasksRequired: 80, xpRequired: 3000 },
   6: { title: 'CEO', tasksRequired: 120, xpRequired: 5000 },
 }
 
 /** 双轨职业路径（Lv.4+）*/
 export const CAREER_PATHS: Record<string, Record<number, { title: string }>> = {
   management: {
-    4: { title: '经理' },
-    5: { title: '总监' },
+    4: { title: 'Manager' },
+    5: { title: 'Director' },
     6: { title: 'CEO' },
   },
   technical: {
-    4: { title: '技术专家' },
-    5: { title: '首席工程师' },
+    4: { title: 'Tech Lead' },
+    5: { title: 'Principal Engineer' },
     6: { title: 'CTO' },
   },
 }
 
 export function getCareerTitle(level: number, path: string = 'management'): string {
-  if (level < 4) return CAREER_LEVELS[level]?.title || '未知'
-  return CAREER_PATHS[path]?.[level]?.title || CAREER_LEVELS[level]?.title || '未知'
+  if (level < 4) return CAREER_LEVELS[level]?.title || 'Unknown'
+  return CAREER_PATHS[path]?.[level]?.title || CAREER_LEVELS[level]?.title || 'Unknown'
 }
 
 export const DEPARTMENTS: Record<string, string> = {
-  management: '管理层',
-  engineering: '工程部',
-  product: '产品部',
-  marketing: '市场部',
-  finance: '财务部',
-  hr: 'HR部门',
-  operations: '运营部',
-  general: '公共区域',
-  unassigned: '未分配',
+  management: 'Management',
+  engineering: 'Engineering',
+  product: 'Product',
+  marketing: 'Marketing',
+  finance: 'Finance',
+  hr: 'HR',
+  operations: 'Operations',
+  general: 'Common',
+  unassigned: 'Unassigned',
 }
 
 /** 用户可选择加入的业务部门（排除公共区域和未分配） */
 export const SELECTABLE_DEPARTMENTS: Record<string, string> = {
-  engineering: '工程部',
-  product: '产品部',
-  marketing: '市场部',
-  finance: '财务部',
-  hr: 'HR部门',
-  operations: '运营部',
+  engineering: 'Engineering',
+  product: 'Product',
+  marketing: 'Marketing',
+  finance: 'Finance',
+  hr: 'HR',
+  operations: 'Operations',
 }
 
 export const MBTI_TYPES = [
@@ -190,15 +190,15 @@ export const AVATAR_KEYS = [
 ]
 
 export const ACTION_LABELS: Record<string, string> = {
-  idle: '空闲',
-  working: '工作中',
-  moving: '移动中',
-  chatting: '聊天中',
-  resting: '休息中',
-  meeting: '会议中',
-  work: '工作中',
-  chat: '聊天中',
-  rest: '休息中',
+  idle: 'Idle',
+  working: 'Working',
+  moving: 'Moving',
+  chatting: 'Chatting',
+  resting: 'Resting',
+  meeting: 'In Meeting',
+  work: 'Working',
+  chat: 'Chatting',
+  rest: 'Resting',
 }
 
 /**

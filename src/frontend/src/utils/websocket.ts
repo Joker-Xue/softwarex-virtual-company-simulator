@@ -19,7 +19,8 @@ export class AgentWebSocket {
   private _reconnectAttempts = 0
 
   constructor(baseUrl?: string) {
-    const wsBase = baseUrl || (import.meta.env.VITE_API_BASE || window.location.origin).replace(/^http/, 'ws')
+    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8001'
+    const wsBase = baseUrl || apiBase.replace(/^http/, 'ws')
     this.url = wsBase
   }
 

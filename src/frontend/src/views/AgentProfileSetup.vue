@@ -37,7 +37,7 @@ const mbtiDescriptions: Record<string, string> = {
   INFJ: '提倡者 - 安静而神秘的理想主义者',
   INFP: '调停者 - 诗意善良的利他主义者',
   ENFJ: '主人公 - 富有魅力的鼓舞者',
-  ENFP: '竞选者 - 热情有创造力的社交达人',
+  ENFP: '竞选者 - 热情有Creativity的社交达人',
   ISTJ: '物流师 - 务实可靠的人',
   ISFJ: '守卫者 - 专注而温暖的守护者',
   ESTJ: '总经理 - 出色的管理者',
@@ -79,11 +79,11 @@ const currentImpact = computed(() => selectedMbti.value ? mbtiImpacts[selectedMb
 
 async function handleSubmit() {
   if (!nickname.value.trim()) {
-    ElMessage.warning('请输入昵称')
+    ElMessage.warning('请输入Nickname')
     return
   }
   if (!selectedMbti.value) {
-    ElMessage.warning('请选择MBTI类型')
+    ElMessage.warning('Please select MBTI type')
     return
   }
   if (pointsLeft.value < 0) {
@@ -107,12 +107,12 @@ async function handleSubmit() {
     showGuide.value = true
   } catch (e: any) {
     const detail = e?.response?.data?.detail || e?.response?.data?.message || e?.message || '未知错误'
-    console.error('创建角色失败:', e?.response?.status, detail, e)
+    console.error('Create Character失败:', e?.response?.status, detail, e)
     if (detail.includes('已创建')) {
       ElMessage.info('角色已存在，正在进入公司...')
       router.push('/agent-world')
     } else {
-      ElMessage.error('创建失败: ' + detail)
+      ElMessage.error('Creation failed: ' + detail)
     }
   } finally {
     submitting.value = false
@@ -144,15 +144,15 @@ function enterCompany() {
         </div>
       </div>
 
-      <!-- 昵称 -->
+      <!-- Nickname -->
       <div class="form-section">
-        <label class="form-label">昵称</label>
-        <el-input v-model="nickname" placeholder="输入你的角色昵称" maxlength="50" show-word-limit class="cyber-input" />
+        <label class="form-label">Nickname</label>
+        <el-input v-model="nickname" placeholder="输入你的角色Nickname" maxlength="50" show-word-limit class="cyber-input" />
       </div>
 
-      <!-- 部门选择 -->
+      <!-- Department选择 -->
       <div class="form-section">
-        <label class="form-label">选择部门</label>
+        <label class="form-label">选择Department</label>
         <div class="dept-grid">
           <div
             v-for="(label, key) in SELECTABLE_DEPARTMENTS"
@@ -235,7 +235,7 @@ function enterCompany() {
           </span>
         </label>
         <div class="attr-list">
-          <div class="attr-row" v-for="(label, key) in { communication: '沟通力', leadership: '领导力', creativity: '创造力', technical: '技术力', teamwork: '协作力', diligence: '勤奋度' }" :key="key">
+          <div class="attr-row" v-for="(label, key) in { communication: 'Communication', leadership: 'Leadership', creativity: 'Creativity', technical: 'Technical', teamwork: 'Teamwork', diligence: '勤奋度' }" :key="key">
             <span class="attr-label">{{ label }}</span>
             <div class="cyber-slider-track">
               <div class="cyber-slider-fill" :style="{ width: (attrs as any)[key] + '%' }"></div>
@@ -259,7 +259,7 @@ function enterCompany() {
         @click="handleSubmit"
       >
         <span v-if="submitting" class="btn-loading"></span>
-        <span>创建角色，进入公司</span>
+        <span>Create Character，进入公司</span>
       </button>
     </div>
 

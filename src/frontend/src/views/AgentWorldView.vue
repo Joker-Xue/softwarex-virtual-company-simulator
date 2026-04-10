@@ -46,7 +46,7 @@ function onPromotion(data: { level: number; title: string }) {
 
 function onEnterRoom(roomConfig: any) {
   const ROOM_NAME_ALIASES: Record<string, string[]> = {
-    '会议室': ['会议室A'],
+    'Meeting Room': ['Meeting RoomA'],
   }
   // roomConfig is from the static ROOMS array (companyMap.ts).
   // Try to find the matching API room (with interior_objects) by name.
@@ -96,14 +96,14 @@ async function setSimSpeed(speed: number) {
       <div class="world-layout">
         <div class="canvas-area">
           <div class="canvas-header">
-            <h3>🏢 虚拟公司</h3>
+            <h3>🏢 Virtual Company</h3>
             <div class="header-controls">
               <div class="speed-controls">
-                <span class="speed-label">模拟速度</span>
+                <span class="speed-label">Sim Speed</span>
                 <button v-for="s in [1, 2, 5]" :key="s" class="speed-btn" :class="{ active: simSpeed === s }" @click="setSimSpeed(s)">{{ s }}x</button>
               </div>
               <span class="ws-status" :class="{ online: store.wsConnected }">
-                {{ store.wsConnected ? '● 已连接' : '○ 未连接' }}
+                {{ store.wsConnected ? '● Connected' : '○ Disconnected' }}
               </span>
             </div>
           </div>
