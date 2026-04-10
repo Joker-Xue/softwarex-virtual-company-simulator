@@ -138,7 +138,7 @@ const typeColors: Record<string, string> = {
       <span class="event-count">{{ events.length }} items</span>
     </div>
 
-    <div v-if="events.length === 0" class="empty-text">暂无Events</div>
+    <div v-if="events.length === 0" class="empty-text">No events yet</div>
 
     <div v-for="event in events" :key="event.id" class="event-card cyber-card"
       :class="{ 'card-ongoing': event.is_active === 'ongoing' || event.is_active === 'active', 'card-finished': event.is_active === 'finished' }">
@@ -186,7 +186,7 @@ const typeColors: Record<string, string> = {
       <!-- Decision -->
       <div v-if="event.agent_decision" class="decision-row">
         <span class="decision-tag" :class="{ joined: event.agent_decision.joined, rejected: !event.agent_decision.joined }">
-          {{ event.agent_decision.joined ? '✓ AI决策参加' : '✗ AI决策拒绝' }}
+          {{ event.agent_decision.joined ? '✓ AI: Join' : '✗ AI: Skip' }}
         </span>
         <div class="interest-bar">
           <div class="interest-track">
@@ -202,7 +202,7 @@ const typeColors: Record<string, string> = {
 
       <div class="event-meta">
         <span v-if="event.rewards_xp">+{{ event.rewards_xp }}XP</span>
-        <span v-if="event.rewards_coins">+{{ event.rewards_coins }}金币</span>
+        <span v-if="event.rewards_coins">+{{ event.rewards_coins }}Coins</span>
       </div>
     </div>
   </div>

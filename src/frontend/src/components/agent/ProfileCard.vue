@@ -380,7 +380,7 @@ async function fetchSalaryInfo() {
         <div v-if="salaryInfo" class="salary-overview">
           <div class="salary-main">
             <span class="salary-label">日薪</span>
-            <span class="salary-amount">{{ salaryInfo.total }} 金币</span>
+            <span class="salary-amount">{{ salaryInfo.total }} Coins</span>
           </div>
           <div class="salary-details">
             <div class="salary-row">

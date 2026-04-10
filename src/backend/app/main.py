@@ -44,7 +44,7 @@ def _env_int(name: str, default: int) -> int:
     return parsed if parsed > 0 else default
 
 
-DYNAMIC_EVENT_INTERVAL_SECONDS = _env_int("DYNAMIC_EVENT_INTERVAL_SECONDS", 3600)
+DYNAMIC_EVENT_INTERVAL_SECONDS = _env_int("DYNAMIC_EVENT_INTERVAL_SECONDS", 60)
 
 
 @asynccontextmanager
@@ -64,11 +64,11 @@ async def lifespan(_: FastAPI):
 
     async def _dynamic_event_loop():
         while True:
-            await asyncio.sleep(DYNAMIC_EVENT_INTERVAL_SECONDS)
             try:
                 await check_dynamic_events()
             except Exception as exc:
                 logger.error("Dynamic event loop failed: %s", exc)
+            await asyncio.sleep(DYNAMIC_EVENT_INTERVAL_SECONDS)
 
     sim_task = start_simulation_loop()
     event_task = asyncio.create_task(_dynamic_event_loop())
