@@ -1,5 +1,5 @@
 """
-Agent长期记忆引擎 - 提取、存储和检索Agent记忆
+Agent long-term Memoriesengine - Extract, store and retrieve AgentMemories
 """
 import logging
 from sqlalchemy import select, func as sa_func
@@ -11,7 +11,7 @@ from app.models.agent_task import AgentTask
 
 logger = logging.getLogger(__name__)
 
-# 事件类型 -> 重要度映射
+# event type -> importance mapping
 IMPORTANCE_MAP = {
     "promotion": 10,
     "task_complete": 7,
@@ -22,7 +22,7 @@ IMPORTANCE_MAP = {
     "move": 1,
 }
 
-# 事件类型 -> 记忆类型映射
+# event type -> Memoriestype mapping
 MEMORY_TYPE_MAP = {
     "promotion": "career",
     "salary": "career",
@@ -42,17 +42,17 @@ async def extract_memory(
     related_agent_id: int | None = None,
 ) -> AgentMemory:
     """
-    从事件中提取记忆并保存到数据库。
+    Extract Memories from events and save to Database。
 
     Args:
-        db: 数据库会话
+        db: Databasesession
         agent_id: Agent ID
-        event_type: 事件类型 (promotion/task_complete/task_fail/chat/move/friendship/salary)
-        content: 记忆内容描述
-        related_agent_id: 相关Agent ID（可选）
+        event_type: event type (promotion/task_complete/task_fail/chat/move/friendship/salary)
+        content: Memories content description
+        related_agent_id: RelatedAgent ID（Optional）
 
     Returns:
-        创建的 AgentMemory 记录
+        AgentMemory record created
     """
     importance = IMPORTANCE_MAP.get(event_type, 3)
     memory_type = MEMORY_TYPE_MAP.get(event_type, "observation")
@@ -82,16 +82,16 @@ async def recall_memories(
     limit: int = 5,
 ) -> list[dict]:
     """
-    检索Agent的近期记忆，按重要度和时间排序。
+    Retrieve the Agent's recent Memories，Sort by importance and time。
 
     Args:
-        db: 数据库会话
+        db: Databasesession
         agent_id: Agent ID
-        context: 上下文过滤 (memory_type: interaction/task/observation/career/social)
-        limit: 返回数量上限
+        context: context filter (memory_type: interaction/task/observation/career/social)
+        limit: Maximum number of Back
 
     Returns:
-        记忆字典列表，包含 id, content, memory_type, importance, created_at
+        Memories dictionary list，Include id, content, memory_type, importance, created_at
     """
     query = select(AgentMemory).where(AgentMemory.agent_id == agent_id)
 
@@ -120,22 +120,22 @@ async def recall_memories(
 
 async def get_memory_summary(db: AsyncSession, agent_id: int) -> dict:
     """
-    获取Agent记忆统计摘要。
+    Get AgentMemories statistics summary。
 
     Args:
-        db: 数据库会话
+        db: Databasesession
         agent_id: Agent ID
 
     Returns:
-        包含 total_memories, most_common_type, highest_importance_memory 的字典
+        Include total_memories, most_common_type, highest_importance_memory dictionary
     """
-    # 总记忆数
+    # total memory count
     total_result = await db.execute(
         select(sa_func.count(AgentMemory.id)).where(AgentMemory.agent_id == agent_id)
     )
     total_memories = total_result.scalar() or 0
 
-    # 最常见记忆类型
+    # The most commonMemoriestype
     most_common_type = None
     if total_memories > 0:
         type_result = await db.execute(
@@ -149,7 +149,7 @@ async def get_memory_summary(db: AsyncSession, agent_id: int) -> dict:
         if row:
             most_common_type = row[0]
 
-    # 最高重要度记忆
+    # Highest importance Memories
     highest_importance_memory = None
     if total_memories > 0:
         high_result = await db.execute(
@@ -183,19 +183,19 @@ async def get_context_for_decision(db: AsyncSession, agent_id: int) -> dict:
     to provide rich context for the AI decision engine.
 
     Args:
-        db: 数据库会话
+        db: Databasesession
         agent_id: Agent ID
 
     Returns:
         dict with keys: recent_memories, memory_summary, recent_actions, pending_task_count
     """
-    # 1. 获取近期重要记忆 (top 5, 按重要度+时间排序)
+    # 1. Get recent important Memories (top 5, Sort by importance + time)
     recent_memories = await recall_memories(db, agent_id, limit=5)
 
-    # 2. 获取记忆统计摘要
+    # 2. Get Memories statistics summary
     memory_summary = await get_memory_summary(db, agent_id)
 
-    # 3. 获取近期行为日志 (最近5条)
+    # 3. Get recent Behavior logs (Last 5 msgs)
     action_result = await db.execute(
         select(AgentActionLog)
         .where(AgentActionLog.agent_id == agent_id)
@@ -213,7 +213,7 @@ async def get_context_for_decision(db: AsyncSession, agent_id: int) -> dict:
         for log in action_logs
     ]
 
-    # 4. 获取待完成任务数
+    # 4. Get pending task count
     pending_result = await db.execute(
         select(sa_func.count(AgentTask.id)).where(
             AgentTask.assignee_id == agent_id,
@@ -222,19 +222,19 @@ async def get_context_for_decision(db: AsyncSession, agent_id: int) -> dict:
     )
     pending_task_count = pending_result.scalar() or 0
 
-    # 5. 构建记忆文本摘要
+    # 5. Building Memories text summaries
     memory_text_parts = []
     for m in recent_memories:
-        memory_text_parts.append(f"[{m['memory_type']}|重要度{m['importance']}] {m['content']}")
-    memory_text = "\n".join(memory_text_parts) if memory_text_parts else "暂无记忆"
+        memory_text_parts.append(f"[{m['memory_type']}|importance{m['importance']}] {m['content']}")
+    memory_text = "\n".join(memory_text_parts) if memory_text_parts else "No memories yet"
 
     summary_text = (
-        f"总记忆数: {memory_summary['total_memories']}, "
-        f"最常见类型: {memory_summary['most_common_type'] or '无'}"
+        f"total memory count: {memory_summary['total_memories']}, "
+        f"The most common type: {memory_summary['most_common_type'] or 'none'}"
     )
     if memory_summary.get("highest_importance_memory"):
         hm = memory_summary["highest_importance_memory"]
-        summary_text += f", 最重要记忆: {hm['content'][:40]}"
+        summary_text += f", The most important Memories: {hm['content'][:40]}"
 
     return {
         "recent_memories": recent_memories,

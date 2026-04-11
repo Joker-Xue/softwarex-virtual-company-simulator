@@ -40,7 +40,7 @@ async function fetchPersonal() {
     renderXpChart()
     renderTaskPie()
   } catch (e: any) {
-    ElMessage.error(e.response?.data?.detail || '获取个人Stats失败')
+    ElMessage.error(e.response?.data?.detail || 'Failed to fetch personal data')
   } finally {
     loading.value = false
   }
@@ -55,7 +55,7 @@ async function fetchCompany() {
     renderDeptBar()
     renderLevelPie()
   } catch (e: any) {
-    ElMessage.error(e.response?.data?.detail || '获取公司Stats失败')
+    ElMessage.error(e.response?.data?.detail || 'Failed to fetch company data')
   } finally {
     loading.value = false
   }
@@ -103,8 +103,8 @@ function renderTaskPie() {
       center: ['50%', '45%'],
       label: { show: false },
       data: [
-        { value: ts.completed, name: 'Done', itemStyle: { color: '#34d399' } },
-        { value: ts.in_progress, name: 'Active', itemStyle: { color: '#fbbf24' } },
+        { value: ts.completed, name: 'Completed', itemStyle: { color: '#34d399' } },
+        { value: ts.in_progress, name: 'In Progress', itemStyle: { color: '#fbbf24' } },
         { value: Math.max(pending, 0), name: 'Pending', itemStyle: { color: '#64748b' } },
       ],
     }],
@@ -117,12 +117,12 @@ function renderDeptBar() {
   deptBarChart = echarts.init(deptBarRef.value, 'dark')
   const ds = companyData.value.department_stats
   const deptNames: Record<string, string> = {
-    management: 'Management',
+    management: 'Management Floor',
     engineering: 'Engineering',
     product: 'Product',
     marketing: 'Marketing',
     finance: 'Finance',
-    hr: 'HR',
+    hr: 'HR Department',
     operations: 'Operations',
     unassigned: 'Unassigned',
   }
@@ -133,12 +133,12 @@ function renderDeptBar() {
     grid: { left: 50, right: 20, top: 20, bottom: 40 },
     xAxis: { type: 'category', data: ds.map((d: any) => deptNames[d.department] || d.department), axisLabel: { color: '#64748b' }, axisLine: { lineStyle: { color: 'rgba(56,189,248,0.15)' } } },
     yAxis: [
-      { type: 'value', name: 'Count', position: 'left', nameTextStyle: { color: '#64748b' }, axisLabel: { color: '#64748b' }, splitLine: { lineStyle: { color: 'rgba(56,189,248,0.08)' } }, axisLine: { lineStyle: { color: 'rgba(56,189,248,0.15)' } } },
-      { type: 'value', name: 'Avg XP', position: 'right', nameTextStyle: { color: '#64748b' }, axisLabel: { color: '#64748b' }, splitLine: { show: false }, axisLine: { lineStyle: { color: 'rgba(56,189,248,0.15)' } } },
+      { type: 'value', name: 'Headcount', position: 'left', nameTextStyle: { color: '#64748b' }, axisLabel: { color: '#64748b' }, splitLine: { lineStyle: { color: 'rgba(56,189,248,0.08)' } }, axisLine: { lineStyle: { color: 'rgba(56,189,248,0.15)' } } },
+      { type: 'value', name: 'Average XP', position: 'right', nameTextStyle: { color: '#64748b' }, axisLabel: { color: '#64748b' }, splitLine: { show: false }, axisLine: { lineStyle: { color: 'rgba(56,189,248,0.15)' } } },
     ],
     series: [
-      { name: 'Count', type: 'bar', data: ds.map((d: any) => d.count), itemStyle: { color: '#22d3ee' } },
-      { name: 'Avg XP', type: 'bar', yAxisIndex: 1, data: ds.map((d: any) => d.avg_xp), itemStyle: { color: '#fbbf24' } },
+      { name: 'Headcount', type: 'bar', data: ds.map((d: any) => d.count), itemStyle: { color: '#22d3ee' } },
+      { name: 'Average XP', type: 'bar', yAxisIndex: 1, data: ds.map((d: any) => d.avg_xp), itemStyle: { color: '#fbbf24' } },
     ],
   })
 }
@@ -193,10 +193,10 @@ onUnmounted(() => {
   <div class="analytics-dashboard">
     <div class="tab-switch">
       <button :class="{ active: activeTab === 'personal' }" @click="activeTab = 'personal'">
-        个人Stats
+        Personal Data
       </button>
       <button :class="{ active: activeTab === 'company' }" @click="activeTab = 'company'">
-        公司Stats
+        Company Data
       </button>
     </div>
 
@@ -206,7 +206,7 @@ onUnmounted(() => {
         <!-- XP Growth Chart -->
         <div class="card cyber-card card-wide">
           <div class="cyber-header">
-            <span class="cyber-header-title">经验值增长趋势（近30天）</span>
+            <span class="cyber-header-title">XP Growth Trend (Last 30 Days)</span>
           </div>
           <div ref="xpChartRef" class="chart-box"></div>
         </div>
@@ -214,36 +214,36 @@ onUnmounted(() => {
         <!-- Task Pie -->
         <div class="card cyber-card">
           <div class="cyber-header">
-            <span class="cyber-header-title">Tasks分布</span>
+            <span class="cyber-header-title">Task Distribution</span>
           </div>
           <div ref="taskPieRef" class="chart-box"></div>
           <div class="stat-row">
-            <span>总Tasks: <strong class="stat-num">{{ personalData.task_stats.total }}</strong></span>
+            <span>Total Tasks: <strong class="stat-num">{{ personalData.task_stats.total }}</strong></span>
           </div>
         </div>
 
         <!-- Social Metrics -->
         <div class="card cyber-card">
           <div class="cyber-header">
-            <span class="cyber-header-title">社交指标</span>
+            <span class="cyber-header-title">Social Metrics</span>
           </div>
           <div class="metric-list">
             <div class="metric-item">
-              <span class="metric-label">Friends数量</span>
+              <span class="metric-label">Friend Count</span>
               <div class="progress-bar">
                 <div class="progress-fill friends" :style="{ width: Math.min(personalData.social_stats.friends_count * 10, 100) + '%' }"></div>
               </div>
               <span class="metric-value metric-cyan">{{ personalData.social_stats.friends_count }}</span>
             </div>
             <div class="metric-item">
-              <span class="metric-label">Send消息</span>
+              <span class="metric-label">Send Message</span>
               <div class="progress-bar">
                 <div class="progress-fill messages" :style="{ width: Math.min(personalData.social_stats.messages_sent, 100) + '%' }"></div>
               </div>
               <span class="metric-value metric-violet">{{ personalData.social_stats.messages_sent }}</span>
             </div>
             <div class="metric-item">
-              <span class="metric-label">平均亲密度</span>
+              <span class="metric-label">Average Affinity</span>
               <div class="progress-bar">
                 <div class="progress-fill affinity" :style="{ width: personalData.social_stats.avg_affinity + '%' }"></div>
               </div>
@@ -255,9 +255,9 @@ onUnmounted(() => {
         <!-- Top Friends -->
         <div class="card cyber-card card-wide">
           <div class="cyber-header">
-            <span class="cyber-header-title">亲密Friends TOP5</span>
+            <span class="cyber-header-title">Top 5 Closest Friends</span>
           </div>
-          <div v-if="personalData.top_friends.length === 0" class="empty-hint">暂无FriendsStats</div>
+          <div v-if="personalData.top_friends.length === 0" class="empty-hint">No friend data yet</div>
           <div v-else class="friend-list">
             <div v-for="(f, idx) in personalData.top_friends" :key="idx" class="friend-row">
               <span class="friend-rank">#{{ Number(idx) + 1 }}</span>
@@ -276,7 +276,7 @@ onUnmounted(() => {
         <!-- Department Bar Chart -->
         <div class="card cyber-card card-wide">
           <div class="cyber-header">
-            <span class="cyber-header-title">部门Count与平均经验值</span>
+            <span class="cyber-header-title">Department Headcount and Average XP</span>
           </div>
           <div ref="deptBarRef" class="chart-box"></div>
         </div>
@@ -284,7 +284,7 @@ onUnmounted(() => {
         <!-- Level Distribution Pie -->
         <div class="card cyber-card">
           <div class="cyber-header">
-            <span class="cyber-header-title">职级分布</span>
+            <span class="cyber-header-title">Level Distribution</span>
           </div>
           <div ref="levelPieRef" class="chart-box"></div>
         </div>
@@ -292,7 +292,7 @@ onUnmounted(() => {
         <!-- Active Rooms -->
         <div class="card cyber-card">
           <div class="cyber-header">
-            <span class="cyber-header-title">房间活跃度</span>
+            <span class="cyber-header-title">Room Activity</span>
           </div>
           <div class="room-list">
             <div v-for="(r, idx) in companyData.active_rooms.slice(0, 6)" :key="idx" class="room-row">
@@ -308,20 +308,20 @@ onUnmounted(() => {
         <!-- Leaderboard -->
         <div class="card cyber-card card-wide">
           <div class="cyber-header">
-            <span class="cyber-header-title">经验值排行榜 TOP10</span>
+            <span class="cyber-header-title">Top 10 XP Leaderboard</span>
           </div>
           <div class="leaderboard">
             <div class="lb-header">
-              <span class="lb-rank">排名</span>
-              <span class="lb-name">昵称</span>
-              <span class="lb-dept">部门</span>
-              <span class="lb-level">职级</span>
+              <span class="lb-rank">Rank</span>
+              <span class="lb-name">Nickname</span>
+              <span class="lb-dept">Department</span>
+              <span class="lb-level">Level</span>
               <span class="lb-xp">XP</span>
             </div>
             <div v-for="(a, idx) in companyData.top_agents" :key="idx" class="lb-row">
               <span class="lb-rank">{{ Number(idx) + 1 }}</span>
               <span class="lb-name">{{ a.nickname }}</span>
-              <span class="lb-dept">{{ { management:'Management', engineering:'Engineering', product:'Product', marketing:'Marketing', finance:'Finance', hr:'HR', operations:'Operations', unassigned:'Unassigned' }[a.department] || a.department }}</span>
+              <span class="lb-dept">{{ { management:'Management Floor', engineering:'Engineering', product:'Product', marketing:'Marketing', finance:'Finance', hr:'HR Department', operations:'Operations', unassigned:'Unassigned' }[a.department] || a.department }}</span>
               <span class="lb-level">Lv.{{ a.career_level }}</span>
               <span class="lb-xp">{{ a.xp }}</span>
             </div>
@@ -331,7 +331,7 @@ onUnmounted(() => {
 
       <!-- Empty state -->
       <div v-if="!loading && ((activeTab === 'personal' && !personalData) || (activeTab === 'company' && !companyData))" class="empty-hint">
-        No data
+        No data available
       </div>
     </div>
   </div>

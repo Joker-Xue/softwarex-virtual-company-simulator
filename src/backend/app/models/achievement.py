@@ -1,5 +1,5 @@
 """
-成就系统模型
+achievement system model
 """
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, UniqueConstraint
 from sqlalchemy.sql import func
@@ -7,7 +7,7 @@ from app.database import Base
 
 
 class Achievement(Base):
-    """成就定义表"""
+    """achievement definition table"""
     __tablename__ = "achievements"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -24,7 +24,7 @@ class Achievement(Base):
 
 
 class UserAchievement(Base):
-    """用户成就记录表"""
+    """User achievement record table"""
     __tablename__ = "user_achievements"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

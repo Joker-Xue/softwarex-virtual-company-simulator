@@ -1,5 +1,5 @@
 """
-Agent任务模型
+AgentTaskModel
 """
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.sql import func
@@ -7,7 +7,7 @@ from app.database import Base
 
 
 class AgentTask(Base):
-    """虚拟角色任务表"""
+    """Virtual RoleTask table"""
     __tablename__ = "agent_tasks"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

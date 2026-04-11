@@ -1,4 +1,4 @@
-import os
+﻿import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -49,7 +49,7 @@ async def get_current_user(
     if payload is None or payload.get("sub") is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="无效的认证凭据",
+            detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -58,7 +58,7 @@ async def get_current_user(
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="无效的认证凭据",
+            detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         ) from exc
 
@@ -67,7 +67,7 @@ async def get_current_user(
     if user is None or not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="无效的认证凭据",
+            detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
@@ -75,5 +75,5 @@ async def get_current_user(
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
     if not current_user.is_active:
-        raise HTTPException(status_code=400, detail="用户已被禁用")
+        raise HTTPException(status_code=400, detail="User has been disabled")
     return current_user

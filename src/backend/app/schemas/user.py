@@ -1,22 +1,22 @@
 """
-用户相关 Pydantic 模型
+UserRelated Pydantic Model
 """
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from typing import Optional
 
 
-# ========== 基础模型 ==========
+# ========== BaseModel ==========
 class UserBase(BaseModel):
-    """用户基础模型"""
-    username: str = Field(..., min_length=3, max_length=50, description="用户名")
-    email: EmailStr = Field(..., description="邮箱")
-    full_name: Optional[str] = Field(None, max_length=100, description="全名")
-    phone: Optional[str] = Field(None, max_length=20, description="电话")
+    """UserBaseModel"""
+    username: str = Field(..., min_length=3, max_length=50, description="username")
+    email: EmailStr = Field(..., description="email")
+    full_name: Optional[str] = Field(None, max_length=100, description="full name")
+    phone: Optional[str] = Field(None, max_length=20, description="phone")
 
 
 class UserInDB(UserBase):
-    """数据库中的用户模型"""
+    """User Model in Database"""
     id: int
     is_active: bool
     is_admin: bool
@@ -27,34 +27,34 @@ class UserInDB(UserBase):
         from_attributes = True
 
 
-# ========== 请求模型 ==========
+# ========== askModel ==========
 class UserCreate(UserBase):
-    """用户注册请求"""
-    password: str = Field(..., min_length=6, max_length=100, description="密码")
+    """userregisterask"""
+    password: str = Field(..., min_length=6, max_length=100, description="password")
 
 
 class UserLogin(BaseModel):
-    """用户登录请求"""
-    username: str = Field(..., description="用户名或邮箱")
-    password: str = Field(..., description="密码")
+    """User Loginask"""
+    username: str = Field(..., description="username or email")
+    password: str = Field(..., description="password")
 
 
 class UserUpdate(BaseModel):
-    """用户更新请求"""
+    """User update ask"""
     full_name: Optional[str] = Field(None, max_length=100)
     phone: Optional[str] = Field(None, max_length=20)
     email: Optional[EmailStr] = None
 
 
 class UserPasswordChange(BaseModel):
-    """修改密码请求"""
-    old_password: str = Field(..., description="旧密码")
-    new_password: str = Field(..., min_length=6, max_length=100, description="新密码")
+    """Modify passwordask"""
+    old_password: str = Field(..., description="old password")
+    new_password: str = Field(..., min_length=6, max_length=100, description="new password")
 
 
-# ========== 响应模型 ==========
+# ========== Response Model ==========
 class UserResponse(UserBase):
-    """用户信息响应"""
+    """UserInfo response"""
     id: int
     is_active: bool
     created_at: datetime
@@ -64,24 +64,24 @@ class UserResponse(UserBase):
 
 
 class RegisterResponse(UserResponse):
-    """注册响应（含 access_token 支持自动登录）"""
+    """register response（Contains access_token to support automatic login）"""
     access_token: str
 
 
 class UserProfileResponse(UserInDB):
-    """用户完整资料响应"""
+    """User complete profile response"""
     pass
 
 
-# ========== Token 模型 ==========
+# ========== Token Model ==========
 class Token(BaseModel):
-    """Token响应"""
+    """Token response"""
     access_token: str
     token_type: str = "bearer"
-    expires_in: int = 1800  # 30分钟
+    expires_in: int = 1800  # 30minutes
 
 
 class TokenData(BaseModel):
-    """Token数据"""
+    """Tokendata"""
     user_id: Optional[int] = None
     username: Optional[str] = None

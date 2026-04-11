@@ -1,7 +1,7 @@
 @import './base.css';
 @import './styles/variables.css';
 
-/* 全局重置 — 覆盖 Vue 脚手架默认样式 */
+/* overall situation reset  override Vue scaffolding default style */
 #app {
   max-width: none;
   margin: 0;
@@ -25,7 +25,7 @@ a:hover {
   background: none;
 }
 
-/* 全局过渡动画 */
+/* overall situation transition animation */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -48,7 +48,7 @@ a:hover {
   transform: translateY(-10px);
 }
 
-/* Element Plus 全局覆盖 — 深色模式 */
+/* Element Plus overall situation coverage  dark mode */
 .el-card {
   border-radius: var(--radius-xl, 16px) !important;
   border: 1px solid var(--color-border) !important;
@@ -149,7 +149,7 @@ a:hover {
   cursor: not-allowed !important;
 }
 
-/* 全局 Markdown 渲染样式 */
+/* overall situation Markdown rendering style */
 .markdown-body h1,
 .markdown-body h2,
 .markdown-body h3 {

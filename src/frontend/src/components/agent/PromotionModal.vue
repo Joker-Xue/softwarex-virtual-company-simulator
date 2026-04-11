@@ -19,10 +19,10 @@ onMounted(() => {
       <div v-if="show" class="promotion-overlay" @click="show = false; emit('close')">
         <div class="promotion-modal cyber-card breathe scan-lines">
           <div class="promo-icon">&#x1F680;</div>
-          <div class="promo-title glow-text">恭喜晋升！</div>
+          <div class="promo-title glow-text">Congratulations on the promotion！</div>
           <div class="promo-level glow-text-amber">{{ title }}</div>
           <div class="promo-level-number">Lv.{{ level }}</div>
-          <div class="promo-desc">你已晋升为 <span class="glow-text-violet">Lv.{{ level }} {{ title }}</span></div>
+          <div class="promo-desc">You have been promoted to <span class="glow-text-violet">Lv.{{ level }} {{ title }}</span></div>
           <div class="fireworks">
             <span v-for="i in 12" :key="i" class="spark" :style="{ '--i': i }" />
           </div>

@@ -1,5 +1,5 @@
 """
-闯关进度模型
+Passage progress model
 """
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, JSON
 from sqlalchemy.sql import func
@@ -8,21 +8,21 @@ from app.database import Base
 
 
 class GameProgress(Base):
-    """闯关进度表"""
+    """Level progress chart"""
     __tablename__ = "game_progress"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
-    current_level = Column(Integer, default=1)  # 当前关卡
-    completed_levels = Column(JSON, default=list)  # 已完成关卡ID列表
-    total_coins_earned = Column(Integer, default=0)  # 通过闯关获得的总金币
-    completion_streak = Column(Integer, default=0)  # 连续完成关卡天数
+    current_level = Column(Integer, default=1)  # Current level
+    completed_levels = Column(JSON, default=list)  # Completed level ID list
+    total_coins_earned = Column(Integer, default=0)  # Total gold coins gained by passing levels
+    completion_streak = Column(Integer, default=0)  # Number of consecutive days to complete levels
     last_completion_date = Column(String(10), nullable=True)  # "YYYY-MM-DD"
-    longest_streak = Column(Integer, default=0)  # 历史最长连续天数
+    longest_streak = Column(Integer, default=0)  # The longest consecutive days in history
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    # 关联关系
+    # Association relationship
     user = relationship("User", backref="game_progress")
 
     def __repr__(self):

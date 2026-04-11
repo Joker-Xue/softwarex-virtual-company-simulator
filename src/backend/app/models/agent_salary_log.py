@@ -1,5 +1,5 @@
 """
-Agent薪资记录模型
+AgentCompensationRecordModel
 """
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.sql import func
@@ -7,7 +7,7 @@ from app.database import Base
 
 
 class AgentSalaryLog(Base):
-    """薪资发放记录表"""
+    """Compensation issuance record form"""
     __tablename__ = "agent_salary_logs"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

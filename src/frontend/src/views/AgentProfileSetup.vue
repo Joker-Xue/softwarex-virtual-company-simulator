@@ -30,25 +30,25 @@ const submitting = ref(false)
 const showGuide = ref(false)
 
 const mbtiDescriptions: Record<string, string> = {
-  INTJ: '建筑师 - 富有想象力的战略家',
-  INTP: '逻辑学家 - 创新的发明家',
-  ENTJ: '指挥官 - 大胆的领导者',
-  ENTP: '辩论家 - 聪明好奇的思想家',
-  INFJ: '提倡者 - 安静而神秘的理想主义者',
-  INFP: '调停者 - 诗意善良的利他主义者',
-  ENFJ: '主人公 - 富有魅力的鼓舞者',
-  ENFP: '竞选者 - 热情有Creativity的社交达人',
-  ISTJ: '物流师 - 务实可靠的人',
-  ISFJ: '守卫者 - 专注而温暖的守护者',
-  ESTJ: '总经理 - 出色的管理者',
-  ESFJ: '执政官 - 极有同情心的社交者',
-  ISTP: '鉴赏家 - 大胆而实际的实验家',
-  ISFP: '探险家 - 灵活有魅力的艺术家',
-  ESTP: '企业家 - 聪明精力充沛的人',
-  ESFP: '表演者 - 自发热情的娱乐者',
+  INTJ: 'Architect - imaginative and strategic',
+  INTP: 'Logician - inventive and analytical',
+  ENTJ: 'Commander - bold and decisive leader',
+  ENTP: 'Debater - curious and quick-thinking',
+  INFJ: 'Advocate - idealistic and insightful',
+  INFP: 'Mediator - kind and imaginative',
+  ENFJ: 'Protagonist - charismatic and inspiring',
+  ENFP: 'Campaigner - energetic and expressive',
+  ISTJ: 'Logistician - practical and dependable',
+  ISFJ: 'Defender - warm and detail-oriented',
+  ESTJ: 'Executive - organized and effective',
+  ESFJ: 'Consul - caring and socially attentive',
+  ISTP: 'Virtuoso - practical and adaptable',
+  ISFP: 'Adventurer - flexible and artistic',
+  ESTP: 'Entrepreneur - energetic and action-oriented',
+  ESFP: 'Entertainer - spontaneous and lively',
 }
 
-// MBTI性格影响预览Stats
+// MBTI impact preview data
 interface MbtiImpact {
   workStyle: string
   socialStyle: string
@@ -57,37 +57,37 @@ interface MbtiImpact {
 }
 
 const mbtiImpacts: Record<string, MbtiImpact> = {
-  INTJ: { workStyle: '独立思考，追求完美方案', socialStyle: '少而精，深度交流', careerTendency: 'Technical', specialBonus: '高难度TasksXP +15%' },
-  INTP: { workStyle: '逻辑驱动，热衷创新', socialStyle: '话题驱动型社交', careerTendency: 'Technical', specialBonus: '工作效率 +26%' },
-  ENTJ: { workStyle: '目标导向，高效执行', socialStyle: '主导型社交，影响力强', careerTendency: 'Management', specialBonus: 'TasksXP +5%' },
-  ENTP: { workStyle: '跳跃思维，善于创新', socialStyle: '广泛社交，辩论爱好者', careerTendency: 'Technical', specialBonus: '社交亲密度 +30%' },
-  INFJ: { workStyle: '洞察驱动，追求意义', socialStyle: '选择性社交，高质量', careerTendency: 'Management', specialBonus: '工作效率 +15%' },
-  INFP: { workStyle: '理想主义，创意优先', socialStyle: '温和共情型社交', careerTendency: 'Management', specialBonus: '社交亲密度 +20%' },
-  ENFJ: { workStyle: '团队协作，激励他人', socialStyle: '天生的社交组织者', careerTendency: 'Management', specialBonus: '社交亲密度 +56%' },
-  ENFP: { workStyle: '灵感驱动，多items目并行', socialStyle: '热情洋溢的社交达人', careerTendency: 'Management', specialBonus: '社交亲密度 +56%' },
-  ISTJ: { workStyle: '严谨有序，按流程办事', socialStyle: '守信可靠的合作者', careerTendency: 'Technical', specialBonus: '工作效率 +27%' },
-  ISFJ: { workStyle: '细致入微，关注细节', socialStyle: '温暖守护型社交', careerTendency: 'Management', specialBonus: '工作效率 +15%' },
-  ESTJ: { workStyle: '结果导向，管理力强', socialStyle: '直接高效的沟通风格', careerTendency: 'Technical', specialBonus: '工作效率 +15%' },
-  ESFJ: { workStyle: '协调合作，关注团队', socialStyle: '社区核心型社交', careerTendency: 'Management', specialBonus: '社交亲密度 +56%' },
-  ISTP: { workStyle: '实操派，解决实际问题', socialStyle: '行动导向型社交', careerTendency: 'Technical', specialBonus: '工作效率 +27%' },
-  ISFP: { workStyle: '感性创作，艺术导向', socialStyle: '安静的观察者', careerTendency: 'Management', specialBonus: '工作效率 +15%' },
-  ESTP: { workStyle: '行动派，敢于冒险', socialStyle: '活力四射的社交者', careerTendency: 'Technical', specialBonus: '社交亲密度 +30%' },
-  ESFP: { workStyle: '活泼多变，氛围担当', socialStyle: '团队开心果', careerTendency: 'Management', specialBonus: '社交亲密度 +56%' },
+  INTJ: { workStyle: 'Independent problem solving with a focus on elegant solutions', socialStyle: 'Small circles and deep conversations', careerTendency: 'Technical Track', specialBonus: 'High-difficulty task XP +15%' },
+  INTP: { workStyle: 'Logic-driven and excited by new ideas', socialStyle: 'Conversation starts with interesting topics', careerTendency: 'Technical Track', specialBonus: 'Work speed +26%' },
+  ENTJ: { workStyle: 'Goal-oriented with fast execution', socialStyle: 'Direct, influential, and leadership-heavy', careerTendency: 'Management Track', specialBonus: 'Task XP +5%' },
+  ENTP: { workStyle: 'Idea-hopping and innovation-seeking', socialStyle: 'Wide social reach with debate energy', careerTendency: 'Technical Track', specialBonus: 'Social affinity +30%' },
+  INFJ: { workStyle: 'Insight-led with a search for meaning', socialStyle: 'Selective but high-quality connection', careerTendency: 'Management Track', specialBonus: 'Work speed +15%' },
+  INFP: { workStyle: 'Idealistic with creativity first', socialStyle: 'Gentle, empathic social style', careerTendency: 'Management Track', specialBonus: 'Social affinity +20%' },
+  ENFJ: { workStyle: 'Collaborative and motivating', socialStyle: 'Natural organizer of social energy', careerTendency: 'Management Track', specialBonus: 'Social affinity +56%' },
+  ENFP: { workStyle: 'Inspiration-driven and multi-threaded', socialStyle: 'Warm, expressive, and highly social', careerTendency: 'Management Track', specialBonus: 'Social affinity +56%' },
+  ISTJ: { workStyle: 'Structured, methodical, and process-driven', socialStyle: 'Reliable and steady teammate', careerTendency: 'Technical Track', specialBonus: 'Work speed +27%' },
+  ISFJ: { workStyle: 'Careful execution with strong attention to detail', socialStyle: 'Supportive and protective', careerTendency: 'Management Track', specialBonus: 'Work speed +15%' },
+  ESTJ: { workStyle: 'Results-first with strong coordination', socialStyle: 'Direct and efficient communication', careerTendency: 'Technical Track', specialBonus: 'Work speed +15%' },
+  ESFJ: { workStyle: 'Cooperative and team-centered', socialStyle: 'Community-builder and connector', careerTendency: 'Management Track', specialBonus: 'Social affinity +56%' },
+  ISTP: { workStyle: 'Hands-on and focused on real problems', socialStyle: 'Action-oriented and concise', careerTendency: 'Technical Track', specialBonus: 'Work speed +27%' },
+  ISFP: { workStyle: 'Creative, aesthetic, and emotionally tuned', socialStyle: 'Quiet observer with gentle presence', careerTendency: 'Management Track', specialBonus: 'Work speed +15%' },
+  ESTP: { workStyle: 'Fast-moving and comfortable with risk', socialStyle: 'Energetic and socially bold', careerTendency: 'Technical Track', specialBonus: 'Social affinity +30%' },
+  ESFP: { workStyle: 'Adaptive, lively, and atmosphere-driven', socialStyle: 'Mood-maker for the whole team', careerTendency: 'Management Track', specialBonus: 'Social affinity +56%' },
 }
 
 const currentImpact = computed(() => selectedMbti.value ? mbtiImpacts[selectedMbti.value] : null)
 
 async function handleSubmit() {
   if (!nickname.value.trim()) {
-    ElMessage.warning('请输入Nickname')
+    ElMessage.warning('Please enter a nickname')
     return
   }
   if (!selectedMbti.value) {
-    ElMessage.warning('Please select MBTI type')
+    ElMessage.warning('Please select an MBTI type')
     return
   }
   if (pointsLeft.value < 0) {
-    ElMessage.warning('属性总点数不能超过300')
+    ElMessage.warning('Total attribute points cannot exceed 300')
     return
   }
 
@@ -106,10 +106,10 @@ async function handleSubmit() {
     })
     showGuide.value = true
   } catch (e: any) {
-    const detail = e?.response?.data?.detail || e?.response?.data?.message || e?.message || '未知错误'
-    console.error('Create Character失败:', e?.response?.status, detail, e)
-    if (detail.includes('已创建')) {
-      ElMessage.info('Profile已存在，正在进入公司...')
+    const detail = e?.response?.data?.detail || e?.response?.data?.message || e?.message || 'Unknown error'
+    console.error('Failed to create profile:', e?.response?.status, detail, e)
+    if (detail.includes('already created')) {
+      ElMessage.info('Profile already exists, entering the company...')
       router.push('/agent-world')
     } else {
       ElMessage.error('Creation failed: ' + detail)
@@ -133,26 +133,26 @@ function enterCompany() {
 
     <div class="setup-card cyber-card scan-lines">
       <h2 class="setup-title glow-text">AGENT PROFILE SETUP</h2>
-      <p class="setup-desc">在虚拟公司中开启你的职业生涯</p>
+      <p class="setup-desc">Start your career inside the virtual company</p>
 
-      <!-- 性格核心提示横幅 -->
+      <!-- Personality guidance banner -->
       <div class="personality-banner">
         <span class="banner-icon">🧬</span>
         <div class="banner-text">
-          <strong>性格决定命运</strong>
-          <span>你选择的MBTI将决定Profile在公司中的一切表现 —— Work efficiency, social style, and career path are all personality-driven.</span>
+          <strong>Personality Shapes Destiny</strong>
+          <span>The MBTI type you choose determines how your character behaves in the company. Work efficiency, social style, and promotion path are all personality-driven, and the AI runs fully according to this setup.</span>
         </div>
       </div>
 
       <!-- Nickname -->
       <div class="form-section">
         <label class="form-label">Nickname</label>
-        <el-input v-model="nickname" placeholder="输入你的ProfileNickname" maxlength="50" show-word-limit class="cyber-input" />
+        <el-input v-model="nickname" placeholder="Enter your character nickname" maxlength="50" show-word-limit class="cyber-input" />
       </div>
 
-      <!-- Department选择 -->
+      <!-- Department selection -->
       <div class="form-section">
-        <label class="form-label">选择Department</label>
+        <label class="form-label">Select Department</label>
         <div class="dept-grid">
           <div
             v-for="(label, key) in SELECTABLE_DEPARTMENTS"
@@ -167,9 +167,9 @@ function enterCompany() {
         </div>
       </div>
 
-      <!-- MBTI选择 -->
+      <!-- MBTI selection -->
       <div class="form-section">
-        <label class="form-label">选择 MBTI 类型</label>
+        <label class="form-label">Select MBTI Type</label>
         <div class="mbti-grid">
           <div
             v-for="mbti in MBTI_TYPES"
@@ -184,58 +184,58 @@ function enterCompany() {
         </div>
         <p v-if="selectedMbti" class="mbti-detail">{{ mbtiDescriptions[selectedMbti] }}</p>
 
-        <!-- 性格影响预览卡片 -->
+        <!-- Personality impact preview -->
         <div v-if="currentImpact" class="impact-preview cyber-card">
           <div class="impact-header glow-text">PERSONALITY IMPACT</div>
           <div class="impact-grid">
             <div class="impact-item">
               <span class="impact-icon">💼</span>
               <div class="impact-content">
-                <span class="impact-label">工作风格</span>
+                <span class="impact-label">Work Style</span>
                 <span class="impact-value">{{ currentImpact.workStyle }}</span>
               </div>
             </div>
             <div class="impact-item">
               <span class="impact-icon">👥</span>
               <div class="impact-content">
-                <span class="impact-label">社交倾向</span>
+                <span class="impact-label">Social Style</span>
                 <span class="impact-value">{{ currentImpact.socialStyle }}</span>
               </div>
             </div>
             <div class="impact-item">
               <span class="impact-icon">📈</span>
               <div class="impact-content">
-                <span class="impact-label">成长路线</span>
-                <span class="impact-value impact-career">倾向{{ currentImpact.careerTendency }}</span>
+                <span class="impact-label">Growth Track</span>
+                <span class="impact-value impact-career">Prefers {{ currentImpact.careerTendency }}</span>
               </div>
             </div>
             <div class="impact-item">
               <span class="impact-icon">⚡</span>
               <div class="impact-content">
-                <span class="impact-label">特殊加成</span>
+                <span class="impact-label">Special Bonus</span>
                 <span class="impact-value impact-bonus">{{ currentImpact.specialBonus }}</span>
               </div>
             </div>
           </div>
           <div class="impact-dimensions">
-            <div class="dim-item"><span class="dim-letter" :class="{ active: selectedMbti[0] === 'E' }">E 外向</span><span class="dim-vs">vs</span><span class="dim-letter" :class="{ active: selectedMbti[0] === 'I' }">I 内向</span><span class="dim-effect">{{ selectedMbti[0] === 'E' ? '社交频率高，亲密度增长快' : '专注工作，效率更高' }}</span></div>
-            <div class="dim-item"><span class="dim-letter" :class="{ active: selectedMbti[1] === 'S' }">S 实感</span><span class="dim-vs">vs</span><span class="dim-letter" :class="{ active: selectedMbti[1] === 'N' }">N 直觉</span><span class="dim-effect">{{ selectedMbti[1] === 'S' ? '常规Tasks完成快' : '高难度TasksXP加成' }}</span></div>
-            <div class="dim-item"><span class="dim-letter" :class="{ active: selectedMbti[2] === 'T' }">T 思考</span><span class="dim-vs">vs</span><span class="dim-letter" :class="{ active: selectedMbti[2] === 'F' }">F 情感</span><span class="dim-effect">{{ selectedMbti[2] === 'T' ? 'TasksXP加成，倾向Technical' : '社交加成，倾向Management' }}</span></div>
-            <div class="dim-item"><span class="dim-letter" :class="{ active: selectedMbti[3] === 'J' }">J 判断</span><span class="dim-vs">vs</span><span class="dim-letter" :class="{ active: selectedMbti[3] === 'P' }">P 感知</span><span class="dim-effect">{{ selectedMbti[3] === 'J' ? '日程严格，工作占比高' : '行为随机，灵活发展' }}</span></div>
+            <div class="dim-item"><span class="dim-letter" :class="{ active: selectedMbti[0] === 'E' }">E Extraversion</span><span class="dim-vs">vs</span><span class="dim-letter" :class="{ active: selectedMbti[0] === 'I' }">I Introversion</span><span class="dim-effect">{{ selectedMbti[0] === 'E' ? 'Higher social frequency with faster affinity growth' : 'More focused on work with higher efficiency' }}</span></div>
+            <div class="dim-item"><span class="dim-letter" :class="{ active: selectedMbti[1] === 'S' }">S Sensing</span><span class="dim-vs">vs</span><span class="dim-letter" :class="{ active: selectedMbti[1] === 'N' }">N Intuition</span><span class="dim-effect">{{ selectedMbti[1] === 'S' ? 'Faster at routine tasks' : 'XP bonus on high-difficulty tasks' }}</span></div>
+            <div class="dim-item"><span class="dim-letter" :class="{ active: selectedMbti[2] === 'T' }">T Thinking</span><span class="dim-vs">vs</span><span class="dim-letter" :class="{ active: selectedMbti[2] === 'F' }">F Feeling</span><span class="dim-effect">{{ selectedMbti[2] === 'T' ? 'Task XP bonus with a technical-track tendency' : 'Social bonus with a management-track tendency' }}</span></div>
+            <div class="dim-item"><span class="dim-letter" :class="{ active: selectedMbti[3] === 'J' }">J Judging</span><span class="dim-vs">vs</span><span class="dim-letter" :class="{ active: selectedMbti[3] === 'P' }">P Perceiving</span><span class="dim-effect">{{ selectedMbti[3] === 'J' ? 'Strict schedule with a higher work ratio' : 'More spontaneous behavior and flexible growth' }}</span></div>
           </div>
         </div>
       </div>
 
-      <!-- 六维属性 -->
+      <!-- Six attributes -->
       <div class="form-section">
         <label class="form-label">
-          分配属性点
+          Allocate Attribute Points
           <span class="points-badge" :class="{ over: pointsLeft < 0, remaining: pointsLeft > 0 }">
-            剩余 {{ pointsLeft }} 点
+            Remaining {{ pointsLeft }} pts
           </span>
         </label>
         <div class="attr-list">
-          <div class="attr-row" v-for="(label, key) in { communication: 'Communication', leadership: 'Leadership', creativity: 'Creativity', technical: 'Technical', teamwork: 'Teamwork', diligence: '勤奋度' }" :key="key">
+          <div class="attr-row" v-for="(label, key) in { communication: 'Communication', leadership: 'Leadership', creativity: 'Creativity', technical: 'Technical Skill', teamwork: 'Teamwork', diligence: 'Diligence' }" :key="key">
             <span class="attr-label">{{ label }}</span>
             <div class="cyber-slider-track">
               <div class="cyber-slider-fill" :style="{ width: (attrs as any)[key] + '%' }"></div>
@@ -259,7 +259,7 @@ function enterCompany() {
         @click="handleSubmit"
       >
         <span v-if="submitting" class="btn-loading"></span>
-        <span>Create Character，进入公司</span>
+        <span>Create Profile and Enter the Company</span>
       </button>
     </div>
 
@@ -276,8 +276,8 @@ function enterCompany() {
               <div class="guide-icon-ring">
                 <span class="guide-icon">🚀</span>
               </div>
-              <h2 class="guide-title">欢迎加入虚拟公司！</h2>
-              <p class="guide-subtitle">你的AI职场模拟之旅即将开始</p>
+              <h2 class="guide-title">Welcome to the Virtual Company!</h2>
+              <p class="guide-subtitle">Your AI workplace simulation is about to begin</p>
             </div>
 
             <!-- Content -->
@@ -285,36 +285,36 @@ function enterCompany() {
               <div class="guide-item">
                 <span class="gi-icon">🧬</span>
                 <div class="gi-text">
-                  <strong>性格驱动一切</strong>
-                  <span>你设定的MBTI性格将全面决定Profile行为 —— All decisions are made autonomously by AI based on your personality.</span>
+                  <strong>Personality Drives Everything</strong>
+                  <span>Your MBTI setup shapes the entire simulation: work speed, social choices, task preference, and promotion track are all decided by the AI through personality rules.</span>
                 </div>
               </div>
               <div class="guide-item">
                 <span class="gi-icon">🤖</span>
                 <div class="gi-text">
-                  <strong>AI全自动运行</strong>
-                  <span>你的Profile将自主工作、社交、参加Events、完成Tasks并获得经验。你只需观察AI如何基于你的性格做出每一个决定。</span>
+                  <strong>Fully Autonomous AI</strong>
+                  <span>Your character will work, socialize, join events, complete tasks, and gain experience automatically. You can simply observe how each decision emerges from the personality model.</span>
                 </div>
               </div>
               <div class="guide-item">
                 <span class="gi-icon">📈</span>
                 <div class="gi-text">
-                  <strong>从实习生到CEO</strong>
-                  <span>起步于实习生，通过完成Tasks积累经验自动晋升。到达Lv.4时AI会根据你的T/F维度自动选择技术或Management。</span>
+                  <strong>From Intern to CEO</strong>
+                  <span>You start as an intern and climb through automatic promotion by completing tasks. At Level 4, the AI chooses a technical or management track based on your T/F dimension.</span>
                 </div>
               </div>
               <div class="guide-item">
                 <span class="gi-icon">📊</span>
                 <div class="gi-text">
-                  <strong>透明决策Trace</strong>
-                  <span>每一个决策都附带MBTI因素分解。打开「Trace」面板，实时查看AI为什么选择了这个行为、这个Tasks、这个Events。</span>
+                  <strong>Transparent Decision Trace</strong>
+                  <span>Every decision includes MBTI factor breakdowns. Open the trace panel to inspect why the AI picked a specific behavior, task, or event in real time.</span>
                 </div>
               </div>
               <div class="guide-item">
                 <span class="gi-icon">⚡</span>
                 <div class="gi-text">
-                  <strong>加速观察</strong>
-                  <span>觉得太慢？顶栏模拟速度可切换1x/2x/5x，加速观察你的Profile在公司中的成长Trace！</span>
+                  <strong>Fast-Forward Observation</strong>
+                  <span>Need a faster view? Use the top-bar simulation speed switch to move between 1x, 2x, and 5x while watching the character grow through the company.</span>
                 </div>
               </div>
             </div>
@@ -330,7 +330,7 @@ function enterCompany() {
 
             <!-- Enter button -->
             <button class="guide-enter-btn" @click="enterCompany">
-              <span>进入虚拟公司</span>
+              <span>Enter the Virtual Company</span>
               <span class="enter-arrow">→</span>
             </button>
           </div>

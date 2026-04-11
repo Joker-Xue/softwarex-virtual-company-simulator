@@ -20,8 +20,8 @@ const effectiveMultipliers = computed(() => personalityTrace.value?.effective_mu
 // Tab state
 const activeTab = ref('info')
 
-// ── 日程相关 ──
-// 当前时间（每分钟更新一次，用于高亮当前日程items）
+// ── DateRelated ──
+// Current time（Updated every minutes，Used to highlight Current schedule items）
 const currentTime = ref(getCurrentTimeStr())
 let timeTimer: ReturnType<typeof setInterval> | null = null
 
@@ -33,7 +33,7 @@ function getCurrentTimeStr(): string {
 onMounted(() => {
   timeTimer = setInterval(() => {
     currentTime.value = getCurrentTimeStr()
-  }, 60000) // 每分钟更新
+  }, 60000) // Update every minutes
   store.fetchPersonalityTrace()
 })
 
@@ -41,44 +41,44 @@ onUnmounted(() => {
   if (timeTimer) clearInterval(timeTimer)
 })
 
-// 日程Stats
+// Schedule data
 const schedule = computed(() => {
   return displayAgent.value?.daily_schedule || []
 })
 
-// 判断某个日程items是否为当前Events时间段
+// JudgingWhether a certain schedule item is the Current activity time period
 function isCurrentBlock(index: number): boolean {
   if (!schedule.value.length) return false
   const now = currentTime.value
   const entry = schedule.value[index]
   const nextEntry = schedule.value[index + 1]
-  // 当前时间 >= 该条目时间 且 < 下一条目时间（或是最后一条）
+  // Current time >= the msgsproject time and < next msgsproject time（Or the last msgs）
   if (entry.time <= now && (!nextEntry || nextEntry.time > now)) {
     return true
   }
   return false
 }
 
-// Events名称到颜色的映射
+// Activity name to color mapping
 function getActivityColor(activity: string): string {
   const colorMap: Record<string, string> = {
-    '工作': '#6366f1',
-    '休息': '#10b981',
-    '午餐': '#f59e0b',
-    '茶歇': '#14b8a6',
-    '社交': '#ec4899',
-    '下班': '#94a3b8',
+    'Work': '#6366f1',
+    'Rest': '#10b981',
+    'lunch': '#f59e0b',
+    'break': '#14b8a6',
+    'Social': '#ec4899',
+    'get off work': '#94a3b8',
   }
   return colorMap[activity] || '#6366f1'
 }
 
-// 房间类型标签
+// Room type tag
 const ROOM_TYPE_LABELS: Record<string, string> = {
-  office: '办公室',
-  cafeteria: '咖啡厅',
-  lounge: '大厅',
-  meeting: '会议室',
-  ceo_office: 'CEO办公室',
+  office: 'office',
+  cafeteria: 'Cafe',
+  lounge: 'Lobby',
+  meeting: 'Meeting Room',
+  ceo_office: 'CEO Office',
 }
 
 // Memory state
@@ -97,11 +97,11 @@ const MEMORY_TYPE_COLORS: Record<string, string> = {
 }
 
 const MEMORY_TYPE_LABELS: Record<string, string> = {
-  interaction: '互动',
-  task: 'Tasks',
-  observation: '观察',
-  career: '职业',
-  social: '社交',
+  interaction: 'interactive',
+  task: 'Task',
+  observation: 'observe',
+  career: 'Profession',
+  social: 'Social',
 }
 
 function clearSelection() {
@@ -113,9 +113,9 @@ async function addFriend() {
   if (!store.selectedAgent) return
   try {
     await store.sendFriendRequest(store.selectedAgent.id)
-    ElMessage.success('Friends申请已Send')
+    ElMessage.success('Friend application has been sent')
   } catch (e: any) {
-    ElMessage.error(e?.response?.data?.detail || 'Send失败，请稍后重试')
+    ElMessage.error(e?.response?.data?.detail || 'Send failed，Please try again later')
   }
 }
 
@@ -154,14 +154,14 @@ function timeAgo(dateStr: string): string {
   const date = new Date(dateStr)
   const diffMs = now.getTime() - date.getTime()
   const diffMin = Math.floor(diffMs / 60000)
-  if (diffMin < 1) return '刚刚'
-  if (diffMin < 60) return `${diffMin}分钟前`
+  if (diffMin < 1) return 'just now'
+  if (diffMin < 60) return `${diffMin} min ago`
   const diffHour = Math.floor(diffMin / 60)
-  if (diffHour < 24) return `${diffHour}小时前`
+  if (diffHour < 24) return `${diffHour} h ago`
   const diffDay = Math.floor(diffHour / 24)
-  if (diffDay < 30) return `${diffDay}天前`
+  if (diffDay < 30) return `${diffDay} d ago`
   const diffMonth = Math.floor(diffDay / 30)
-  return `${diffMonth}个月前`
+  return `${diffMonth} months ago`
 }
 
 // When switching to memories tab, load them
@@ -174,7 +174,7 @@ watch(activeTab, (val) => {
   }
 })
 
-// ── 薪资相关 ──
+// ── CompensationRelated ──
 const salaryInfo = ref<any>(null)
 const salaryHistory = ref<any[]>([])
 const salaryLoading = ref(false)
@@ -196,7 +196,7 @@ async function fetchSalaryInfo() {
 
 <template>
   <div class="profile-card" v-if="displayAgent">
-    <div v-if="!isMe" class="back-btn" @click="clearSelection">&larr; 返回我的Profile</div>
+    <div v-if="!isMe" class="back-btn" @click="clearSelection">&larr; BackMy Role</div>
 
     <div class="card-header">
       <div class="avatar" :style="{ background: AVATAR_COLORS[displayAgent.avatar_key] || '#6366f1', boxShadow: '0 0 12px ' + (AVATAR_COLORS[displayAgent.avatar_key] || '#6366f1') }">
@@ -214,17 +214,17 @@ async function fetchSalaryInfo() {
 
     <!-- Tabs -->
     <el-tabs v-model="activeTab" class="profile-tabs">
-      <el-tab-pane label="信息" name="info" />
-      <el-tab-pane label="今日日程" name="schedule" />
-      <el-tab-pane v-if="isMe" label="记忆" name="memories" />
-      <el-tab-pane v-if="isMe" label="薪资" name="salary" />
+      <el-tab-pane label="Info" name="info" />
+      <el-tab-pane label="Today's Schedule" name="schedule" />
+      <el-tab-pane v-if="isMe" label="Memories" name="memories" />
+      <el-tab-pane v-if="isMe" label="Compensation" name="salary" />
     </el-tabs>
 
     <!-- Info Tab -->
     <template v-if="activeTab === 'info'">
-      <!-- 属性雷达（简化为条形图） -->
+      <!-- property radar（Simplified to msgs graph） -->
       <div class="attrs-section">
-        <div class="attr-bar" v-for="(label, key) in { attr_communication: '沟通力', attr_leadership: '领导力', attr_creativity: '创造力', attr_technical: '技术力', attr_teamwork: '协作力', attr_diligence: '勤奋度' }" :key="key">
+        <div class="attr-bar" v-for="(label, key) in { attr_communication: 'Communication', attr_leadership: 'Leadership', attr_creativity: 'Creativity', attr_technical: 'Technical Skill', attr_teamwork: 'Teamwork', attr_diligence: 'Diligence' }" :key="key">
           <span class="bar-label">{{ label }}</span>
           <div class="bar-track cyber-progress">
             <div class="bar-fill cyber-progress-bar" :style="{ width: (displayAgent as any)[key] + '%' }" />
@@ -235,31 +235,31 @@ async function fetchSalaryInfo() {
 
       <!-- MBTI Influence -->
       <div class="mbti-influence" v-if="effectiveMultipliers.work_speed">
-        <div class="influence-title">{{ store.myProfile?.mbti }} 性格影响</div>
+        <div class="influence-title">{{ store.myProfile?.mbti }} personality influence</div>
         <div class="influence-grid">
           <div class="inf-item">
             <span class="inf-label">Work Speed</span>
             <span class="inf-value" :class="{ boosted: effectiveMultipliers.work_speed > 1 }">{{ effectiveMultipliers.work_speed?.toFixed(2) }}x</span>
           </div>
           <div class="inf-item">
-            <span class="inf-label">社交加成</span>
+            <span class="inf-label">Social Bonus</span>
             <span class="inf-value" :class="{ boosted: effectiveMultipliers.social_bonus > 1 }">{{ effectiveMultipliers.social_bonus?.toFixed(2) }}x</span>
           </div>
           <div class="inf-item">
-            <span class="inf-label">经验倍率</span>
+            <span class="inf-label">XP Multiplier</span>
             <span class="inf-value" :class="{ boosted: effectiveMultipliers.xp_bonus > 1 }">{{ effectiveMultipliers.xp_bonus?.toFixed(2) }}x</span>
           </div>
           <div class="inf-item">
             <span class="inf-label">Career Tendency</span>
-            <span class="inf-value career">{{ effectiveMultipliers.career_tendency === 'technical' ? '技术' : '管理' }}</span>
+            <span class="inf-value career">{{ effectiveMultipliers.career_tendency === 'technical' ? 'technology' : 'manage' }}</span>
           </div>
         </div>
       </div>
 
-      <!-- 职级进度 -->
+      <!-- Level progress -->
       <div class="level-progress" v-if="isMe && store.nextLevel">
         <div class="progress-label">
-          下一级: {{ store.nextLevel.title }}
+          Next Level: {{ store.nextLevel.title }}
           (Tasks {{ store.myProfile!.tasks_completed }}/{{ store.nextLevel.tasksRequired }}，
           XP {{ store.myProfile!.xp }}/{{ store.nextLevel.xpRequired }})
         </div>
@@ -270,20 +270,20 @@ async function fetchSalaryInfo() {
         />
       </div>
 
-      <!-- 状态 -->
+      <!-- state -->
       <div class="status-row">
-        <span>状态: {{ ACTION_LABELS[displayAgent.current_action] || '空闲' }}</span>
-        <span>位置: ({{ displayAgent.pos_x }}, {{ displayAgent.pos_y }})</span>
+        <span>Status: {{ ACTION_LABELS[displayAgent.current_action] || 'Idle' }}</span>
+        <span>Position: ({{ displayAgent.pos_x }}, {{ displayAgent.pos_y }})</span>
       </div>
 
-      <!-- 操作按钮 -->
+      <!-- Action button -->
       <div v-if="!isMe" class="action-btns">
-        <button class="cyber-btn" @click="addFriend">加Friends</button>
-        <button class="cyber-btn cyber-btn-violet" @click="emit('open-chat', displayAgent!.id)">发消息</button>
+        <button class="cyber-btn" @click="addFriend">Add Friend</button>
+        <button class="cyber-btn cyber-btn-violet" @click="emit('open-chat', displayAgent!.id)">Message</button>
       </div>
     </template>
 
-    <!-- Schedule Tab (今日日程) -->
+    <!-- Schedule Tab (Today's Schedule) -->
     <template v-if="activeTab === 'schedule'">
       <div class="schedule-section">
         <div v-if="schedule.length > 0" class="schedule-timeline-wrap cyber-scroll">
@@ -304,12 +304,12 @@ async function fetchSalaryInfo() {
                   {{ entry.activity }}
                 </span>
                 <span class="schedule-room-tag">{{ ROOM_TYPE_LABELS[entry.room_type] || entry.room_type }}</span>
-                <span class="schedule-current-tag" v-if="isCurrentBlock(idx)">当前</span>
+                <span class="schedule-current-tag" v-if="isCurrentBlock(idx)">Current</span>
               </div>
             </el-timeline-item>
           </el-timeline>
         </div>
-        <div v-else class="schedule-empty">暂无日程安排</div>
+        <div v-else class="schedule-empty">No schedule available</div>
       </div>
     </template>
 
@@ -318,12 +318,12 @@ async function fetchSalaryInfo() {
       <div class="memory-filter">
         <el-select
           v-model="memoryTypeFilter"
-          placeholder="全部类型"
+          placeholder="All Types"
           clearable
           size="small"
           @change="onMemoryTypeChange"
         >
-          <el-option label="全部类型" value="" />
+          <el-option label="All Types" value="" />
           <el-option
             v-for="(label, key) in MEMORY_TYPE_LABELS"
             :key="key"
@@ -331,7 +331,7 @@ async function fetchSalaryInfo() {
             :value="key"
           />
         </el-select>
-        <span class="memory-count">共 {{ store.memoriesTotalCount }} 条记忆</span>
+        <span class="memory-count">Total {{ store.memoriesTotalCount }} memories</span>
       </div>
 
       <div v-loading="memoryLoading" class="memory-timeline-wrap cyber-scroll">
@@ -352,14 +352,14 @@ async function fetchSalaryInfo() {
                 >
                   {{ MEMORY_TYPE_LABELS[mem.memory_type] || mem.memory_type }}
                 </span>
-                <span class="memory-importance" :title="`重要度: ${mem.importance}/10`">
+                <span class="memory-importance" :title="`Importance: ${mem.importance}/10`">
                   {{ getImportanceStars(mem.importance) }}
                 </span>
               </div>
             </div>
           </el-timeline-item>
         </el-timeline>
-        <div v-else class="memory-empty">暂无记忆</div>
+        <div v-else class="memory-empty">No memories yet</div>
       </div>
 
       <div class="memory-pagination" v-if="store.memoriesTotalCount > memoryPageSize">
@@ -379,33 +379,33 @@ async function fetchSalaryInfo() {
       <div v-loading="salaryLoading" class="salary-section">
         <div v-if="salaryInfo" class="salary-overview">
           <div class="salary-main">
-            <span class="salary-label">日薪</span>
-            <span class="salary-amount">{{ salaryInfo.total }} Coins</span>
+            <span class="salary-label">Daily Pay</span>
+            <span class="salary-amount">{{ salaryInfo.total }} coins</span>
           </div>
           <div class="salary-details">
             <div class="salary-row">
-              <span>职级</span>
+              <span>Level</span>
               <span>{{ salaryInfo.career_title }} (Lv.{{ salaryInfo.career_level }})</span>
             </div>
             <div class="salary-row">
-              <span>基础薪资</span>
+              <span>Base Salary</span>
               <span>{{ salaryInfo.base_salary }}</span>
             </div>
             <div class="salary-row">
-              <span>绩效加成</span>
+              <span>Performance Bonus</span>
               <span>+{{ salaryInfo.performance_bonus }} ({{ salaryInfo.performance_rate }}%)</span>
             </div>
           </div>
         </div>
         <div v-if="salaryHistory.length > 0" class="salary-history">
-          <h4>近期薪资记录</h4>
+          <h4>Recent Pay Records</h4>
           <div v-for="log in salaryHistory" :key="log.id" class="salary-log-item">
             <span class="log-desc">{{ log.description }}</span>
             <span class="log-amount">+{{ log.amount }}</span>
             <span class="log-date">{{ log.paid_at ? new Date(log.paid_at).toLocaleDateString() : '' }}</span>
           </div>
         </div>
-        <div v-else-if="!salaryLoading" class="salary-empty">暂无薪资记录</div>
+        <div v-else-if="!salaryLoading" class="salary-empty">No pay records yet</div>
       </div>
     </template>
   </div>

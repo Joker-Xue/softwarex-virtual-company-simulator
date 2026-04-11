@@ -1,5 +1,5 @@
 """
-WebSocket端点 - 实时世界同步
+WebSocketendpoint - Real-time world synchronization
 """
 import asyncio
 import json
@@ -43,8 +43,8 @@ def _decode_canvas_y(pos_y: int) -> int:
 
 def _detect_floor(x: int, encoded_y: int) -> int:
     """
-    根据编码坐标检测所在房间楼层。
-    先按 pos_y 楼层偏移解码 floor，再在该 floor 内按 canvas 坐标命中房间。
+    Detect the room floor based on coded coordinates。
+    First press pos_y floor offset to decode floor，Then hit the room according to the canvas coordinates within the floor.
     """
     floor = _decode_floor_from_pos_y(encoded_y)
     canvas_y = _decode_canvas_y(encoded_y)
@@ -59,28 +59,28 @@ def _detect_floor(x: int, encoded_y: int) -> int:
 
 
 class ConnectionManager:
-    """WebSocket连接管理器 - 支持楼层AOI过滤 + 心跳超时检测"""
+    """WebSocket connection manager - supports floor AOIfilter + heartbeat timeout Detection"""
 
-    HEARTBEAT_TIMEOUT = 60  # 超过60秒无活动视为死连接
-    CLEANUP_INTERVAL = 30   # 每30秒扫描一次
+    HEARTBEAT_TIMEOUT = 60  # No activity for more than 60 seconds is considered a dead connection
+    CLEANUP_INTERVAL = 30   # Scan every 30 seconds
 
     def __init__(self):
         # agent_id -> WebSocket
         self.active: Dict[int, WebSocket] = {}
-        # agent_id -> floor (楼层AOI跟踪)
+        # agent_id -> floor (Floor AOI tracking)
         self.floor_map: Dict[int, int] = {}
         # agent_id -> last activity timestamp
         self._last_activity: Dict[int, float] = {}
-        # 后台清理任务
+        # Background cleanup task
         self._cleanup_task: Optional[asyncio.Task] = None
 
     def _ensure_cleanup_task(self):
-        """确保后台清理协程已启动"""
+        """Make sure the background cleanup coroutine is started"""
         if self._cleanup_task is None or self._cleanup_task.done():
             self._cleanup_task = asyncio.create_task(self._cleanup_loop())
 
     async def _cleanup_loop(self):
-        """定期清理死连接"""
+        """Clean up dead connections regularly"""
         while True:
             try:
                 await asyncio.sleep(self.CLEANUP_INTERVAL)
@@ -91,7 +91,7 @@ class ConnectionManager:
                 logger.error("WS cleanup error: %s", e)
 
     async def cleanup_dead_connections(self):
-        """移除超过 HEARTBEAT_TIMEOUT 秒没有活动的连接"""
+        """Remove connections that have been inactive for more than HEARTBEAT_TIMEOUT seconds"""
         now = time.time()
         dead = [
             agent_id for agent_id, last in self._last_activity.items()
@@ -102,13 +102,13 @@ class ConnectionManager:
             ws = self.active.get(agent_id)
             if ws:
                 try:
-                    await ws.close(code=4003, reason="心跳超时")
+                    await ws.close(code=4003, reason="Heartbeat timeout")
                 except Exception:
                     pass
             self.disconnect(agent_id)
 
     def touch(self, agent_id: int):
-        """更新最后活动时间"""
+        """Update last Activitytime"""
         self._last_activity[agent_id] = time.time()
 
     async def connect(self, agent_id: int, ws: WebSocket, floor: int = 1, accept: bool = True):
@@ -125,7 +125,7 @@ class ConnectionManager:
         self._last_activity.pop(agent_id, None)
 
     def update_floor(self, agent_id: int, floor: int):
-        """更新agent所在楼层"""
+        """Update the floor where the agent is located"""
         self.floor_map[agent_id] = floor
 
     async def send_to(self, agent_id: int, data: dict):
@@ -137,7 +137,7 @@ class ConnectionManager:
                 self.disconnect(agent_id)
 
     async def broadcast(self, data: dict, exclude: int = None):
-        """全局广播 - 用于join/leave/chat等全局事件"""
+        """overall situation - Used for global events such as join/leave/chat"""
         dead = []
         for aid, ws in self.active.items():
             if aid == exclude:
@@ -151,7 +151,7 @@ class ConnectionManager:
             self.floor_map.pop(aid, None)
 
     async def broadcast_floor(self, floor: int, data: dict, exclude: int = None):
-        """楼层广播 - 仅发送给同楼层的agent（AOI过滤）"""
+        """Floor Broadcast - Send only to agents on the same floor（AOIfilter）"""
         dead = []
         for aid, ws in self.active.items():
             if aid == exclude:
@@ -171,7 +171,7 @@ manager = ConnectionManager()
 
 
 async def _auth_ws(token: str) -> int | None:
-    """从token解析user_id"""
+    """Parse user_id from token"""
     payload = decode_access_token(token)
     if not payload:
         return None
@@ -183,21 +183,21 @@ async def _auth_ws(token: str) -> int | None:
 
 @router.websocket("/world")
 async def ws_world(ws: WebSocket):
-    """WebSocket 端点：从首条消息中读取 token 认证（不通过 URL query param）"""
+    """WebSocket endpoint：Read token authentication from the first msgsinformation（Not passing URL query param）"""
     await ws.accept()
 
-    # 等待首条消息携带 token
+    # Waiting for the first msgsinformation to carry token
     try:
         raw = await ws.receive_text()
         first_msg = json.loads(raw)
         token = first_msg.get("token", "")
     except Exception:
-        await ws.close(code=4001, reason="认证失败：需要发送包含 token 的首条消息")
+        await ws.close(code=4001, reason="Authentication failed：the first message must include a token")
         return
 
     user_id = await _auth_ws(token)
     if not user_id:
-        await ws.close(code=4001, reason="认证失败")
+        await ws.close(code=4001, reason="Authentication failed")
         return
 
     async with AsyncSessionLocal() as db:
@@ -206,10 +206,10 @@ async def ws_world(ws: WebSocket):
         )
         profile = result.scalar_one_or_none()
         if not profile:
-            await ws.close(code=4002, reason="尚未创建角色")
+            await ws.close(code=4002, reason="Profile has not been created yet")
             return
 
-        # 兼容旧数据：若当前位置不是语义点位，连接时自动吸附到最近合法点
+        # compatible old data：If the Current position is not a semantic point，Automatically snap to the nearest legal point when connecting
         if get_spot_name_by_pos(profile.pos_x, profile.pos_y) is None:
             snapped_spot = snap_to_nearest_spot(
                 x=profile.pos_x or 0,
@@ -227,11 +227,11 @@ async def ws_world(ws: WebSocket):
         profile.last_seen = datetime.now(timezone.utc)
         await db.commit()
 
-    # 检测初始楼层
+    # Detection initial floor
     initial_floor = _detect_floor(profile.pos_x, profile.pos_y)
     await manager.connect(agent_id, ws, floor=initial_floor, accept=False)
 
-    # 广播上线（全局可见）
+    # Broadcasting online（overall situation is visible）
     async with AsyncSessionLocal() as db:
         result = await db.execute(
             select(AgentProfile).where(AgentProfile.id == agent_id)
@@ -291,24 +291,24 @@ async def ws_world(ws: WebSocket):
                         p.current_action = "moving"
                         await db.commit()
                         x, y = snapped_x, snapped_y
-                # 检测新楼层，更新AOI
+                # DetectionNew Floor，Update AOI
                 new_floor = _detect_floor(x, y)
                 old_floor = manager.floor_map.get(agent_id, 1)
                 if new_floor != old_floor:
-                    # 通知旧楼层：agent离开视野
+                    # Notify old floor：agent leaves view
                     await manager.broadcast_floor(
                         old_floor,
                         {"type": "agent_floor_leave", "agent_id": agent_id, "floor": new_floor},
                         exclude=agent_id,
                     )
                     manager.update_floor(agent_id, new_floor)
-                    # 通知新楼层：agent进入视野
+                    # Notify new floor：agent comes into view
                     await manager.broadcast_floor(
                         new_floor,
                         {"type": "agent_floor_join", "agent_id": agent_id, "x": x, "y": y, "floor": new_floor},
                         exclude=agent_id,
                     )
-                # 仅广播给同楼层的agent（AOI过滤）
+                # Only broadcast to agents on the same floor（AOIfilter）
                 await manager.broadcast_floor(
                     new_floor,
                     {"type": "agent_move", "agent_id": agent_id, "x": x, "y": y},
@@ -325,7 +325,7 @@ async def ws_world(ws: WebSocket):
                     if p:
                         p.current_action = action
                         await db.commit()
-                # action事件仅广播给同楼层的agent（AOI过滤）
+                # actionEvents are only broadcast to agents on the same floor（AOIfilter）
                 agent_floor = manager.floor_map.get(agent_id, 1)
                 await manager.broadcast_floor(
                     agent_floor,

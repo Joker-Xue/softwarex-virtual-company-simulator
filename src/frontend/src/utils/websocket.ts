@@ -1,12 +1,12 @@
 /**
- * WebSocket封装 - 支持指数退避重连、重连状态指示、最大重试次数
+ * WebSocket encapsulation - supports exponential backoff reconnection, reconnection state indication, maximum number of retries
  */
 
 type MessageHandler = (data: any) => void
 
-const RECONNECT_BASE_DELAY = 3000    // 初始重连延迟 3s
-const RECONNECT_MAX_DELAY = 30000    // 最大重连延迟 30s
-const MAX_RECONNECT_ATTEMPTS = 10    // 最大重连次数
+const RECONNECT_BASE_DELAY = 3000    // Initial reconnection delay 3s
+const RECONNECT_MAX_DELAY = 30000    // Maximum reconnection delay 30s
+const MAX_RECONNECT_ATTEMPTS = 10    // Maximum number of reconnections
 
 export class AgentWebSocket {
   private ws: WebSocket | null = null
@@ -19,8 +19,7 @@ export class AgentWebSocket {
   private _reconnectAttempts = 0
 
   constructor(baseUrl?: string) {
-    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8001'
-    const wsBase = baseUrl || apiBase.replace(/^http/, 'ws')
+    const wsBase = baseUrl || (import.meta.env.VITE_API_BASE || window.location.origin).replace(/^http/, 'ws')
     this.url = wsBase
   }
 
@@ -28,12 +27,12 @@ export class AgentWebSocket {
     return this._connected
   }
 
-  /** 是否正在重连中，可用于 UI 展示重连指示器 */
+  /** Is reconnecting in progress?，Can be used in UI to display reconnection indicator */
   get reconnecting() {
     return this._reconnecting
   }
 
-  /** 当前已重连尝试次数 */
+  /** CurrentThe number of reconnect attempts */
   get reconnectAttempts() {
     return this._reconnectAttempts
   }
@@ -45,13 +44,13 @@ export class AgentWebSocket {
     this.ws = new WebSocket(fullUrl)
 
     this.ws.onopen = () => {
-      // 后端从首条消息读取 token 进行认证（不走 URL query param）
+      // The backend reads the token from the first msgsinformation for authentication.（No URL query param）
       this.ws!.send(JSON.stringify({ token }))
       this._connected = true
       this._reconnecting = false
       this._reconnectAttempts = 0
       this.emit('connected', {})
-      // 心跳
+      // heartbeat
       this.pingTimer = setInterval(() => {
         this.send({ type: 'ping' })
       }, 30000)
@@ -62,7 +61,7 @@ export class AgentWebSocket {
         const data = JSON.parse(event.data)
         const type = data.type || 'unknown'
         this.emit(type, data)
-        this.emit('*', data) // 通配符
+        this.emit('*', data) // wildcard
       } catch {
         // ignore
       }
@@ -72,7 +71,7 @@ export class AgentWebSocket {
       this._connected = false
       this.clearTimers()
       this.emit('disconnected', { code: event.code, reason: event.reason })
-      // 自动重连（非主动关闭）
+      // Automatically reconnect（Inactive shutdown）
       if (event.code !== 4001 && event.code !== 4002 && event.code !== 1000) {
         this._scheduleReconnect(token)
       }
@@ -84,8 +83,8 @@ export class AgentWebSocket {
   }
 
   /**
-   * 指数退避重连：3s → 6s → 12s → 24s → 30s(max)
-   * 超过 MAX_RECONNECT_ATTEMPTS 次后停止，发出 max_reconnect 事件。
+   * Exponential backoff reconnection：3s → 6s → 12s → 24s → 30s(max)
+   * Stop after MAX_RECONNECT_ATTEMPTS times，Emit max_reconnect event.
    */
   private _scheduleReconnect(token: string) {
     if (this._reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
@@ -171,7 +170,7 @@ export class AgentWebSocket {
   }
 }
 
-// 单例
+// Singleton
 let instance: AgentWebSocket | null = null
 
 export function getAgentWS(): AgentWebSocket {

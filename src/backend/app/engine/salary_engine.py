@@ -1,5 +1,5 @@
 """
-薪资引擎
+Compensationengine
 """
 from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,28 +11,28 @@ from app.models.agent_task import AgentTask
 from app.models.coin_wallet import CoinWallet, CoinTransaction
 
 
-# 薪资表：按career_level
+# Compensation table：by career_level
 SALARY_TABLE = {
-    0: 50,    # 实习生
-    1: 100,   # 初级员工
-    2: 200,   # 中级员工
-    3: 350,   # 高级员工
-    4: 500,   # 经理
-    5: 800,   # 总监
+    0: 50,    # Intern
+    1: 100,   # Junior Staff
+    2: 200,   # Mid-level Staff
+    3: 350,   # Senior Staff
+    4: 500,   # Manager
+    5: 800,   # Director
     6: 1200,  # CEO
 }
 
 
 def calculate_daily_salary(agent: AgentProfile, expired_count: int = 0) -> dict:
     """
-    计算日薪 = 基础薪资 + 绩效加成 - 过期任务惩罚
+    Calculate Daily Pay = Base Salary + Performance Bonus - Expired Task Penalty
 
-    绩效加成公式：base * min(0.20, max(0, (completed - expired) * 0.002))
-    如果本月 expired > completed，额外惩罚：salary * 0.9
+    Performance Bonusformula：base * min(0.20, max(0, (completed - expired) * 0.002))
+    If this month expired > completed，additional punishment：salary * 0.9
     """
     base = SALARY_TABLE.get(agent.career_level, 50)
 
-    # 绩效：考虑过期任务的影响
+    # performance：Consider the impact of expired tasks
     completed = agent.tasks_completed or 0
     effective_tasks = max(0, completed - expired_count)
     perf_rate = min(0.20, max(0, effective_tasks * 0.002))
@@ -40,7 +40,7 @@ def calculate_daily_salary(agent: AgentProfile, expired_count: int = 0) -> dict:
 
     total = base + perf_bonus
 
-    # 如果过期任务数量超过完成数量，应用惩罚系数
+    # If the number of overdue tasks exceeds the number of completed tasks，Apply penalty coefficient
     penalty_applied = False
     if expired_count > completed:
         total = int(total * 0.9)
@@ -57,7 +57,7 @@ def calculate_daily_salary(agent: AgentProfile, expired_count: int = 0) -> dict:
 
 
 async def _get_monthly_expired_count(db: AsyncSession, agent_id: int) -> int:
-    """获取Agent本月过期任务数量"""
+    """Get the number of expired tasks of Agent this month"""
     now = datetime.now(timezone.utc)
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     result = await db.execute(
@@ -72,8 +72,8 @@ async def _get_monthly_expired_count(db: AsyncSession, agent_id: int) -> int:
 
 async def distribute_salaries(db: AsyncSession) -> dict:
     """
-    遍历所有Agent发放日薪，写入AgentSalaryLog + CoinWallet
-    返回统计数据
+    Traverse all Agents and issue Daily Pay，Write to AgentSalaryLog + CoinWallet
+    Backstatistics
     """
     today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
@@ -84,7 +84,7 @@ async def distribute_salaries(db: AsyncSession) -> dict:
     total_paid = 0
 
     for agent in agents:
-        # 检查今天是否已发放
+        # Check if it has been issued today
         existing = await db.execute(
             select(AgentSalaryLog).where(
                 AgentSalaryLog.agent_id == agent.id,
@@ -94,18 +94,18 @@ async def distribute_salaries(db: AsyncSession) -> dict:
         if existing.scalar_one_or_none():
             continue
 
-        # 获取本月过期任务数
+        # Get the number of expired tasks this month
         expired_count = await _get_monthly_expired_count(db, agent.id)
 
         salary_info = calculate_daily_salary(agent, expired_count=expired_count)
         amount = salary_info["total"]
 
-        # 构造描述
-        desc = f"日薪: 基础{salary_info['base_salary']} + 绩效{salary_info['performance_bonus']}"
+        # Construction description
+        desc = f"Daily Pay: Base{salary_info['base_salary']} + performance{salary_info['performance_bonus']}"
         if salary_info["penalty_applied"]:
-            desc += " (过期任务惩罚-10%)"
+            desc += " (Expired Task Penalty -10%)"
 
-        # 记录薪资日志
+        # Record Compensation log
         log = AgentSalaryLog(
             agent_id=agent.id,
             amount=amount,
@@ -114,7 +114,7 @@ async def distribute_salaries(db: AsyncSession) -> dict:
         )
         db.add(log)
 
-        # 发放到钱包
+        # Send to wallet
         wallet_result = await db.execute(
             select(CoinWallet).where(CoinWallet.user_id == agent.user_id)
         )
@@ -125,7 +125,7 @@ async def distribute_salaries(db: AsyncSession) -> dict:
                 user_id=agent.user_id,
                 amount=amount,
                 tx_type="salary",
-                description=f"日薪发放 (Lv.{agent.career_level})",
+                description=f"Daily Pay issuance (Lv.{agent.career_level})",
             )
             db.add(tx)
 

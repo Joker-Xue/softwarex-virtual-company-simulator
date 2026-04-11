@@ -17,8 +17,8 @@ onMounted(() => {
 watch(() => store.friendAcceptedNotif, (notif) => {
   if (notif) {
     ElNotification({
-      title: 'Friends申请已通过',
-      message: `${notif.nickname} 通过了你的Friends申请`,
+      title: 'Friend application has been approved',
+      message: `${notif.nickname} Passed your friend application`,
       type: 'success',
       duration: 4000,
       position: 'top-right',
@@ -35,29 +35,29 @@ function switchToRequests() {
 async function accept(id: number) {
   try {
     await store.acceptFriend(id)
-    ElMessage.success('已接受')
+    ElMessage.success('Accepted')
     store.fetchReceivedHistory()
-  } catch { ElMessage.error('Failed') }
+  } catch { ElMessage.error('Operation failed') }
 }
 
 async function reject(id: number) {
   try {
     await store.rejectFriend(id)
-    ElMessage.success('已拒绝')
+    ElMessage.success('Rejected')
     store.fetchReceivedHistory()
-  } catch { ElMessage.error('Failed') }
+  } catch { ElMessage.error('Operation failed') }
 }
 
 function compatColor(label: string): string {
-  if (label === '极佳') return '#22c55e'
-  if (label === '良好') return '#eab308'
-  if (label === '一般') return '#f97316'
+  if (label === 'excellent') return '#22c55e'
+  if (label === 'good') return '#eab308'
+  if (label === 'generally') return '#f97316'
   return '#ef4444'
 }
 
 function roleLabel(role: string): string {
-  if (role === 'mentor') return '导师'
-  if (role === 'mentee') return '学员'
+  if (role === 'mentor') return 'tutor'
+  if (role === 'mentee') return 'student'
   return ''
 }
 
@@ -65,41 +65,41 @@ function timeAgo(dateStr: string): string {
   if (!dateStr) return ''
   const diff = Date.now() - new Date(dateStr).getTime()
   const m = Math.floor(diff / 60000)
-  if (m < 1) return '刚刚'
-  if (m < 60) return `${m}分钟前`
+  if (m < 1) return 'just now'
+  if (m < 60) return `${m} min ago`
   const h = Math.floor(m / 60)
-  if (h < 24) return `${h}小时前`
-  return `${Math.floor(h / 24)}天前`
+  if (h < 24) return `${h} h ago`
+  return `${Math.floor(h / 24)} d ago`
 }
 
 const STATUS_TEXT: Record<string, string> = {
-  pending: '等待通过',
-  accepted: '已通过',
-  rejected: '已拒绝',
+  pending: 'Waiting to pass',
+  accepted: 'Passed',
+  rejected: 'Rejected',
 }
 </script>
 
 <template>
   <div class="friend-list">
-    <!-- 顶部导航 -->
+    <!-- Top navigation -->
     <div class="top-nav">
       <button class="nav-btn" :class="{ active: activeView === 'friends' }" @click="activeView = 'friends'">
-        Friends列表
+        Friend List
         <span v-if="store.friends.length" class="count-badge">{{ store.friends.length }}</span>
       </button>
       <button class="nav-btn" :class="{ active: activeView === 'requests' }" @click="switchToRequests">
-        申请记录
+        Application record
         <span v-if="store.pendingRequests.length" class="count-badge dot-badge">
           <span class="pulse-dot pulse-dot-rose"></span>{{ store.pendingRequests.length }}
         </span>
       </button>
     </div>
 
-    <!-- ── Friends列表视图 ── -->
+    <!-- ── Friend List view  -->
     <template v-if="activeView === 'friends'">
-      <!-- Pending请求（收到的） -->
+      <!-- Pendingask（received） -->
       <div v-if="store.pendingRequests.length" class="section">
-        <div class="section-title">Pending请求 ({{ store.pendingRequests.length }})</div>
+        <div class="section-title">Pendingask ({{ store.pendingRequests.length }})</div>
         <div v-for="req in store.pendingRequests" :key="req.id" class="friend-item pending">
           <div class="friend-avatar" :style="{ background: AVATAR_COLORS[req.avatar_key] || '#6366f1', boxShadow: '0 0 10px ' + (AVATAR_COLORS[req.avatar_key] || '#6366f1') }">
             {{ req.nickname?.[0] || '?' }}
@@ -108,15 +108,15 @@ const STATUS_TEXT: Record<string, string> = {
             <div class="friend-name">{{ req.nickname }}</div>
             <div class="req-time">{{ timeAgo(req.created_at) }}</div>
           </div>
-          <button class="cyber-btn cyber-btn-sm cyber-btn-emerald" @click.stop="accept(req.id)">接受</button>
-          <button class="cyber-btn cyber-btn-sm cyber-btn-rose" @click.stop="reject(req.id)">拒绝</button>
+          <button class="cyber-btn cyber-btn-sm cyber-btn-emerald" @click.stop="accept(req.id)">accept</button>
+          <button class="cyber-btn cyber-btn-sm cyber-btn-rose" @click.stop="reject(req.id)">reject</button>
         </div>
       </div>
 
-      <!-- Friends列表 -->
+      <!-- Friend List -->
       <div class="section">
-        <div class="section-title">Friends ({{ store.friends.length }})</div>
-        <div v-if="store.friends.length === 0" class="empty">还没有Friends，在地图上点击其他Profile添加吧</div>
+        <div class="section-title">friend ({{ store.friends.length }})</div>
+        <div v-if="store.friends.length === 0" class="empty">No friends yet，Click on other roles on the map to add them</div>
         <div
           v-for="f in store.friends" :key="f.id"
           class="friend-item"
@@ -132,9 +132,9 @@ const STATUS_TEXT: Record<string, string> = {
                 {{ roleLabel(f.role) }}
               </span>
             </div>
-            <div class="friend-level">{{ CAREER_LEVELS[f.friend_level]?.title || '实习生' }}</div>
+            <div class="friend-level">{{ CAREER_LEVELS[f.friend_level]?.title || 'Intern' }}</div>
             <div class="affinity-row">
-              <span class="affinity-label">亲密度</span>
+              <span class="affinity-label">affinity</span>
               <div class="affinity-track">
                 <div class="affinity-fill" :style="{ width: (f.affinity ?? 50) + '%' }"></div>
               </div>
@@ -142,21 +142,21 @@ const STATUS_TEXT: Record<string, string> = {
             </div>
           </div>
           <div class="friend-actions">
-            <el-tooltip v-if="f.compatibility_label" :content="`兼容性: ${(f.compatibility_score * 100).toFixed(0)}% (${f.friend_mbti})`" placement="top">
+            <el-tooltip v-if="f.compatibility_label" :content="`compatible: ${(f.compatibility_score * 100).toFixed(0)}% (${f.friend_mbti})`" placement="top">
               <span class="cyber-badge cyber-badge-cyan compat-tag">{{ f.compatibility_label }}</span>
             </el-tooltip>
-            <button class="cyber-btn cyber-btn-sm">Chat</button>
+            <button class="cyber-btn cyber-btn-sm">chat</button>
           </div>
         </div>
       </div>
     </template>
 
-    <!-- ── 申请记录视图 ── -->
+    <!-- ── Application record view  -->
     <template v-else>
-      <!-- 我发出的申请 -->
+      <!-- sent requests -->
       <div class="section">
-        <div class="section-title">我发出的申请 ({{ store.sentRequests.length }})</div>
-        <div v-if="store.sentRequests.length === 0" class="empty">No sent requests</div>
+        <div class="section-title">sent requests ({{ store.sentRequests.length }})</div>
+        <div v-if="store.sentRequests.length === 0" class="empty">No applications have been issued yet</div>
         <div v-for="req in store.sentRequests" :key="req.id" class="req-item">
           <div class="friend-avatar" :style="{ background: AVATAR_COLORS[req.avatar_key] || '#6366f1', boxShadow: '0 0 8px ' + (AVATAR_COLORS[req.avatar_key] || '#6366f1') }">
             {{ req.nickname?.[0] || '?' }}
@@ -174,10 +174,10 @@ const STATUS_TEXT: Record<string, string> = {
         </div>
       </div>
 
-      <!-- 收到的申请 -->
+      <!-- received requests -->
       <div class="section">
-        <div class="section-title">收到的申请 ({{ store.receivedHistory.length }})</div>
-        <div v-if="store.receivedHistory.length === 0" class="empty">No received requests</div>
+        <div class="section-title">received requests ({{ store.receivedHistory.length }})</div>
+        <div v-if="store.receivedHistory.length === 0" class="empty">received requests</div>
         <div v-for="req in store.receivedHistory" :key="req.id" class="req-item">
           <div class="friend-avatar" :style="{ background: AVATAR_COLORS[req.avatar_key] || '#6366f1', boxShadow: '0 0 8px ' + (AVATAR_COLORS[req.avatar_key] || '#6366f1') }">
             {{ req.nickname?.[0] || '?' }}
@@ -186,12 +186,12 @@ const STATUS_TEXT: Record<string, string> = {
             <div class="req-name">{{ req.nickname }}</div>
             <div class="req-time">{{ timeAgo(req.created_at) }}</div>
           </div>
-          <!-- Pending：显示接受/拒绝 -->
+          <!-- Pending：Show accept/reject -->
           <template v-if="req.status === 'pending'">
-            <button class="cyber-btn cyber-btn-sm cyber-btn-emerald" @click="accept(req.id)">接受</button>
-            <button class="cyber-btn cyber-btn-sm cyber-btn-rose" @click="reject(req.id)">拒绝</button>
+            <button class="cyber-btn cyber-btn-sm cyber-btn-emerald" @click="accept(req.id)">accept</button>
+            <button class="cyber-btn cyber-btn-sm cyber-btn-rose" @click="reject(req.id)">reject</button>
           </template>
-          <!-- 已处理：显示��态 -->
+          <!-- Processed：show��Status -->
           <div v-else class="req-status" :class="`status-${req.status}`">
             <span v-if="req.status === 'accepted'">✓ </span>
             <span v-else>✕ </span>
@@ -257,7 +257,7 @@ const STATUS_TEXT: Record<string, string> = {
 .friend-item:hover { border-color: var(--border-glow); background: var(--bg-hover); }
 .friend-item.pending { background: rgba(251,191,36,0.04); border-color: rgba(251,191,36,0.15); }
 
-/* ── Request Item (申请记录) ── */
+/* ── Request Item (Application record) ── */
 .req-item {
   display: flex; align-items: center; gap: 10px;
   padding: 8px 10px; border-radius: var(--radius-md);

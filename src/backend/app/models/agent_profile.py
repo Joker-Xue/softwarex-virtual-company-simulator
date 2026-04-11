@@ -1,5 +1,5 @@
 """
-虚拟Agent角色档案模型
+Virtual AgentRole Profile Model
 """
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, JSON, ForeignKey
 from sqlalchemy.sql import func
@@ -8,7 +8,7 @@ from app.database import Base
 
 
 class AgentProfile(Base):
-    """虚拟角色档案表"""
+    """Virtual Role profile table"""
     __tablename__ = "agent_profiles"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -24,7 +24,7 @@ class AgentProfile(Base):
     attr_teamwork = Column(Integer, default=50)
     attr_diligence = Column(Integer, default=50)
     career_level = Column(Integer, default=0)
-    career_path = Column(String(20), default="")  # "" 未选择, "management" 管理, "technical" 技术
+    career_path = Column(String(20), default="")  # "" Not selected, "management" manage, "technical" technology
     department = Column(String(50), default="unassigned")
     tasks_completed = Column(Integer, default=0)
     xp = Column(Integer, default=0)

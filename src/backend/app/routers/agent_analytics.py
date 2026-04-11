@@ -1,5 +1,5 @@
 """
-数据分析面板API
+dataanalyze panel API
 """
 from datetime import datetime, timedelta, UTC
 from fastapi import APIRouter, Depends, HTTPException
@@ -41,18 +41,18 @@ async def _get_profile(user: User, db: AsyncSession) -> AgentProfile:
     )
     profile = result.scalar_one_or_none()
     if not profile:
-        raise HTTPException(404, "尚未创建角色")
+        raise HTTPException(404, "Profile has not been created yet")
     return profile
 
 
-@router.get("/analytics/personal", summary="个人数据分析")
+@router.get("/analytics/personal", summary="Personal Dataanalyze")
 async def personal_analytics(
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
 ):
     me = await _get_profile(user, db)
 
-    # ── XP History: 从已完成任务聚合真实 XP ──
+    # ── XP History: Aggregate real XP from completed tasks
     today = datetime.now(UTC).date()
     total_xp = me.xp or 0
     thirty_days_ago = today - timedelta(days=29)
@@ -73,7 +73,7 @@ async def personal_analytics(
     xp_map = {row.day: int(row.daily_xp) for row in xp_by_day_result}
 
     if xp_map:
-        # 真实数据：累计方式构建历史
+        # real data：Build history cumulatively
         cumulative = max(0, total_xp - sum(xp_map.values()))
         xp_history = []
         for i in range(30):
@@ -81,7 +81,7 @@ async def personal_analytics(
             cumulative += xp_map.get(day, 0)
             xp_history.append({"date": day.strftime("%m-%d"), "xp": min(cumulative, total_xp)})
     else:
-        # 回退：新用户或无任务记录时，保留原有模拟公式
+        # fallback：New user or no Task record，Keep the original simulation formula
         xp_history = []
         for i in range(30):
             day = today - timedelta(days=29 - i)
@@ -211,7 +211,7 @@ async def personal_analytics(
     }
 
 
-@router.get("/analytics/company", summary="公司数据分析")
+@router.get("/analytics/company", summary="Company Dataanalyze")
 async def company_analytics(
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
@@ -247,7 +247,7 @@ async def company_analytics(
     level_distribution = [
         {
             "level": row.career_level,
-            "title": CAREER_LEVELS.get(row.career_level, {}).get("title", "未知"),
+            "title": CAREER_LEVELS.get(row.career_level, {}).get("title", "Unknown"),
             "count": row.count,
         }
         for row in level_result.all()
@@ -311,27 +311,27 @@ async def company_analytics(
     }
 
 
-@router.get("/analytics/dashboard", summary="运营大屏实时数据")
+@router.get("/analytics/dashboard", summary="Operate large-screen real-time data")
 async def dashboard_realtime(
     db: AsyncSession = Depends(get_db),
 ):
-    """公司运营大屏API — 无需登录，供大屏展示使用"""
+    """Company operation large screen API - no login required，For large screen display use"""
     from datetime import date
 
     today = date.today()
     now = datetime.now(UTC)
 
-    # ── 在线人数 ──
+    # ── Online Headcount
     online_result = await db.execute(
         select(sa_func.count(AgentProfile.id)).where(AgentProfile.is_online == True)
     )
     online_count = online_result.scalar() or 0
 
-    # ── 总员工数 ──
+    # ── Total number of staff ──
     total_agents_result = await db.execute(select(sa_func.count(AgentProfile.id)))
     total_agents = total_agents_result.scalar() or 0
 
-    # ── 今日完成任务数 ──
+    # ── Today Complete task count
     today_start = datetime(today.year, today.month, today.day, tzinfo=UTC)
     today_tasks_result = await db.execute(
         select(sa_func.count(AgentTask.id)).where(
@@ -341,13 +341,13 @@ async def dashboard_realtime(
     )
     today_tasks = today_tasks_result.scalar() or 0
 
-    # ── 全公司总XP ──
+    # ── Total company XP ──
     total_xp_result = await db.execute(
         select(sa_func.sum(AgentProfile.xp))
     )
     total_xp = total_xp_result.scalar() or 0
 
-    # ── 部门产出趋势（最近7天，每天每部门完成任务数）──
+    # ── Department output trend（Last 7 days，Every DepartmentComplete every day task count）──
     seven_days_ago = now - timedelta(days=7)
     from sqlalchemy import cast, Date
     dept_trend_result = await db.execute(
@@ -371,7 +371,7 @@ async def dashboard_realtime(
             dept_trend[dept] = {}
         dept_trend[dept][row.day.strftime("%m-%d") if row.day else ""] = row.count
 
-    # ── 职级分布 ──
+    # ── Level Distribution ──
     level_result = await db.execute(
         select(
             AgentProfile.career_level,
@@ -382,13 +382,13 @@ async def dashboard_realtime(
     level_distribution = [
         {
             "level": row.career_level,
-            "title": CAREER_LEVELS.get(row.career_level, {}).get("title", "未知"),
+            "title": CAREER_LEVELS.get(row.career_level, {}).get("title", "Unknown"),
             "count": row.count,
         }
         for row in level_result.all()
     ]
 
-    # ── Top 10 排行榜 ──
+    # ── Top 10 leaderboard ──
     top_result = await db.execute(
         select(AgentProfile).order_by(AgentProfile.xp.desc()).limit(10)
     )
@@ -398,14 +398,14 @@ async def dashboard_realtime(
             "nickname": a.nickname,
             "xp": a.xp,
             "career_level": a.career_level,
-            "career_title": CAREER_LEVELS.get(a.career_level, {}).get("title", "未知"),
+            "career_title": CAREER_LEVELS.get(a.career_level, {}).get("title", "Unknown"),
             "department": a.department or "unassigned",
             "avatar_key": a.avatar_key,
         }
         for i, a in enumerate(top_result.scalars().all())
     ]
 
-    # ── 部门统计 ──
+    # ── Department statistics
     dept_result = await db.execute(
         select(
             AgentProfile.department,
@@ -424,7 +424,7 @@ async def dashboard_realtime(
         for row in dept_result.all()
     ]
 
-    # ── 在线Agent位置（供地图展示）──
+    # ── Online Agent Location（for map display）──
     online_agents_result = await db.execute(
         select(
             AgentProfile.id,
@@ -451,7 +451,7 @@ async def dashboard_realtime(
         for a in online_agents_result.all()
     ]
 
-    # ── 活跃房间 ──
+    # ── active room ──
     rooms_result = await db.execute(select(CompanyRoom))
     rooms = rooms_result.scalars().all()
     active_rooms = []
@@ -486,21 +486,21 @@ async def dashboard_realtime(
     }
 
 
-@router.get("/analytics/behavior", summary="行为模式分析")
+@router.get("/analytics/behavior", summary="Behavior mode analyze")
 async def behavior_analysis(
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """分析Agent近30天行为模式：活跃时段热力图、行为偏好分布、个性化建议、MBTI对比"""
+    """Analyze the Agent's behavior pattern in the past 30 days：Active period heat map, behavior preference distribution, personalized suggestions, MBTI comparison"""
     me = await _get_profile(user, db)
     return await get_behavior_pattern(db, me.id)
 
 
-@router.get("/analytics/prediction", summary="职业轨迹预测")
+@router.get("/analytics/prediction", summary="Career trace prediction")
 async def career_prediction(
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """基于当前数据预测晋升时间和职业发展路径"""
+    """Predict promotion time and career development path based on Current data"""
     me = await _get_profile(user, db)
     return await get_career_prediction(db, me.id)

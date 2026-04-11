@@ -1,12 +1,12 @@
 /**
  * Cyber-Corporate Design System
- * 赛博企业主题 — 全局 CSS 变量与通用组件类
+ * Cyber Enterprise Theme  overall situation CSS variables and common component classes
  */
 
 /* ═══ Google Fonts imported in index.html ═══ */
 
 :root {
-  /* ── 色彩系统 ── */
+  /* ── color system ── */
   --bg-deep:       #0a0e1a;
   --bg-surface:    #111827;
   --bg-card:       rgba(17, 24, 39, 0.75);
@@ -27,30 +27,30 @@
   --text-secondary:#94a3b8;
   --text-muted:    #64748b;
 
-  /* ── 部门色 ── */
+  /* ── Department color */
   --dept-engineering: #60a5fa;
   --dept-marketing:   #f472b6;
   --dept-finance:     #34d399;
   --dept-hr:          #fbbf24;
 
-  /* ── 字体 ── */
+  /* ── font ── */
   --font-display: "Orbitron", "Rajdhani", sans-serif;
   --font-body:    "Noto Sans SC", "Microsoft YaHei", sans-serif;
   --font-mono:    "JetBrains Mono", "Fira Code", monospace;
 
-  /* ── 间距 ── */
+  /* ── spacing ── */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 12px;
   --space-lg: 16px;
   --space-xl: 24px;
 
-  /* ── 圆角 ── */
+  /* ── rounded corners ── */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
 
-  /* ── 动画 ── */
+  /* ── animation ── */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --duration-fast: 0.15s;
   --duration-base: 0.25s;
@@ -58,7 +58,7 @@
 }
 
 /* ═══════════════════════════════════
-   毛玻璃卡片
+   frosted glass card
    ═══════════════════════════════════ */
 .cyber-card {
   position: relative;
@@ -79,7 +79,7 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-/* ── 角标装饰 ── */
+/* ── Corner decoration ── */
 .cyber-card::before,
 .cyber-card::after {
   content: '';
@@ -109,7 +109,7 @@
 }
 
 /* ═══════════════════════════════════
-   发光文字
+   Luminous text
    ═══════════════════════════════════ */
 .glow-text {
   color: var(--accent-cyan);
@@ -129,7 +129,7 @@
 }
 
 /* ═══════════════════════════════════
-   扫描线覆盖层
+   scan line overlay
    ═══════════════════════════════════ */
 .scan-lines {
   position: relative;
@@ -151,7 +151,7 @@
 }
 
 /* ═══════════════════════════════════
-   霓虹按钮
+   neon button
    ═══════════════════════════════════ */
 .cyber-btn {
   display: inline-flex;
@@ -196,7 +196,7 @@
 }
 
 /* ═══════════════════════════════════
-   霓虹进度条
+   neon progress msgs
    ═══════════════════════════════════ */
 .cyber-progress {
   height: 6px;
@@ -213,7 +213,7 @@
 }
 
 /* ═══════════════════════════════════
-   霓虹徽章
+   neon badge
    ═══════════════════════════════════ */
 .cyber-badge {
   display: inline-flex;
@@ -252,7 +252,7 @@
 }
 
 /* ═══════════════════════════════════
-   脉冲动画（状态灯/徽章）
+   Pulse animation（state light/badge）
    ═══════════════════════════════════ */
 @keyframes cyber-pulse {
   0%, 100% { opacity: 1; box-shadow: 0 0 4px currentColor; }
@@ -270,7 +270,7 @@
 .pulse-dot-rose { background: var(--accent-rose); color: var(--accent-rose); }
 
 /* ═══════════════════════════════════
-   呼吸发光（卡片边框）
+   breath glow（card border）
    ═══════════════════════════════════ */
 @keyframes cyber-breathe {
   0%, 100% { border-color: rgba(56, 189, 248, 0.15); }
@@ -281,7 +281,7 @@
 }
 
 /* ═══════════════════════════════════
-   淡入动画
+   fade in animation
    ═══════════════════════════════════ */
 @keyframes cyber-fade-in {
   from { opacity: 0; transform: translateY(8px); }
@@ -296,7 +296,7 @@
 .fade-in-delay-4 { animation-delay: 0.2s; }
 
 /* ═══════════════════════════════════
-   自定义滚动条
+   Custom scrolling msgs
    ═══════════════════════════════════ */
 .cyber-scroll::-webkit-scrollbar {
   width: 4px;
@@ -313,7 +313,7 @@
 }
 
 /* ═══════════════════════════════════
-   卡片 header 通用样式
+   Card header common style
    ═══════════════════════════════════ */
 .cyber-header {
   display: flex;
@@ -346,7 +346,7 @@
 }
 
 /* ═══════════════════════════════════
-   噪点纹理覆盖层（可选）
+   Noise texture overlay（Optional）
    ═══════════════════════════════════ */
 .noise-overlay::before {
   content: '';

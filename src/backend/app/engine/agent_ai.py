@@ -1,5 +1,5 @@
 """
-AI决策引擎 - 为离线Agent生成自主行为
+AIengine - Generate autonomous behavior for offline agents
 """
 import json
 import random
@@ -48,25 +48,25 @@ from app.utils.cache import cache_get, cache_set, make_cache_key
 
 logger = logging.getLogger(__name__)
 
-# 房间中心坐标缓存
+# Room center coordinate Cache
 _room_centers: dict = {}
 
-# LLM决策缓存TTL（同一Agent 5分钟内不重复请求）
+# LLM DecisionCacheTTL（same agent 5minutesNo repeated requests within）
 LLM_DECISION_CACHE_TTL = 300  # 5 minutes
 
-# 楼层Y坐标偏移量：每层偏移700，避免不同楼层坐标重叠
+# Floor Y coordinate offset：each floor offset 700，Avoid overlapping coordinates on different floors
 # floor 1: pos_y ∈ [0, 699]，floor 2: pos_y ∈ [700, 1399]，floor 3: pos_y ∈ [1400, 2099]
 FLOOR_Y_OFFSET = 700
 
 
 def clear_room_cache():
-    """清除房间中心坐标缓存，下次调用时从DB重新构建（含floor编码）。"""
+    """Clear the room center coordinate Cache，Rebuild from DB on next call（Contains floor coding）。"""
     global _room_centers
     _room_centers = {}
 
 
 async def _get_room_centers(db: AsyncSession) -> dict:
-    """获取所有房间中心坐标。y坐标已编码楼层偏移，可通过 pos_y % FLOOR_Y_OFFSET 还原画布y。"""
+    """Get the center coordinates of all rooms. y coordinate encoded floor offset，Canvasy can be restored via pos_y % FLOOR_Y_OFFSET."""
     global _room_centers
     if _room_centers:
         return _room_centers
@@ -78,7 +78,7 @@ async def _get_room_centers(db: AsyncSession) -> dict:
         floor = r.floor or 1
         _room_centers[r.name] = {
             "x": canvas_x,
-            "y": canvas_y,                                          # 原始画布y（仅供参考）
+            "y": canvas_y,                                          # Original canvasy（For reference only）
             "encoded_y": canvas_y + (floor - 1) * FLOOR_Y_OFFSET,  # pos_y with floor offset
             "type": r.room_type,
             "department": r.department,
@@ -88,7 +88,7 @@ async def _get_room_centers(db: AsyncSession) -> dict:
 
 
 def _get_mbti_weights(mbti: str) -> dict:
-    """根据MBTI计算行为权重"""
+    """Calculate Behavior weight based on MBTI"""
     weights = {"work": 30, "chat": 20, "rest": 15, "move_to": 25, "meeting": 10}
 
     if mbti[0] == "E":
@@ -124,20 +124,20 @@ def _weighted_choice(weights: dict) -> str:
 
 
 async def _ensure_daily_schedule(profile: AgentProfile, db: AsyncSession) -> list[dict]:
-    """确保Agent拥有每日日程，如果没有则生成一份并持久化"""
+    """Make sure the Agent has a daily schedule，If not, generate a copy and persist it"""
     schedule = profile.daily_schedule
     if schedule:
         return schedule
-    # 生成新的每日日程
+    # Generate new daily schedule
     schedule = generate_daily_schedule(profile)
     profile.daily_schedule = schedule
     return schedule
 
 
 def _get_current_room(profile: AgentProfile, rooms: dict) -> str:
-    """根据Agent坐标推算当前所在房间"""
+    """Calculate the room where Current is located based on Agent coordinates"""
     px, py = profile.pos_x or 0, profile.pos_y or 0
-    best_room = "未知区域"
+    best_room = "Unknown area"
     best_dist = float("inf")
     for name, info in rooms.items():
         dx = px - info["x"]
@@ -151,28 +151,28 @@ def _get_current_room(profile: AgentProfile, rooms: dict) -> str:
 
 def _apply_named_spot(profile: AgentProfile, action: str) -> str:
     """
-    根据 action 和 profile 信息选择语义座位并更新 pos_x / pos_y。
-    返回选中的座位名（用于日志）。
+    Select semantic seats based on action and profile Info and update pos_x/pos_y.
+    BackSelected seat name（for logs）。
 
-    规则：
-    - CEO/总监（anchor 角色）：工作/会议/闲置 → 常驻自己办公室锚点，接待来访 → 锚点旁访客席
-    - 普通员工 work  → 部门工位
-    - 普通员工 chat  → 拜访高管时去对方办公室访客席，否则去大厅/咖啡厅
-    - 普通员工 rest  → 咖啡厅
-    - 普通员工 meeting → 会议室座椅
-    - 普通员工 move_to/idle → 大厅
+    rules：
+    - CEO/Director（anchor Role）：Work/Meeting/Idle  anchored own officeanchor point，Receiving visitors  Visitor next to anchor point's seat
+    - regular staff work  → Departmentdesk
+    - regular staff chat  → When visiting an executive, go to the visitor's seat in the other party's office，Otherwise go to Lobby/Cafe
+    - regular staff rest  → Cafe
+    - regular staff meeting → Meeting room seat
+    - regular staff move_to/idle → Lobby
     """
     agent_id = profile.id or 0
     career_level = profile.career_level or 0
     career_path = profile.career_path or ""
     dept = (profile.department or "").strip()
 
-    # ── 高管：锚定在自己办公室 ──
+    # ── executive：Anchor in your own office
     if is_anchor_role(career_level, dept, career_path):
         anchor = get_anchor_spot(career_level, dept, career_path)
         if anchor:
             if action == "chat":
-                # 接待来访时坐访客席旁边（自己留在锚点）
+                # Take the Visitor seat when receiving visitors's next to seat（Stay at anchor point by yourself）
                 spot = anchor
             else:
                 spot = anchor
@@ -181,17 +181,17 @@ def _apply_named_spot(profile: AgentProfile, action: str) -> str:
             profile.pos_y = py
             return spot
 
-    # ── 普通员工 ──
+    # ── regular staff ──
     if action == "work":
         spot = assign_work_spot(dept, agent_id)
         if spot is None:
-            # 未知部门 → 大厅
+            # UnknownDepartment → Lobby
             spot = "lobby_reception"
     elif action == "chat":
-        # 部门员工聊天：30% 概率上三楼拜访高管，70% 去大厅/咖啡厅
+        # DepartmentStaffchat：30% Chances are you can go to the third floor to visit Executive，70% Go to Lobby/Cafe
         if random.random() < 0.3:
-            # 去总监办公室访客席
-            visitor_spots = get_visitor_spots(5)  # 总监级别
+            # Director office visitor seat
+            visitor_spots = get_visitor_spots(5)  # Director level
             spot = random.choice(visitor_spots)
         else:
             if random.random() < 0.5:
@@ -232,7 +232,7 @@ async def decide_action_llm(
     agent_id = profile.id
     cache_key = make_cache_key("agent_decision", str(agent_id))
 
-    # ── 检查Redis缓存：同一Agent 5分钟内不重复请求 ──
+    # ── Check RedisCache：same agent 5minutesNo repeated requests within ──
     cached_decision = await cache_get(cache_key)
     if cached_decision:
         logger.debug("Using cached LLM decision for agent %d", agent_id)
@@ -242,19 +242,19 @@ async def decide_action_llm(
         return cached_decision
 
     try:
-        # ── 1. 收集上下文信息 ──
+        # ── 1. Collect contextInfo ──
         context = await get_context_for_decision(db, agent_id)
         rooms = await _get_room_centers(db)
         career_info = CAREER_LEVELS.get(profile.career_level or 0, {})
-        career_title = career_info.get("title", "实习生")
+        career_title = career_info.get("title", "Intern")
 
-        # 日程上下文
+        # Schedule text
         schedule = await _ensure_daily_schedule(profile, db)
         scheduled = get_current_scheduled_activity(schedule)
         if scheduled:
-            schedule_context = f"当前日程: {scheduled['time']} - {scheduled['activity']}（{scheduled['room_type']}）"
+            schedule_context = f"Current schedule: {scheduled['time']} - {scheduled['activity']}（{scheduled['room_type']}）"
         else:
-            schedule_context = "当前无日程安排"
+            schedule_context = "CurrentNo schedule"
 
         # MBTI hints
         mbti = profile.mbti or "ISTJ"
@@ -262,25 +262,25 @@ async def decide_action_llm(
             f"- {MBTI_HINTS.get(ch, '')}" for ch in mbti if ch in MBTI_HINTS
         )
 
-        # 房间信息
+        # RoomInfo
         rooms_info = "\n".join(
-            f"- {name}: 类型={info['type']}, 部门={info['department']}"
+            f"- {name}: type={info['type']}, Department={info['department']}"
             for name, info in rooms.items()
         )
 
-        # 附近Agent描述
+        # Nearby Agent Description
         if nearby_agents:
             nearby_text = ", ".join(
-                f"{a.get('nickname', '未知')}({a.get('department', '')})"
+                f"{a.get('nickname', 'Unknown')}({a.get('department', '')})"
                 for a in nearby_agents
             )
         else:
-            nearby_text = "周围没有人"
+            nearby_text = "no one around"
 
-        # 当前房间
+        # Current room
         current_room = _get_current_room(profile, rooms)
 
-        # ── 2. 构建Prompt ──
+        # ── 2. BuildPrompt ──
         prompt = AGENT_DECISION_PROMPT_V2.format(
             nickname=profile.nickname,
             mbti=mbti,
@@ -306,14 +306,14 @@ async def decide_action_llm(
             mbti_hints=hints,
         )
 
-        # ── 3. 调用LLM ──
+        # ── 3. Call LLM ──
         llm_result = await call_llm_json(
             prompt,
-            system_prompt="你是一个虚拟公司AI员工行为决策引擎。请严格按照要求输出JSON格式。",
+            system_prompt="you are a virtual companyAIStaffAction Decisionengine。Please output JSON format strictly according to the requirements.。",
             cache_prefix="agent_decision",
         )
 
-        # ── 4. 解析结果 ──
+        # ── 4. Parse results ──
         if isinstance(llm_result, dict) and "error" in llm_result:
             logger.warning("LLM decision failed for agent %d: %s", agent_id, llm_result["error"])
             result, _ = await decide_action_simple(profile, db)
@@ -324,16 +324,16 @@ async def decide_action_llm(
         reason = llm_result.get("reason", "")
         dialogue = llm_result.get("dialogue", "")
 
-        # 验证action合法性
+        # Verify the legality of the action
         valid_actions = {"move_to", "work", "chat", "rest", "meeting"}
         if action not in valid_actions:
             action = "idle"
 
-        # ── 5. 更新Agent状态（使用语义座位而非房间中心） ──
+        # ── 5. UpdateAgentstate（use semantic seating instead of room center） ──
         _apply_named_spot(profile, action)
         profile.current_action = action if action != "move_to" else "idle"
 
-        # ── 6. 写入记忆和日志 ──
+        # ── 6. Write Memories and logs
         try:
             event_type = "move"
             if action == "work":
@@ -343,7 +343,7 @@ async def decide_action_llm(
 
             memory_content = f"{profile.nickname} {reason}"
             if dialogue:
-                memory_content += f"，说了: \"{dialogue[:30]}\""
+                memory_content += f"，Said: \"{dialogue[:30]}\""
             await extract_memory(db, agent_id, event_type, memory_content)
         except Exception as e:
             logger.warning("Failed to extract memory for agent %s: %s", agent_id, e)
@@ -361,7 +361,7 @@ async def decide_action_llm(
         )
         db.add(log)
 
-        # ── 7. 缓存决策结果（5分钟） ──
+        # ── 7. Cache decision results（5minutes） ──
         decision = {
             "action": action,
             "target": target,
@@ -379,11 +379,11 @@ async def decide_action_llm(
 
 
 async def decide_action_simple(profile: AgentProfile, db: AsyncSession) -> dict:
-    """简单规则决策（不调用LLM，用于MVP）"""
+    """Simple rules decision making（LLM is not called，for MVP）"""
     rooms = await _get_room_centers(db)
 
-    # ── 日程引擎优先 ──
-    # 检查Agent日程，如果当前时间有安排的活动，优先按日程行动
+    # ── Schedule engine priority
+    # Check Agent schedule，If there are activities scheduled at Current time，Prioritize action according to schedule
     schedule = await _ensure_daily_schedule(profile, db)
     scheduled = get_current_scheduled_activity(schedule)
 
@@ -391,24 +391,24 @@ async def decide_action_simple(profile: AgentProfile, db: AsyncSession) -> dict:
         activity = scheduled["activity"]
         action = get_action_for_activity(activity)
 
-        if activity == "工作":
-            # 高管常驻办公室，其他人去部门工位
+        if activity == "Work":
+            # executiveanchoredoffice，Others go to Departmentdesk
             spot = _apply_named_spot(profile, "work")
             target = spot_to_room_name(spot)
-            reason = f"按日程安排，专注工作中（{scheduled['time']}）"
-        elif activity == "午餐":
+            reason = f"follow the schedule，focused work（{scheduled['time']}）"
+        elif activity == "lunch":
             spot = _apply_named_spot(profile, "rest")
             target = spot_to_room_name(spot)
-            reason = f"按日程安排，午餐时间（{scheduled['time']}）"
-        elif activity in ("休息", "茶歇"):
+            reason = f"follow the schedule，lunchtime（{scheduled['time']}）"
+        elif activity in ("Rest", "break"):
             spot = _apply_named_spot(profile, "rest")
             target = spot_to_room_name(spot)
-            reason = f"按日程安排，{activity}时间（{scheduled['time']}）"
-        elif activity == "社交":
+            reason = f"follow the schedule，{activity}time（{scheduled['time']}）"
+        elif activity == "Social":
             spot = _apply_named_spot(profile, "chat")
             target = spot_to_room_name(spot)
-            reason = f"按日程安排，社交时间（{scheduled['time']}）"
-        elif activity == "下班":
+            reason = f"follow the schedule，Socialtime（{scheduled['time']}）"
+        elif activity == "get off work":
             spot = get_after_work_spot(
                 agent_id=profile.id or 0,
                 department=profile.department or "",
@@ -419,27 +419,27 @@ async def decide_action_simple(profile: AgentProfile, db: AsyncSession) -> dict:
             profile.pos_x = px
             profile.pos_y = py
             target = spot_to_room_name(spot)
-            reason = f"按日程安排，下班了（{scheduled['time']}）"
+            reason = f"follow the schedule，get off Worked（{scheduled['time']}）"
         else:
             spot = _apply_named_spot(profile, "idle")
             target = spot_to_room_name(spot)
-            reason = f"按日程安排，{activity}（{scheduled['time']}）"
+            reason = f"follow the schedule，{activity}（{scheduled['time']}）"
 
         profile.current_action = action
 
-        # 提取行为记忆
+        # extract behavior memories
         try:
             event_type = "move"
             if action == "work":
                 event_type = "task_complete"
             elif action == "chat":
                 event_type = "chat"
-            memory_content = f"{profile.nickname} {reason}，前往{target}"
+            memory_content = f"{profile.nickname} {reason}，go to{target}"
             await extract_memory(db, profile.id, event_type, memory_content)
         except Exception as e:
             logger.warning("Failed to extract memory for agent %s: %s", profile.id, e)
 
-        # 记录日志
+        # record logs
         log = AgentActionLog(
             agent_id=profile.id,
             action=action,
@@ -456,29 +456,29 @@ async def decide_action_simple(profile: AgentProfile, db: AsyncSession) -> dict:
         }
         return (action_dict, decision_record)
 
-    # ── 回退：无日程匹配时使用权重决策 ──
+    # ── fallback：Use weight decision when there is no schedule matching
     weights = _get_mbti_weights(profile.mbti)
 
-    # 召回近期记忆作为决策上下文
+    # Recall recent Memories as decision context
     try:
         recent_memories = await recall_memories(db, profile.id, limit=5)
     except Exception as e:
         logger.warning("Failed to recall memories for agent %s: %s", profile.id, e)
         recent_memories = []
 
-    # 根据记忆调整行为权重
+    # Adjust behavior weights based on Memories
     for mem in recent_memories:
         if mem["memory_type"] == "task" and mem["importance"] >= 7:
-            # 最近完成了高重要度任务，增加休息倾向
+            # Recently completed high-importance tasks，Add RestPrefers 
             weights["rest"] = weights.get("rest", 15) + 5
         elif mem["memory_type"] == "social":
-            # 最近有社交记忆，增加聊天倾向
+            # Recently SocialMemories，Add chatPrefers 
             weights["chat"] = weights.get("chat", 20) + 5
         elif mem["memory_type"] == "career" and mem["importance"] >= 8:
-            # 最近有职业变动（如晋升），增加工作积极性
+            # Recent career changes（such as promotion），Increase work enthusiasm
             weights["work"] = weights.get("work", 30) + 10
 
-    # 职级限制
+    # Levellimit
     if profile.career_level < 2:
         weights.pop("meeting", None)
 
@@ -507,39 +507,39 @@ async def decide_action_simple(profile: AgentProfile, db: AsyncSession) -> dict:
 
     action = _weighted_choice(weights)
 
-    # 应用语义座位并获取目标位置名
+    # Apply semantic seating and get target location name
     chosen_spot = _apply_named_spot(profile, action)
     target = spot_to_room_name(chosen_spot)
 
     if action == "work":
-        reason = "专注工作中"
+        reason = "focused work"
     elif action == "chat":
-        reason = "找人聊聊天"
+        reason = "Find someone to chat with"
     elif action == "rest":
-        reason = "休息一下，喝杯咖啡"
+        reason = "Rest for a moment，have a cup of coffee"
     elif action == "move_to":
-        reason = "四处走走"
+        reason = "walk around"
         action = "idle"
     elif action == "meeting":
-        reason = "参加会议"
+        reason = "join meeting"
     else:
-        reason = "空闲中"
+        reason = "Idle"
 
     profile.current_action = action
 
-    # 提取行为记忆
+    # extract behavior memories
     try:
         event_type = "move"
         if action == "work":
             event_type = "task_complete"
         elif action == "chat":
             event_type = "chat"
-        memory_content = f"{profile.nickname} {reason}，前往{target}"
+        memory_content = f"{profile.nickname} {reason}，go to{target}"
         await extract_memory(db, profile.id, event_type, memory_content)
     except Exception as e:
         logger.warning("Failed to extract memory for agent %s: %s", profile.id, e)
 
-    # 记录日志
+    # record logs
     log = AgentActionLog(
         agent_id=profile.id,
         action=action,
@@ -551,11 +551,11 @@ async def decide_action_simple(profile: AgentProfile, db: AsyncSession) -> dict:
     action_dict = {"action": action, "target": target, "reason": reason}
 
     # Build Chinese explanation
-    action_labels = {"work": "工作", "chat": "社交", "rest": "休息", "move_to": "走动", "meeting": "会议"}
-    explanation = mbti + "性格倾向: 选择" + action_labels.get(action, action)
+    action_labels = {"work": "Work", "chat": "Social", "rest": "Rest", "move_to": "walk around", "meeting": "Meeting"}
+    explanation = mbti + "personalityPrefers : choose" + action_labels.get(action, action)
     top_actions = sorted(probabilities.items(), key=lambda x: -x[1])[:3]
-    explanation += " (概率" + str(probabilities.get(action, 0)) + "%, "
-    explanation += "前三: " + ", ".join(action_labels.get(a, a) + str(p) + "%" for a, p in top_actions) + ")"
+    explanation += " (Probability" + str(probabilities.get(action, 0)) + "%, "
+    explanation += "Top three: " + ", ".join(action_labels.get(a, a) + str(p) + "%" for a, p in top_actions) + ")"
 
     decision_record = {
         "type": "action_decision",
@@ -571,7 +571,7 @@ async def decide_action_simple(profile: AgentProfile, db: AsyncSession) -> dict:
 
 
 def get_task_preference_scores(agent, tasks) -> list:
-    """根据MBTI和属性对任务列表排序，返回 [(task, score, reason, alignment), ...]"""
+    """Sort task list based on MBTI and attributes，Back [(task, score, reason, alignment), ...]"""
     mbti = agent.mbti or "ISTJ"
     results = []
 
@@ -599,35 +599,35 @@ def get_task_preference_scores(agent, tasks) -> list:
                 dim = "N" if tag_key in ("creative", "innovation", "strategy", "planning") else \
                       "S" if tag_key in ("management", "routine", "process", "documentation") else \
                       "T" if tag_key in ("technical", "coding", "debugging", "architecture") else "F"
-                reasons.append(dim + "型偏好+" + str(bonus))
+                reasons.append(dim + "Type Preference+" + str(bonus))
                 break
 
         # Attribute bonus
         if "technical" in task_tag.lower() or "coding" in task_tag.lower():
             attr_bonus = (getattr(agent, "attr_technical", 50) or 50) // 10
             score += attr_bonus
-            reasons.append("技术力" + str(getattr(agent, "attr_technical", 50)) + "+" + str(attr_bonus))
+            reasons.append("Technical Skill" + str(getattr(agent, "attr_technical", 50)) + "+" + str(attr_bonus))
         elif "social" in task_tag.lower() or "team" in task_tag.lower():
             attr_bonus = (getattr(agent, "attr_communication", 50) or 50) // 10
             score += attr_bonus
-            reasons.append("沟通力" + str(getattr(agent, "attr_communication", 50)) + "+" + str(attr_bonus))
+            reasons.append("Communication" + str(getattr(agent, "attr_communication", 50)) + "+" + str(attr_bonus))
         elif "creative" in task_tag.lower():
             attr_bonus = (getattr(agent, "attr_creativity", 50) or 50) // 10
             score += attr_bonus
-            reasons.append("创造力" + str(getattr(agent, "attr_creativity", 50)) + "+" + str(attr_bonus))
+            reasons.append("Creativity" + str(getattr(agent, "attr_creativity", 50)) + "+" + str(attr_bonus))
         elif "management" in task_tag.lower():
             attr_bonus = (getattr(agent, "attr_leadership", 50) or 50) // 10
             score += attr_bonus
-            reasons.append("领导力" + str(getattr(agent, "attr_leadership", 50)) + "+" + str(attr_bonus))
+            reasons.append("Leadership" + str(getattr(agent, "attr_leadership", 50)) + "+" + str(attr_bonus))
 
         # Difficulty preference
         diff = getattr(task, "difficulty", 1) or 1
         if mbti[1] == "N" and diff >= 3:
             score += 10
-            reasons.append("N型偏好高难度+10")
+            reasons.append("NType Preference High Difficulty +10")
 
         alignment = "high" if score >= 70 else "low" if score < 40 else "neutral"
-        reason_str = ", ".join(reasons) if reasons else "基础匹配"
+        reason_str = ", ".join(reasons) if reasons else "Base match"
         results.append((task, score, reason_str, alignment))
 
     results.sort(key=lambda x: -x[1])
@@ -635,7 +635,7 @@ def get_task_preference_scores(agent, tasks) -> list:
 
 
 async def _get_nearby_agents(db: AsyncSession, profile: AgentProfile, radius: int = 100) -> list[dict]:
-    """获取Agent附近的其他Agent信息"""
+    """Get other AgentInfo near the Agent"""
     px, py = profile.pos_x or 0, profile.pos_y or 0
     result = await db.execute(
         select(AgentProfile).where(
@@ -659,7 +659,7 @@ async def _get_nearby_agents(db: AsyncSession, profile: AgentProfile, radius: in
 
 
 async def run_ai_tick():
-    """执行一次AI决策循环��所有AI角色，包括在线和离线）"""
+    """Execute an AI decision loop��All AIRoles，Includes online and offline）"""
     async with AsyncSessionLocal() as db:
         result = await db.execute(
             select(AgentProfile).where(
@@ -670,9 +670,9 @@ async def run_ai_tick():
 
         for agent in agents:
             try:
-                # 获取附近Agent信息
+                # Get nearby AgentInfo
                 nearby = await _get_nearby_agents(db, agent)
-                # 优先尝试LLM决策，失败自动回退到简单决策
+                # Prioritize tryLLM decisions，Automatic fallback to simple decision-making on failure
                 await decide_action_llm(agent, db, nearby_agents=nearby)
             except Exception as e:
                 logger.error("AI tick error for agent %s: %s", agent.id, e)

@@ -25,7 +25,7 @@ watch(() => store.chatMessages.length, async () => { await nextTick(); scrollToB
 watch(() => store.aiTyping, async (val) => { if (val) { await nextTick(); scrollToBottom() } })
 watch(() => groupMessages.value.length, async () => { await nextTick(); scrollToBottom() })
 
-// 监听频道实时消息（WS推送）
+// Monitor Channels real-time information（WS push）
 watch(() => store.lastChannelMessage, (val) => {
   if (!val || val.group_id !== activeGroupId.value) return
   if (!groupMessages.value.some(m => m.id === val.message.id)) {
@@ -87,17 +87,17 @@ function goBack() {
 }
 
 function currentGroupName() {
-  return groups.value.find(g => g.group_id === activeGroupId.value)?.name || '群聊'
+  return groups.value.find(g => g.group_id === activeGroupId.value)?.name || 'group chat'
 }
 </script>
 
 <template>
   <div class="chat-window">
-    <!-- 列表视图 -->
+    <!-- List view -->
     <div v-if="!store.chatTarget && !activeGroupId" class="chat-select cyber-scroll">
       <div class="mode-switch">
-        <button :class="{ active: chatMode === 'private' }" @click="chatMode = 'private'">私聊</button>
-        <button :class="{ active: chatMode === 'group' }" @click="chatMode = 'group'">频道</button>
+        <button :class="{ active: chatMode === 'private' }" @click="chatMode = 'private'">Direct</button>
+        <button :class="{ active: chatMode === 'group' }" @click="chatMode = 'group'">Channels</button>
       </div>
       <template v-if="chatMode === 'private'">
         <div v-for="f in store.friends" :key="f.id" class="chat-friend-item"
@@ -109,27 +109,27 @@ function currentGroupName() {
             class="unread-dot"
           >{{ store.unreadPerSender[f.from_id === store.myProfile?.id ? f.to_id : f.from_id] }}</span>
         </div>
-        <p v-if="store.friends.length === 0" class="hint">暂无Friends</p>
+        <p v-if="store.friends.length === 0" class="hint">No friends yet</p>
       </template>
       <template v-else>
         <div v-for="g in groups" :key="g.group_id" class="chat-friend-item group-item" @click="selectGroup(g.group_id)">
           <span class="group-icon">{{ g.group_type === 'announcement' ? '📢' : g.group_type === 'department' ? '🏢' : '💬' }}</span>
           <span class="friend-name">{{ g.name }}</span>
-          <span v-if="g.message_count" class="msg-count">{{ g.message_count }}条</span>
+          <span v-if="g.message_count" class="msg-count">{{ g.message_count }} msgs</span>
         </div>
-        <p v-if="groups.length === 0" class="hint">No channels</p>
+        <p v-if="groups.length === 0" class="hint">No channels yet</p>
       </template>
     </div>
 
-    <!-- Chat视图 -->
+    <!-- chat view -->
     <template v-else>
       <div class="chat-header">
-        <span class="back" @click="goBack">&larr; 返回</span>
-        <span class="chat-with">{{ activeGroupId ? currentGroupName() : '私聊' }}</span>
+        <span class="back" @click="goBack">&larr; Back</span>
+        <span class="chat-with">{{ activeGroupId ? currentGroupName() : 'Direct' }}</span>
       </div>
 
       <div class="messages cyber-scroll" ref="messagesEl">
-        <!-- 私聊 -->
+        <!-- Direct -->
         <template v-if="chatMode === 'private'">
           <div v-for="msg in store.chatMessages" :key="msg.id" class="msg-row"
             :class="{ mine: msg.sender_id === store.myProfile?.id }">
@@ -145,14 +145,14 @@ function currentGroupName() {
           </div>
         </template>
 
-        <!-- 频道 -->
+        <!-- Channels -->
         <template v-else>
-          <div v-if="groupLoading" class="hint" style="padding:20px 0">加载中...</div>
+          <div v-if="groupLoading" class="hint" style="padding:20px 0">Loading...</div>
           <template v-else>
             <div v-for="msg in groupMessages" :key="msg.id" class="msg-row"
               :class="{ mine: msg.sender_id === store.myProfile?.id }">
               <div v-if="msg.sender_id !== store.myProfile?.id" class="sender-name">
-                {{ msg.sender_nickname || '未知' }}
+                {{ msg.sender_nickname || 'Unknown' }}
                 <span v-if="msg.msg_type === 'ai_generated'" class="ai-badge">AI</span>
               </div>
               <div class="msg-bubble">{{ msg.content }}</div>
@@ -162,10 +162,10 @@ function currentGroupName() {
         </template>
 
         <div v-if="!groupLoading && (chatMode === 'private' ? store.chatMessages : groupMessages).length === 0"
-          class="hint" style="padding:32px 0">No messages</div>
+          class="hint" style="padding:32px 0">No messages yet</div>
       </div>
 
-      <div v-if="activeGroupId === 'announcement'" class="readonly-hint">📢 公告频道由AI自动维护，仅可查看</div>
+      <div v-if="activeGroupId === 'announcement'" class="readonly-hint">📢 The announcement channel is maintained by AI and is view-only</div>
       <div v-else class="chat-input">
         <el-input v-model="input" placeholder="Type a message..." @keyup.enter="send" size="default" />
         <button class="cyber-btn" @click="send" :disabled="!input.trim()">Send</button>

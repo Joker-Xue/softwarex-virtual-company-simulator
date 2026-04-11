@@ -1,5 +1,5 @@
 """
-会议室预约系统API
+Meeting Room Reservation System API
 """
 from datetime import datetime, timedelta, timezone
 
@@ -58,13 +58,13 @@ async def _get_profile(user: User, db: AsyncSession) -> AgentProfile:
     )
     profile = result.scalar_one_or_none()
     if not profile:
-        raise HTTPException(404, "尚未创建角色")
+        raise HTTPException(404, "Profile has not been created yet")
     return profile
 
 
 # ── Endpoints ──
 
-@router.get("/list", summary="会议预约列表")
+@router.get("/list", summary="Meeting reservation list")
 async def list_meetings(
     status: str = None,
     user: User = Depends(get_current_active_user),
@@ -78,7 +78,7 @@ async def list_meetings(
     result = await db.execute(q)
     bookings = result.scalars().all()
 
-    # 丰富展示数据
+    # Rich display of data
     room_ids = {b.room_id for b in bookings}
     organizer_ids = {b.organizer_id for b in bookings}
 
@@ -109,7 +109,7 @@ async def list_meetings(
     ]
 
 
-@router.post("/create", summary="预约会议室")
+@router.post("/create", summary="Book a Meeting Room")
 async def create_meeting(
     body: MeetingCreate,
     user: User = Depends(get_current_active_user),
@@ -117,21 +117,21 @@ async def create_meeting(
 ):
     me = await _get_profile(user, db)
 
-    # 验证房间存在且是会议室
+    # Verify that the room exists and is Meeting Room
     room_result = await db.execute(
         select(CompanyRoom).where(CompanyRoom.id == body.room_id)
     )
     room = room_result.scalar_one_or_none()
     if not room:
-        raise HTTPException(404, "房间不存在")
+        raise HTTPException(404, "Room does not exist")
     if room.room_type not in ("meeting", "office", "ceo_office"):
-        raise HTTPException(400, "该房间不支持预约会议")
+        raise HTTPException(400, "This room does not support meeting reservations")
 
-    # 验证时间不在过去
+    # Verify that time is not in the past
     if body.start_time < datetime.now(timezone.utc):
-        raise HTTPException(400, "会议开始时间不能在过去")
+        raise HTTPException(400, "Meeting start time cannot be in the past")
 
-    # 验证无时间冲突
+    # Verify that there is no time conflict
     end_time = body.start_time + timedelta(minutes=body.duration_minutes)
     conflict_result = await db.execute(
         select(MeetingBooking).where(
@@ -145,12 +145,12 @@ async def create_meeting(
     for c in conflicts:
         c_end = c.start_time + timedelta(minutes=c.duration_minutes)
         if body.start_time < c_end and end_time > c.start_time:
-            raise HTTPException(409, f"与已有会议「{c.title}」时间冲突")
+            raise HTTPException(409, f'Conflicts with the existing meeting "{c.title}"')
 
-    # 验证参与者存在
+    # Verify participant exists
     all_participants = list(set([me.id] + body.participant_ids))
     if len(all_participants) > room.capacity:
-        raise HTTPException(400, f"参与人数超过房间容量({room.capacity})")
+        raise HTTPException(400, f"Participating in Headcount exceeds room capacity({room.capacity})")
 
     booking = MeetingBooking(
         room_id=body.room_id,
@@ -166,21 +166,21 @@ async def create_meeting(
     await db.flush()
     await db.refresh(booking)
 
-    # 记忆
+    # Memories
     await extract_memory(
         db, me.id, "task_complete",
-        f"预约了会议「{body.title}」，邀请了{len(all_participants) - 1}位同事",
+        f'Scheduled meeting "{body.title}" and invited {len(all_participants) - 1} colleagues',
     )
 
     return {
         "id": booking.id,
-        "message": "会议预约成功",
+        "message": "Meeting reservation successful",
         "start_time": booking.start_time,
         "participants": len(all_participants),
     }
 
 
-@router.post("/{booking_id}/complete", summary="完成会议")
+@router.post("/{booking_id}/complete", summary="Complete meeting")
 async def complete_meeting(
     booking_id: int,
     user: User = Depends(get_current_active_user),
@@ -193,15 +193,15 @@ async def complete_meeting(
     )
     booking = result.scalar_one_or_none()
     if not booking:
-        raise HTTPException(404, "会议不存在")
+        raise HTTPException(404, "The meeting does not exist")
     if booking.organizer_id != me.id:
-        raise HTTPException(403, "只有组织者可以结束会议")
+        raise HTTPException(403, "Only the organizer can end the meeting")
     if booking.status == "completed":
-        raise HTTPException(400, "会议已结束")
+        raise HTTPException(400, "Meeting has ended")
 
     booking.status = "completed"
 
-    # 给所有参与者奖励XP
+    # Give rewardXP to all participants
     participants = booking.participant_ids or []
     rewarded = []
     for pid in participants:
@@ -214,19 +214,19 @@ async def complete_meeting(
             rewarded.append(profile.nickname)
             await extract_memory(
                 db, pid, "task_complete",
-                f"参加会议「{booking.title}」，获得{booking.xp_reward}XP",
+                f"join meeting「{booking.title}」，gain{booking.xp_reward}XP",
             )
 
     await db.flush()
 
     return {
-        "message": "会议已完成",
+        "message": "MeetingCompleted",
         "xp_reward": booking.xp_reward,
         "participants_rewarded": len(rewarded),
     }
 
 
-@router.post("/{booking_id}/cancel", summary="取消会议")
+@router.post("/{booking_id}/cancel", summary="Cancel Meeting")
 async def cancel_meeting(
     booking_id: int,
     user: User = Depends(get_current_active_user),
@@ -239,13 +239,13 @@ async def cancel_meeting(
     )
     booking = result.scalar_one_or_none()
     if not booking:
-        raise HTTPException(404, "会议不存在")
+        raise HTTPException(404, "The meeting does not exist")
     if booking.organizer_id != me.id:
-        raise HTTPException(403, "只有组织者可以取消会议")
+        raise HTTPException(403, "Only the organizer can cancel a meeting")
     if booking.status in ("completed", "cancelled"):
-        raise HTTPException(400, "会议已结束或已取消")
+        raise HTTPException(400, "Meeting has ended or been canceled")
 
     booking.status = "cancelled"
     await db.flush()
 
-    return {"message": "会议已取消"}
+    return {"message": "Meeting canceled"}

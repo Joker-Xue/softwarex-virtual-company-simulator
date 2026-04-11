@@ -1,5 +1,5 @@
 """
-亲密度衰减引擎 - 维护好友关系的动态平衡
+affinityengine - Maintain the dynamic balance of friend relationships
 """
 import logging
 from datetime import datetime, timedelta, timezone
@@ -12,24 +12,24 @@ from app.models.agent_friendship import AgentFriendship
 
 logger = logging.getLogger(__name__)
 
-# 衰减参数
-DECAY_INACTIVE_DAYS = 3       # 超过此天数无互动开始衰减
-DECAY_RATE_PER_DAY = 2        # 每天衰减的亲密度
-MIN_AFFINITY = 0              # 亲密度下限
-MAX_AFFINITY = 100            # 亲密度上限
+# Attenuation parameter
+DECAY_INACTIVE_DAYS = 3       # After this number of days without interaction, it will begin to decay.
+DECAY_RATE_PER_DAY = 2        # Affinity decays every day
+MIN_AFFINITY = 0              # affinity lower limit
+MAX_AFFINITY = 100            # affinity upper limit
 
-# 不同互动对亲密度的影响
+# The impact of different interactions on affinity
 AFFINITY_REWARDS = {
-    "chat": 2,                # 聊天
-    "task_collaborate": 5,    # 完成协作任务
-    "event_together": 3,      # 参加同一活动
-    "task_complete_dept": 3,  # 同部门完成任务
-    "mentor_task": 4,         # 导师指导任务
+    "chat": 2,                # chat
+    "task_collaborate": 5,    # Complete the collaboration task
+    "event_together": 3,      # Participate in the same Activity
+    "task_complete_dept": 3,  # Same as DepartmentComplete Task
+    "mentor_task": 4,         # Instructor guidance task
 }
 
 
 def clamp_affinity(value: int) -> int:
-    """确保亲密度在有效范围内"""
+    """Make sure affinity is within the valid range"""
     return max(MIN_AFFINITY, min(MAX_AFFINITY, value))
 
 
@@ -40,10 +40,10 @@ async def update_interaction_time(
     interaction_type: str = "chat",
 ) -> int | None:
     """
-    记录两个Agent之间的互动，更新亲密度和最后互动时间。
+    Record the interaction between two agents，Update affinity and last interaction time。
 
     Returns:
-        更新后的亲密度值，如果不是好友则返回None
+        Updated affinity value，If not friend then BackNone
     """
     result = await db.execute(
         select(AgentFriendship).where(
@@ -67,13 +67,13 @@ async def update_interaction_time(
 
 async def run_affinity_decay():
     """
-    定时任务：对长期无互动的好友关系执行亲密度衰减。
-    建议每天运行一次。
+    Timing Task：Perform affinity decay on long-term non-interactive friend relationships。
+    It is recommended to run it once a day。
     """
     async with AsyncSessionLocal() as db:
         threshold = datetime.now(timezone.utc) - timedelta(days=DECAY_INACTIVE_DAYS)
 
-        # 查找所有已接受且最后互动时间超过阈值的好友关系
+        # Find all accepted friend relationships whose last interaction time exceeds the threshold
         result = await db.execute(
             select(AgentFriendship).where(
                 AgentFriendship.status == "accepted",
@@ -91,7 +91,7 @@ async def run_affinity_decay():
             if fs.last_interaction_at:
                 days_inactive = (datetime.now(timezone.utc) - fs.last_interaction_at).days
             else:
-                # 如果从未记录互动时间，从接受时间算起
+                # If the interaction time is never recorded，Counting from accepttime
                 if fs.accepted_at:
                     days_inactive = (datetime.now(timezone.utc) - fs.accepted_at).days
                 else:

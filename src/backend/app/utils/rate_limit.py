@@ -1,8 +1,8 @@
 """
-端点级别限流工具
+endpoint level rate limit tool
 
-基于 Redis 的简单计数器限流，Redis 不可用时降级为内存计数器。
-配合 FastAPI Depends 使用。
+Simple counter rate limit based on Redis，Redis Demotes to memory counter when unavailable.
+Formulation FastAPI Depends use.
 """
 import time
 import logging
@@ -13,49 +13,49 @@ from app.utils.cache import cache_get, cache_set
 
 logger = logging.getLogger(__name__)
 
-# 内存 fallback：key -> (count, window_start)
+# memory fallback：key -> (count, window_start)
 _memory_counters: dict[str, tuple[int, float]] = {}
 
 
 async def check_rate_limit(key: str, max_calls: int, window_seconds: int):
     """
-    检查限流。超限则抛出 HTTP 429。
+    Check the rate limit. If the limit is exceeded, HTTP 429 will be thrown.
 
-    :param key: 限流唯一标识（如 "rl:generate:{user_id}"）
-    :param max_calls: 窗口内最大调用次数
-    :param window_seconds: 窗口时长（秒）
+    :param key: rate limit unique identifier（like "rl:generate:{user_id}"）
+    :param max_calls: Maximum number of calls within the window
+    :param window_seconds: Window duration（Second）
     """
     cache_key = f"rl:{key}"
 
-    # 尝试 Redis
+    # try Redis
     current = await cache_get(cache_key)
     if current is not None:
         count = int(current.get("count", 0))
         if count >= max_calls:
             raise HTTPException(
                 status_code=429,
-                detail=f"操作过于频繁，请{window_seconds}秒后再试",
+                detail=f"Operating too frequently，{window_seconds}Try again in seconds",
             )
         await cache_set(cache_key, {"count": count + 1}, ttl=window_seconds)
         return
 
-    # Redis 不可用 -> 尝试写入新的 Redis 条目
+    # Redis Not available -> try to write new Redis msgs directory
     set_ok = await cache_set(cache_key, {"count": 1}, ttl=window_seconds)
     if set_ok:
         return
 
-    # Redis 完全不可用，降级为内存计数器
+    # Redis completely unavailable，downgraded to memory counter
     now = time.time()
     entry = _memory_counters.get(cache_key)
     if entry:
         count, window_start = entry
         if now - window_start > window_seconds:
-            # 窗口过期，重置
+            # window expired，reset
             _memory_counters[cache_key] = (1, now)
         elif count >= max_calls:
             raise HTTPException(
                 status_code=429,
-                detail=f"操作过于频繁，请{window_seconds}秒后再试",
+                detail=f"Operating too frequently，{window_seconds}Try again in seconds",
             )
         else:
             _memory_counters[cache_key] = (count + 1, window_start)

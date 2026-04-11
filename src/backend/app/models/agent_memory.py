@@ -1,5 +1,5 @@
 """
-Agent长期记忆模型
+Agent long-term MemoriesModel
 """
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.sql import func
@@ -7,7 +7,7 @@ from app.database import Base
 
 
 class AgentMemory(Base):
-    """Agent记忆表"""
+    """AgentMemories"""
     __tablename__ = "agent_memories"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

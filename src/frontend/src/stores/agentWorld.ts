@@ -1,5 +1,5 @@
 /**
- * 虚拟世界 Pinia Store
+ * Virtual world Pinia store
  */
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
@@ -188,18 +188,18 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
   const roomMap = ref<CompanyRoom[]>([])
   const personalityTrace = ref<any>(null)
   const taskStatus = ref<any>(null)
-  // 私聊AITyping状态
+  // Private-chat AI typing state
   const aiTyping = ref(false)
-  // 频道实时消息推送（组件监听此值处理新消息）
+  // Real-time channel message push (components watch this value to handle new messages)
   const lastChannelMessage = ref<{ group_id: string; message: any } | null>(null)
-  // Friends申请通过通知
+  // Friend request approval notification
   const friendAcceptedNotif = ref<{ nickname: string } | null>(null)
 
   // Computed
   const hasProfile = computed(() => !!myProfile.value)
   const careerTitle = computed(() => {
     if (!myProfile.value) return ''
-    return CAREER_LEVELS[myProfile.value.career_level]?.title || '未知'
+    return CAREER_LEVELS[myProfile.value.career_level]?.title || 'Unknown'
   })
   const nextLevel = computed(() => {
     if (!myProfile.value) return null
@@ -207,19 +207,19 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
     return CAREER_LEVELS[next] || null
   })
 
-  /** 当前楼层的房间配置 */
+  /** CurrentFloor room configuration */
   const currentFloorRooms = computed<RoomConfig[]>(() => {
     return getRoomsByFloor(currentFloor.value)
   })
 
-  /** 判断一个坐标点是否落在某楼层 —— 通过楼层Y偏移编码解码 */
+  /** Judging whether a coordinate point falls on a certain floor - decoding through floor Y offset encoding */
   function isAgentOnFloor(agent: AgentProfile, floor: number): boolean {
-    // pos_y 包含楼层偏移：floor = Math.floor(pos_y / FLOOR_Y_OFFSET) + 1
+    // pos_y Includes floor offset：floor = Math.floor(pos_y / FLOOR_Y_OFFSET) + 1
     const agentFloor = Math.floor(agent.pos_y / FLOOR_Y_OFFSET) + 1
     return agentFloor === floor
   }
 
-  /** 当前楼层在线的Profile（在该层某个房间内 或 坐标在走廊区域内的Profile） */
+  /** Current Floor Online Role（In a certain room on this floor or in a Role whose coordinates are in the corridor area） */
   const currentFloorAgents = computed<AgentProfile[]>(() => {
     return onlineAgents.value.filter(a => isAgentOnFloor(a, currentFloor.value))
   })
@@ -265,7 +265,7 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
   }
 
   async function moveAgent(x: number, y: number) {
-    // 将画布坐标编码为楼层偏移pos_y，再通过WebSocketSend
+    // Encode canvas coordinates as floor offset pos_y，Then pass WebSocketSend
     const encodedY = y + (currentFloor.value - 1) * FLOOR_Y_OFFSET
     const ws = getAgentWS()
     ws.move(x, encodedY)
@@ -312,10 +312,10 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
 
   async function completeTask(taskId: number) {
     const { data } = await request.post(`/api/task/${taskId}/complete`)
-    // 更新本地Tasks状态
+    // Update local Taskstate
     const idx = tasks.value.findIndex(t => t.id === taskId)
     if (idx >= 0) tasks.value[idx].status = 'completed'
-    // 更新profile
+    // Update profile
     if (myProfile.value && data.career_level !== undefined) {
       myProfile.value.xp = data.total_xp
       myProfile.value.tasks_completed = data.tasks_completed
@@ -378,15 +378,15 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
       content,
     })
     chatMessages.value.push(data)
-    // 也通过WSSend
+    // Also via WSSend
     const ws = getAgentWS()
     ws.chat(receiverId, content)
-    // 如果对方是AIProfile，显示"Typing"状态（后端会通过WS推送回复）
+    // If the opponent is an AI character，show"Entering"state（The backend will push the reply through WS）
     const targetFriend = friends.value.find(
       f => (f.from_id === myProfile.value?.id ? f.to_id : f.from_id) === receiverId
     )
     if (data.msg_type !== 'ai_generated') {
-      // 检查目标是否是AIProfile（通过在线agents列表）
+      // Check if the target is an AIRole（Via online agents list）
       const targetAgent = onlineAgents.value.find(a => a.id === receiverId)
       if (targetAgent?.ai_enabled) {
         aiTyping.value = true
@@ -472,7 +472,7 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
     })
 
     ws.on('new_message', (data: any) => {
-      // 收到消息时清除"Typing"状态
+      // Clear when receiving information"Entering"state
       aiTyping.value = false
       if (data.from === chatTarget.value) {
         chatMessages.value.push({
@@ -491,7 +491,7 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
     })
 
     ws.on('channel_message', (data: any) => {
-      // 频道实时消息：更新 lastChannelMessage，组件自行判断是否追加
+      // Channelsreal-time information：Update lastChannelMessage，Whether the component's own Judging is appended
       lastChannelMessage.value = {
         group_id: data.group_id,
         message: data.message,
@@ -499,7 +499,7 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
     })
 
     ws.on('friend_accepted', (data: any) => {
-      // NPC 通过Friends申请：自动RefreshFriends列表和发出的申请状态
+      // NPC Apply through friend：Automatically refresh Friend List and issued application state
       friendAcceptedNotif.value = { nickname: data.nickname || 'NPC' }
       fetchFriends()
       fetchSentRequests()
@@ -511,7 +511,7 @@ export const useAgentWorldStore = defineStore('agentWorld', () => {
       }
     })
 
-    // 模拟引擎广播：批量更新所有agent位置和状态
+    // Simulate engine broadcast：Update all agent locations and statuses in batches
     ws.on('sim_update', (data: any) => {
       if (Array.isArray(data.agents)) {
         for (const agentData of data.agents) {

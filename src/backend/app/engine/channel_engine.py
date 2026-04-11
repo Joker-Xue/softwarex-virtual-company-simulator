@@ -1,5 +1,5 @@
 """
-频道自动化引擎 - 每日公告、部门闲聊、用户消息回复
+Channels automation engine - daily Announcement, Department chat, user information reply
 """
 import asyncio
 import logging
@@ -21,7 +21,7 @@ from app.utils.llm import call_llm_json
 
 logger = logging.getLogger(__name__)
 
-# 跟踪最后一次发布公告的日期，避免重复
+# Track the date of the last Announcement，avoid duplication
 _last_announcement_date: date | None = None
 
 DEPT_CHANNEL_MAP = {
@@ -35,65 +35,65 @@ DEPT_CHANNEL_MAP = {
 }
 
 CAREER_TITLE_MAP = {
-    0: "实习生", 1: "初级员工", 2: "员工", 3: "高级员工",
-    4: "经理", 5: "���监", 6: "CEO",
+    0: "Intern", 1: "Junior Staff", 2: "Staff", 3: "Senior Staff",
+    4: "Manager", 5: "���supervise", 6: "CEO",
 }
 
 DEPT_FALLBACK_MESSAGES = {
     "engineering": [
-        "今天的代码review完成了，大家有什么问题欢迎讨论",
-        "刚跑完测试，通过率不错，继续保持！",
-        "有人在用新框架遇到配置问题吗？",
-        "提醒：周五前记得提交进度报告",
-        "本地环境重启了一次，现在稳定了",
+        "Today's code review is completed，Do you have any questions? Welcome to discuss.",
+        "Just finished running Tests，Good pass rate，keep it up！",
+        "Has anyone encountered configuration issues with the new framework?？",
+        "remind：Remember to submit your progress report before Friday",
+        "The local environment was restarted once，Stable now",
     ],
     "marketing": [
-        "本周活动方案出来了，大家可以看看",
-        "竞品分析报告整理好了，一会发群里",
-        "用户反馈汇总完成，有几个有意思的点",
-        "新的推广文案需要大家帮忙看看语气",
-        "这周转化率比上周提升了不少",
+        "This week the Activity plan is out，You can take a look",
+        "Competitive product analysis reports have been sorted out，Will post in group soon",
+        "Summary of user feedback completed，There are a few interesting points",
+        "The new promotion copy needs your help to check the tone.",
+        "The conversion rate this week has improved a lot compared to last week",
     ],
     "finance": [
-        "月度报表已更新，请各部门核对数据",
-        "提醒大家报销单要在本月底前提交",
-        "预算审批流程有调整，具体看文件",
-        "Q季度数据汇总完毕，整体表现还行",
-        "资金流水已对账，没有异常",
+        "Monthly report has been updated，Please check the data with each Department",
+        "Remind everyone that reimbursement forms must be submitted before the end of this month",
+        "The budget approval process has been adjusted，See the document for details",
+        "Q quarter data summary completed，Overall performance is okay",
+        "Fund flow has been reconciled，No exception",
     ],
     "hr": [
-        "新同事入职培训安排好了，欢迎大家关照",
-        "绩效面谈本周开始，请各位配合",
-        "团建活动投票结果出来了！",
-        "招聘进展顺利，下周有新成员加入",
-        "培训资料已更新，有空可以看看",
+        "Training for new Colleague has been arranged，Welcome, take care of everyone",
+        "Performance interviews start this week，Please cooperate",
+        "Team BuildingActivity voting results are out！",
+        "Recruitment is going well，New members will join next week",
+        "Training information has been updated，You can take a look when you have time",
     ],
     "product": [
-        "新版本需求文档已在共享文件夹，请大家review",
-        "用户调研结果整理完了，发现几个核心痛点",
-        "下个迭代的功能优先级排好了，来讨论一下",
-        "原型图更新了，欢迎大家提意见",
-        "本周用户访谈收获不少，稍后分享给大家",
+        "The new version of the requirements document is already in the shared folder，Please review",
+        "User research results have been compiled，Discovered several core pain points",
+        "The Function priorities for the next iteration have been arranged.，Let's discuss",
+        "The prototype diagram has been updated，Welcome everyone's comments",
+        "I learned a lot from the user interviews this week，Share with everyone later",
     ],
     "operations": [
-        "服务器本周监控正常，无告警",
-        "部署流程优化了一版，减少了手动步骤",
-        "数据备份已验证，一切正常",
-        "本周SLA达标，继续保持",
-        "新的运维文档整理好了，大家可以参考",
+        "Server monitoring is normal this week，No alarm",
+        "The deployment process has been optimized.，Reduced manual steps",
+        "data backup verified，everything is fine",
+        "SLA met this week，keep it up",
+        "The new operation and maintenance documents have been sorted out，You can refer to",
     ],
     "management": [
-        "本周重点工作对齐完成，各部门按计划推进",
-        "季度目标完成度看起来不错，继续加油",
-        "跨部门协作事项请及时同步进展",
-        "管理层会议纪要已发出，请查收",
-        "各部门负责人记得本周五前提交周报",
+        "This week's key work alignment is completed，Each Department is progressing as planned",
+        "Quarterly target achievement looks good，keep pushing",
+        "Please synchronize progress on cross-Department collaboration matters in a timely manner",
+        "Management FloorMeeting minutes have been sent，Please check",
+        "Heads of each Department remember to submit weekly reports before this Friday",
     ],
 }
 
 
 async def _broadcast_channel_message(group_id: str, msg: AgentMessage, sender: AgentProfile):
-    """通过WebSocket广播频道消息"""
+    """Broadcast Channels messages via WebSocket"""
     try:
         from app.routers.agent_ws import manager
         await manager.broadcast({
@@ -114,15 +114,15 @@ async def _broadcast_channel_message(group_id: str, msg: AgentMessage, sender: A
 
 
 async def post_daily_announcement():
-    """生成并发布每日全公司公告"""
+    """Generate and publish daily company-wide Announcements"""
     global _last_announcement_date
     today = datetime.now(timezone.utc).date()
     if _last_announcement_date == today:
-        return  # 今天已经发过了
+        return  # Already sent it today
 
     async with AsyncSessionLocal() as db:
         try:
-            # 优先找管理层NPC作为发布人
+            # Prioritize finding Management FloorNPC as the publisher
             result = await db.execute(
                 select(AgentProfile).where(
                     AgentProfile.ai_enabled == True,
@@ -141,25 +141,25 @@ async def post_daily_announcement():
                 return
 
             announcer = random.choice(managers)
-            career_title = CAREER_TITLE_MAP.get(announcer.career_level or 0, "员工")
+            career_title = CAREER_TITLE_MAP.get(announcer.career_level or 0, "Staff")
 
             try:
                 llm_result = await call_llm_json(
                     DAILY_ANNOUNCEMENT_PROMPT.format(
-                        date=today.strftime("%Y年%m月%d日"),
+                        date=today.strftime("%Y%mDay of month %d"),
                         announcer_name=announcer.nickname,
                         announcer_title=career_title,
                     ),
-                    system_prompt="你是虚拟公司公告生成助手，请生成简短自然的公告内容。",
+                    system_prompt="you are virtual companyAnnouncement generation assistant，Please generate short and natural Announcement content。",
                     cache_prefix="daily_announcement",
                     use_cache=False,
                 )
                 if isinstance(llm_result, dict) and "announcement" in llm_result:
                     content = llm_result["announcement"]
                 else:
-                    content = f"【{today.strftime('%m月%d日')}】各位同仁好，今日公司运营正常，感谢大家的努力！——{announcer.nickname}"
+                    content = f"【{today.strftime('%mDay of month %d')}】Hello colleagues，The company is operating normally today，thank you all for your efforts！——{announcer.nickname}"
             except Exception:
-                content = f"【{today.strftime('%m月%d日')}】大家好，今日工作顺利推进，继续加油！——{announcer.nickname}"
+                content = f"【{today.strftime('%mDay of month %d')}】Hello everyone，Work progresses smoothly today，keep pushing！——{announcer.nickname}"
 
             msg = AgentMessage(
                 sender_id=announcer.id,
@@ -181,7 +181,7 @@ async def post_daily_announcement():
 
 
 async def post_department_chatter(department: str):
-    """触发部门频道中的AI角色发一条日常消息"""
+    """Trigger the AI character in DepartmentChannels to send a message msgs daily information"""
     group_id = DEPT_CHANNEL_MAP.get(department)
     if not group_id:
         return
@@ -200,7 +200,7 @@ async def post_department_chatter(department: str):
 
             npc = random.choice(npcs)
 
-            # 获取最近5条消息作为上下文
+            # Get the last 5 msgsinformation as context
             recent_result = await db.execute(
                 select(AgentMessage)
                 .where(AgentMessage.group_id == group_id)
@@ -209,9 +209,9 @@ async def post_department_chatter(department: str):
             )
             recent_msgs = list(recent_result.scalars().all())
             recent_msgs.reverse()
-            history = "\n".join(f"{m.content}" for m in recent_msgs) if recent_msgs else "（频道暂无消息）"
+            history = "\n".join(f"{m.content}" for m in recent_msgs) if recent_msgs else "（ChannelsNo messages yet）"
 
-            career_title = CAREER_TITLE_MAP.get(npc.career_level or 0, "员工")
+            career_title = CAREER_TITLE_MAP.get(npc.career_level or 0, "Staff")
 
             try:
                 llm_result = await call_llm_json(
@@ -222,16 +222,16 @@ async def post_department_chatter(department: str):
                         department=department,
                         recent_history=history,
                     ),
-                    system_prompt="你是虚拟公司员工，在部门频道发日常消息。",
+                    system_prompt="you are virtual companyStaff，Send daily messages on DepartmentChannels。",
                     cache_prefix="dept_chat",
                     use_cache=False,
                 )
                 if isinstance(llm_result, dict) and "message" in llm_result:
                     content = llm_result["message"]
                 else:
-                    content = random.choice(DEPT_FALLBACK_MESSAGES.get(department, ["大家好！"]))
+                    content = random.choice(DEPT_FALLBACK_MESSAGES.get(department, ["Hello everyone!"]))
             except Exception:
-                content = random.choice(DEPT_FALLBACK_MESSAGES.get(department, ["大家好！"]))
+                content = random.choice(DEPT_FALLBACK_MESSAGES.get(department, ["Hello everyone!"]))
 
             msg = AgentMessage(
                 sender_id=npc.id,
@@ -252,8 +252,8 @@ async def post_department_chatter(department: str):
 
 
 async def post_channel_reply(group_id: str, user_sender_id: int, user_message: str, department: str):
-    """对用户在频道中的消息生成NPC回复（带自然延迟）"""
-    await asyncio.sleep(random.uniform(6, 18))  # 自然的回复延迟
+    """Generate NPC replies to user messages in Channels（with natural delay）"""
+    await asyncio.sleep(random.uniform(6, 18))  # natural reply delay
 
     async with AsyncSessionLocal() as db:
         try:
@@ -270,14 +270,14 @@ async def post_channel_reply(group_id: str, user_sender_id: int, user_message: s
 
             npc = random.choice(npcs)
 
-            # 获取发言用户名字
+            # Get the speaking username word
             user_result = await db.execute(
                 select(AgentProfile).where(AgentProfile.id == user_sender_id)
             )
             user_profile = user_result.scalar_one_or_none()
-            user_name = user_profile.nickname if user_profile else "同事"
+            user_name = user_profile.nickname if user_profile else "Colleague"
 
-            career_title = CAREER_TITLE_MAP.get(npc.career_level or 0, "员工")
+            career_title = CAREER_TITLE_MAP.get(npc.career_level or 0, "Staff")
 
             try:
                 llm_result = await call_llm_json(
@@ -289,16 +289,16 @@ async def post_channel_reply(group_id: str, user_sender_id: int, user_message: s
                         user_name=user_name,
                         user_message=user_message,
                     ),
-                    system_prompt="你是虚拟公司员工，在部门频道回复同事消息。",
+                    system_prompt="you are virtual companyStaff，Reply to Colleague message in DepartmentChannels。",
                     cache_prefix="channel_reply",
                     use_cache=False,
                 )
                 if isinstance(llm_result, dict) and "reply" in llm_result:
                     content = llm_result["reply"]
                 else:
-                    content = f"好的，{user_name}，了解了！"
+                    content = f"Got it, {user_name}，Understood！"
             except Exception:
-                content = f"收到，{user_name}！👍"
+                content = f"Received, {user_name}！👍"
 
             msg = AgentMessage(
                 sender_id=npc.id,

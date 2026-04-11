@@ -1,6 +1,6 @@
 """
-NPC种子数据系统 - 创建16个AI虚拟角色，覆盖7个部门和各职业等级
-部门：management / engineering / product / marketing / finance / hr / operations
+NPC seed data system - Create 16 AI virtual Roles，Covers 7 departments and various career levels
+Department：management / engineering / product / marketing / finance / hr / operations
 """
 import logging
 import asyncio
@@ -24,120 +24,120 @@ from app.engine.named_spots import (
 logger = logging.getLogger(__name__)
 
 NPC_ROSTER = [
-    # ── 管理层 (3F) ──
+    # ── Management Floor (3F) ──
     {
-        "nickname": "陈总", "mbti": "ENTJ", "department": "management",
+        "nickname": "Chen", "mbti": "ENTJ", "department": "management",
         "career_level": 6, "career_path": "management",
         "attrs": {"communication": 85, "leadership": 95, "creativity": 70,
                   "technical": 60, "teamwork": 75, "diligence": 80},
         "tasks_completed": 130, "xp": 6000, "floor": 3,
     },
     {
-        "nickname": "王总监", "mbti": "ESTJ", "department": "management",
+        "nickname": "Wang", "mbti": "ESTJ", "department": "management",
         "career_level": 5, "career_path": "management",
         "attrs": {"communication": 75, "leadership": 85, "creativity": 55,
                   "technical": 80, "teamwork": 70, "diligence": 90},
         "tasks_completed": 90, "xp": 3500, "floor": 3,
     },
     {
-        "nickname": "李总监", "mbti": "ENFJ", "department": "management",
+        "nickname": "Li", "mbti": "ENFJ", "department": "management",
         "career_level": 5, "career_path": "management",
         "attrs": {"communication": 90, "leadership": 80, "creativity": 85,
                   "technical": 40, "teamwork": 85, "diligence": 75},
         "tasks_completed": 85, "xp": 3200, "floor": 3,
     },
-    # ── 工程部 (2F) ──
+    # ── Engineering (2F) ──
     {
-        "nickname": "张经理", "mbti": "ISTJ", "department": "engineering",
+        "nickname": "Zhang", "mbti": "ISTJ", "department": "engineering",
         "career_level": 4, "career_path": "management",
         "attrs": {"communication": 60, "leadership": 70, "creativity": 50,
                   "technical": 85, "teamwork": 65, "diligence": 95},
         "tasks_completed": 55, "xp": 1700, "floor": 2,
     },
     {
-        "nickname": "刘工", "mbti": "INTP", "department": "engineering",
+        "nickname": "Liu", "mbti": "INTP", "department": "engineering",
         "career_level": 3, "career_path": "technical",
         "attrs": {"communication": 40, "leadership": 35, "creativity": 85,
                   "technical": 95, "teamwork": 45, "diligence": 70},
         "tasks_completed": 35, "xp": 900, "floor": 2,
     },
     {
-        "nickname": "马弟", "mbti": "INFP", "department": "engineering",
+        "nickname": "Ma", "mbti": "INFP", "department": "engineering",
         "career_level": 1, "career_path": "",
         "attrs": {"communication": 55, "leadership": 30, "creativity": 90,
                   "technical": 70, "teamwork": 60, "diligence": 50},
         "tasks_completed": 6, "xp": 120, "floor": 2,
     },
-    # ── 产品部 (2F) ──
+    # ── Product (2F) ──
     {
-        "nickname": "孙经理", "mbti": "ENFJ", "department": "product",
+        "nickname": "Sun", "mbti": "ENFJ", "department": "product",
         "career_level": 4, "career_path": "management",
         "attrs": {"communication": 85, "leadership": 70, "creativity": 90,
                   "technical": 55, "teamwork": 80, "diligence": 75},
         "tasks_completed": 48, "xp": 1550, "floor": 2,
     },
     {
-        "nickname": "钱工", "mbti": "ISFP", "department": "product",
+        "nickname": "Qian", "mbti": "ISFP", "department": "product",
         "career_level": 2, "career_path": "",
         "attrs": {"communication": 65, "leadership": 40, "creativity": 85,
                   "technical": 60, "teamwork": 70, "diligence": 70},
         "tasks_completed": 14, "xp": 350, "floor": 2,
     },
-    # ── 市场部 (2F) ──
+    # ── Marketing (2F) ──
     {
-        "nickname": "周姐", "mbti": "ENFP", "department": "marketing",
+        "nickname": "Zhou", "mbti": "ENFP", "department": "marketing",
         "career_level": 3, "career_path": "technical",
         "attrs": {"communication": 85, "leadership": 60, "creativity": 90,
                   "technical": 40, "teamwork": 80, "diligence": 55},
         "tasks_completed": 33, "xp": 850, "floor": 2,
     },
     {
-        "nickname": "郑姐", "mbti": "ESFP", "department": "marketing",
+        "nickname": "Zheng", "mbti": "ESFP", "department": "marketing",
         "career_level": 2, "career_path": "",
         "attrs": {"communication": 85, "leadership": 50, "creativity": 75,
                   "technical": 35, "teamwork": 80, "diligence": 60},
         "tasks_completed": 16, "xp": 380, "floor": 2,
     },
-    # ── 财务部 (2F) ──
+    # ── Finance (2F) ──
     {
-        "nickname": "吴哥", "mbti": "ISTP", "department": "finance",
+        "nickname": "Wu", "mbti": "ISTP", "department": "finance",
         "career_level": 2, "career_path": "",
         "attrs": {"communication": 45, "leadership": 40, "creativity": 55,
                   "technical": 80, "teamwork": 50, "diligence": 85},
         "tasks_completed": 18, "xp": 400, "floor": 2,
     },
     {
-        "nickname": "林弟", "mbti": "ENTP", "department": "finance",
+        "nickname": "Lin", "mbti": "ENTP", "department": "finance",
         "career_level": 1, "career_path": "",
         "attrs": {"communication": 75, "leadership": 50, "creativity": 80,
                   "technical": 65, "teamwork": 55, "diligence": 45},
         "tasks_completed": 5, "xp": 110, "floor": 2,
     },
-    # ── HR部门 (1F) ──
+    # ── HR Department (1F) ──
     {
-        "nickname": "赵经理", "mbti": "ESFJ", "department": "hr",
+        "nickname": "Zhao", "mbti": "ESFJ", "department": "hr",
         "career_level": 4, "career_path": "management",
         "attrs": {"communication": 90, "leadership": 75, "creativity": 60,
                   "technical": 35, "teamwork": 90, "diligence": 80},
         "tasks_completed": 52, "xp": 1600, "floor": 1,
     },
     {
-        "nickname": "黄妹", "mbti": "ISFJ", "department": "hr",
+        "nickname": "Huang", "mbti": "ISFJ", "department": "hr",
         "career_level": 1, "career_path": "",
         "attrs": {"communication": 70, "leadership": 45, "creativity": 40,
                   "technical": 35, "teamwork": 85, "diligence": 90},
         "tasks_completed": 7, "xp": 130, "floor": 1,
     },
-    # ── 运营部 (2F) ──
+    # ── Operations (2F) ──
     {
-        "nickname": "吕哥", "mbti": "ESTP", "department": "operations",
+        "nickname": "Lv", "mbti": "ESTP", "department": "operations",
         "career_level": 3, "career_path": "technical",
         "attrs": {"communication": 80, "leadership": 55, "creativity": 70,
                   "technical": 60, "teamwork": 75, "diligence": 65},
         "tasks_completed": 30, "xp": 820, "floor": 2,
     },
     {
-        "nickname": "韩妹", "mbti": "INFJ", "department": "operations",
+        "nickname": "Han", "mbti": "INFJ", "department": "operations",
         "career_level": 1, "career_path": "",
         "attrs": {"communication": 70, "leadership": 35, "creativity": 75,
                   "technical": 45, "teamwork": 80, "diligence": 75},
@@ -145,13 +145,13 @@ NPC_ROSTER = [
     },
 ]
 
-# 2F 新布局（600x600画布）:
-#   左列(全高): 工程部  x=0,   y=50,  w=200, h=450  center=(100, 275)
-#   中列上:     市场部  x=220, y=50,  w=180, h=210  center=(310, 155)
-#   中列下:     产品部  x=220, y=280, w=180, h=220  center=(310, 390)
-#   右列上:     财务部  x=420, y=50,  w=180, h=210  center=(510, 155)
-#   右列下:     运营部  x=420, y=280, w=180, h=220  center=(510, 390)
-# pos_y 使用楼层偏移编码: floor1=+0, floor2=+700, floor3=+1400
+# 2F new layout（600x600canvas）:
+#   left column(full height): Engineering  x=0,   y=50,  w=200, h=450  center=(100, 275)
+#   Upper middle column: Marketing x=220, y=50,  w=180, h=210  center=(310, 155)
+#   Bottom middle column: Product x=220, y=280, w=180, h=220  center=(310, 390)
+#   On the right column: Finance x=420, y=50,  w=180, h=210  center=(510, 155)
+#   Bottom right column: Operations x=420, y=280, w=180, h=220  center=(510, 390)
+# pos_y use floor offset coding: floor1=+0, floor2=+700, floor3=+1400
 
 FLOOR2_DEPT_CENTERS = {
     "engineering": (100, 975),   # 275 + 700
@@ -205,7 +205,7 @@ async def _npcs_already_seeded(db: AsyncSession) -> bool:
 
 
 def _is_npc_profile(profile: AgentProfile) -> bool:
-    """兼容历史结构识别NPC。"""
+    """compatible history structure to identify NPCs."""
     if str(profile.avatar_key or "").startswith("npc_"):
         return True
     personality = profile.personality
@@ -260,9 +260,9 @@ def _build_distribution(rows: list[tuple[int, str, int, int, bool]]) -> dict:
 
 async def get_simulation_distribution(db: AsyncSession) -> dict:
     """
-    获取“世界可见角色”分布：
-    - 在线玩家
-    - 常驻NPC（不受 is_online 脏状态影响）
+    Get the "World Visible Role" distribution：
+    - online players
+    - anchoredNPC（Not affected by is_online dirty state）
     """
     result = await db.execute(select(AgentProfile))
     profiles = result.scalars().all()
@@ -368,8 +368,8 @@ async def seed_npcs_standalone():
 
 async def reset_npc_positions(db: AsyncSession) -> int:
     """
-    将所有 AI 角色重置到对应语义座位（使用 named_spots 系统）。
-    在服务器启动时调用，修复旧数据库中的随机坐标。
+    Reset all AI Roles to corresponding semantic seats（use named_spots system）。
+    Called when the server starts，Fix random coordinates in old Database。
     """
     from app.engine.agent_ai import clear_room_cache
     clear_room_cache()
@@ -395,7 +395,7 @@ async def reset_npc_positions(db: AsyncSession) -> int:
         if spot:
             agent.pos_x, agent.pos_y = get_spot_pos(spot)
         else:
-            # 未知部门 → 大厅接待
+            # UnknownDepartment → Lobby reception
             from app.engine.named_spots import get_spot_pos as gsp
             agent.pos_x, agent.pos_y = gsp("lobby_reception")
         updated += 1
@@ -407,11 +407,11 @@ async def reset_npc_positions(db: AsyncSession) -> int:
 
 async def rebuild_npcs(db: AsyncSession) -> dict:
     """
-    一次性重建NPC数据：
-    1) 删除现有NPC（仅NPC）
-    2) 按ROSTER重新seed
-    3) 执行语义点位重排
-    4) 返回统计报告
+    Rebuild NPCdata at once：
+    1) Delete existing NPC（NPCs only）
+    2) Press ROSTER to reseed
+    3) Perform semantic point rearrangement
+    4) Backstatistical report
     """
     for attempt in range(3):
         try:
@@ -432,7 +432,7 @@ async def rebuild_npcs(db: AsyncSession) -> dict:
                     await db.delete(user)
             await db.commit()
 
-            # 使用现有幂等seed逻辑重新创建NPC
+            # Recreate NPCs using existing idempotent seed logic
             created_npc = await seed_npcs(db)
             repositioned = await reset_npc_positions(db)
 

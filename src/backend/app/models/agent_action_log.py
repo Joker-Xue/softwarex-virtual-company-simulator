@@ -1,5 +1,5 @@
 """
-Agent行为日志模型
+AgentBehaviorLogModel
 """
 from sqlalchemy import Column, Integer, String, DateTime, JSON, ForeignKey
 from sqlalchemy.sql import func
@@ -7,7 +7,7 @@ from app.database import Base
 
 
 class AgentActionLog(Base):
-    """行为日志表"""
+    """Behavior log table"""
     __tablename__ = "agent_action_logs"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

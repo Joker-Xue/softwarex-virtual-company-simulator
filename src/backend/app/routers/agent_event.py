@@ -1,5 +1,5 @@
 """
-社交活动API
+SocialActivityAPI
 """
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -22,11 +22,11 @@ async def _get_profile(user: User, db: AsyncSession) -> AgentProfile:
     )
     profile = result.scalar_one_or_none()
     if not profile:
-        raise HTTPException(404, "尚未创建角色")
+        raise HTTPException(404, "Profile has not been created yet")
     return profile
 
 
-@router.get("/list", summary="获取活动列表")
+@router.get("/list", summary="Get activity list")
 async def list_events(
     status: str = Query(None, description="upcoming/active/ended"),
     user: User = Depends(get_current_active_user),
@@ -41,7 +41,7 @@ async def list_events(
     result = await db.execute(query)
     events = result.scalars().all()
 
-    # 批量查询房间名称
+    # Query room names in batches
     room_ids = [e.room_id for e in events if e.room_id]
     room_names: dict[int, str] = {}
     if room_ids:
@@ -72,7 +72,7 @@ async def list_events(
     ]
 
 
-@router.get("/{event_id}", summary="活动详情")
+@router.get("/{event_id}", summary="Activity details")
 async def get_event(
     event_id: int,
     user: User = Depends(get_current_active_user),
@@ -85,9 +85,9 @@ async def get_event(
     )
     event = result.scalar_one_or_none()
     if not event:
-        raise HTTPException(404, "活动不存在")
+        raise HTTPException(404, "Activity does not exist")
 
-    # 获取参与者详情
+    # Get participant details
     participants_info = []
     participant_ids = event.participants or []
     if participant_ids:
@@ -119,7 +119,7 @@ async def get_event(
     }
 
 
-@router.post("/{event_id}/join", summary="参加活动")
+@router.post("/{event_id}/join", summary="join event")
 async def join_event(
     event_id: int,
     user: User = Depends(get_current_active_user),
@@ -132,23 +132,23 @@ async def join_event(
     )
     event = result.scalar_one_or_none()
     if not event:
-        raise HTTPException(404, "活动不存在")
+        raise HTTPException(404, "Activity does not exist")
 
     if event.is_active == "ended":
-        raise HTTPException(400, "活动已结束")
+        raise HTTPException(400, "Activity has ended")
 
     participants = list(event.participants or [])
     if me.id in participants:
-        raise HTTPException(409, "已参加此活动")
+        raise HTTPException(409, "Already participated in this Activity")
 
     if len(participants) >= event.max_participants:
-        raise HTTPException(400, "活动人数已满")
+        raise HTTPException(400, "ActivityHeadcount is full")
 
     participants.append(me.id)
     event.participants = participants
     await db.flush()
 
-    # 发放奖励
+    # Issue reward
     rewards_given = False
     if event.rewards_xp > 0:
         me.xp = (me.xp or 0) + event.rewards_xp
@@ -165,7 +165,7 @@ async def join_event(
                 user_id=user.id,
                 amount=event.rewards_coins,
                 tx_type="event_reward",
-                description=f"参加活动「{event.name}」奖励",
+                description=f"join event「{event.name}」reward",
             )
             db.add(tx)
             rewards_given = True
@@ -173,7 +173,7 @@ async def join_event(
     await db.flush()
 
     return {
-        "message": f"成功参加活动「{event.name}」",
+        "message": f'Successfully joined event "{event.name}"',
         "participant_count": len(participants),
         "rewards": {
             "xp": event.rewards_xp,
@@ -182,22 +182,22 @@ async def join_event(
     }
 
 
-@router.post("/generate-weekly", summary="生成本周活动")
+@router.post("/generate-weekly", summary="Generate this week's Activity")
 async def generate_weekly_events(
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """管理接口：生成本周的预设活动"""
+    """Management interface：Generate this week's default Activity"""
     await _get_profile(user, db)
 
     now = datetime.now(timezone.utc)
-    # 本周五
+    # this friday
     days_until_friday = (4 - now.weekday()) % 7
     if days_until_friday == 0 and now.hour >= 18:
         days_until_friday = 7
     friday = now + timedelta(days=days_until_friday)
 
-    # 获取咖啡厅房间ID
+    # Get Cafe room ID
     room_result = await db.execute(
         select(CompanyRoom.id).where(CompanyRoom.room_type == "cafeteria").limit(1)
     )
@@ -208,9 +208,9 @@ async def generate_weekly_events(
 
     templates = [
         {
-            "name": "周五下午茶",
+            "name": "Friday Afternoon Tea",
             "event_type": "tea_break",
-            "description": "每周五的下午茶时光，放松身心，和同事聊聊天！",
+            "description": "Afternoon Tea every Friday，relax，Chat with Colleague！",
             "scheduled_at": friday.replace(hour=15, minute=0, second=0, microsecond=0),
             "duration_minutes": 60,
             "max_participants": 30,
@@ -219,9 +219,9 @@ async def generate_weekly_events(
             "room_id": cafe_room_id,
         },
         {
-            "name": "团队分享会",
+            "name": "Team sharing session",
             "event_type": "team_building",
-            "description": "各部门分享近期工作心得和技术经验。",
+            "description": "Each department shares recent work experience and technical experience。",
             "scheduled_at": friday.replace(hour=10, minute=0, second=0, microsecond=0),
             "duration_minutes": 90,
             "max_participants": 50,
@@ -230,9 +230,9 @@ async def generate_weekly_events(
             "room_id": None,
         },
         {
-            "name": "新人欢迎会",
+            "name": "Welcome party",
             "event_type": "team_building",
-            "description": "欢迎新同事加入公司大家庭！",
+            "description": "WelcomeNew Colleague joins the company family！",
             "scheduled_at": (now + timedelta(days=1)).replace(hour=14, minute=0, second=0, microsecond=0),
             "duration_minutes": 60,
             "max_participants": 20,
@@ -244,7 +244,7 @@ async def generate_weekly_events(
 
     created = []
     for t in templates:
-        # 检查是否已存在同名同时间活动
+        # Check if an event with the same name already exists
         existing = await db.execute(
             select(CompanyEvent).where(
                 CompanyEvent.name == t["name"],
@@ -274,5 +274,5 @@ async def generate_weekly_events(
     return {"created": created, "count": len(created)}
 
 
-# 需要导入 CompanyRoom 用于生成活动
+# Need to import CompanyRoom to generate Activity
 from app.models.company_room import CompanyRoom

@@ -177,7 +177,7 @@ function draw() {
       if (occupancy && occupancy.queue_count > 0) {
         ctx.fillStyle = '#f97316'
         ctx.font = 'bold 10px sans-serif'
-        ctx.fillText(`排队 ${occupancy.queue_count}`, ox + ow - 18, oy + 14)
+        ctx.fillText(`queue ${occupancy.queue_count}`, ox + ow - 18, oy + 14)
       }
     } else {
       ctx.strokeStyle = 'rgba(167,139,250,0.25)'
@@ -264,7 +264,7 @@ function drawLegend() {
   ctx.font = '9px sans-serif'
   ctx.textAlign = 'left'
   ctx.fillStyle = 'rgba(226,232,240,0.6)'
-  ctx.fillText('点击空白移动到合法点位；点击高亮物件执行操作', 10, legendY + 6)
+  ctx.fillText('Click on the blank space to move to the legal point；Click on the highlighted object to perform the operation', 10, legendY + 6)
 }
 
 function startDrawLoop() {
@@ -288,8 +288,8 @@ async function loadInteractions() {
     interactions.value = await store.fetchRoomInteractions(props.room.id)
   } catch (e: any) {
     interactions.value = null
-    statusText.value = '交互结构加载失败'
-    ElMessage.error(e?.response?.data?.message || '房间交互加载失败')
+    statusText.value = 'Interactive structure loading failed'
+    ElMessage.error(e?.response?.data?.message || 'Room interaction failed to load')
   } finally {
     loading.value = false
   }
@@ -333,7 +333,7 @@ async function onCanvasClick(evt: MouseEvent) {
       const result = await store.interactInsideRoom(props.room.id, objectKey)
       statusText.value = result.reason
       if (result.success) {
-        ElMessage.success(`Success：Tasks+${result.task_delta}，XP+${result.xp_delta}`)
+        ElMessage.success(`Operation successful：Task+${result.task_delta}，XP+${result.xp_delta}`)
         await Promise.all([store.fetchTasks(), loadInteractions()])
       } else {
         ElMessage.warning(result.reason)
@@ -344,9 +344,9 @@ async function onCanvasClick(evt: MouseEvent) {
 
     loading.value = true
     await store.moveInsideRoom(props.room.id, p.roomX, p.roomY)
-    statusText.value = '已移动到最近可交互点位'
+    statusText.value = 'Moved to the nearest interactive point'
   } catch (e: any) {
-    statusText.value = e?.response?.data?.message || 'Failed'
+    statusText.value = e?.response?.data?.message || 'Operation failed'
     ElMessage.error(statusText.value)
   } finally {
     loading.value = false
@@ -387,7 +387,7 @@ onUnmounted(() => {
 <template>
   <el-dialog
     :model-value="visible"
-    :title="room ? room.name + ' - 内部场景' : '房间内部'"
+    :title="room ? room.name + ' - interior scene' : 'room interior'"
     width="560px"
     :close-on-click-modal="true"
     @close="emit('close')"
@@ -401,9 +401,9 @@ onUnmounted(() => {
         @click="onCanvasClick"
       />
       <div class="room-info" v-if="room">
-        <span class="info-item">容量: {{ room.capacity }}人</span>
-        <span class="info-item">物品: {{ (room.interior_objects || []).length }}件</span>
-        <span class="info-item">在场: {{ roomAgents.length }}人</span>
+        <span class="info-item">Capacity: {{ room.capacity }}people</span>
+        <span class="info-item">thing: {{ (room.interior_objects || []).length }}pieces</span>
+        <span class="info-item">Presence: {{ roomAgents.length }} people</span>
       </div>
       <div v-if="statusText" class="status-line">{{ statusText }}</div>
     </div>

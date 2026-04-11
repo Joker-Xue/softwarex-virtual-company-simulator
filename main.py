@@ -1,5 +1,5 @@
 """
-项目入口文件
+Project entry point file
 """
 from dotenv import load_dotenv
 load_dotenv()

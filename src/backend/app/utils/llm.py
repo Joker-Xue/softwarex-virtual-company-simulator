@@ -1,14 +1,14 @@
 """
-大模型调用封装
+Large Model call encapsulation
 
-功能：
-- 支持OpenAI兼容接口（如DeepSeek、通义千问、智谱GLM等）
-- 多模型轮询调度，分散单一供应商压力
-- 故障自动切换：超时/限流/错误时自动跳到下一个模型
-- 统一请求/响应格式
-- 错误重试（指数退避）
-- 结果缓存到Redis（相同输入hash做key，TTL=24h）
-- 全局并发控制（asyncio.Semaphore）
+Function：
+- Support OpenAIcompatible interface（Such as DeepSeek, Tongyi Qianwen, GLM, etc.）
+- Multi-model polling scheduling，Distribute pressure to a single supplier
+- failover：Automatically jump to the next Model when timeout/rate limit/error occurs
+- Unify ask/response format
+- Retry on error（Exponential save）
+- Results Cache to Redis（Use the same input hash as key，TTL=24h）
+- Global concurrency control（asyncio.Semaphore）
 """
 import os
 import json
@@ -39,10 +39,10 @@ def get_llm_settings() -> Dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# 多模型池：轮询 + 故障切换
+# Multiple Model Pool：poll + failover
 # ---------------------------------------------------------------------------
-# 环境变量 LLM_POOL 可配置逗号分隔的模型列表，留空则只用 LLM_MODEL
-# 例: LLM_POOL=DeepSeek-V3.2,GLM-4.5-Air,Qwen3-32B,ERNIE-4.5-300B-A47B,Hunyuan-A13B-Instruct
+# Environment variable LLM_POOL Configurable comma separated list of models，Leave blank to use only LLM_MODEL
+# : LLM_POOL=DeepSeek-V3.2,GLM-4.5-Air,Qwen3-32B,ERNIE-4.5-300B-A47B,Hunyuan-A13B-Instruct
 
 def _parse_model_pool() -> List[str]:
     """Parse model pool from env. Returns list of model IDs."""
@@ -115,7 +115,7 @@ class ModelRouter:
     def mark_unhealthy(self, model_id: str) -> None:
         """Mark a model as temporarily unhealthy."""
         self._cooldowns[model_id] = time.monotonic()
-        logger.warning(f"模型 {model_id} 标记为不健康，冷却 {self.cooldown_seconds}s")
+        logger.warning(f"Model {model_id} mark is unhealthy，cooling {self.cooldown_seconds}s")
 
     def mark_healthy(self, model_id: str) -> None:
         """Clear cooldown for a model that succeeded."""
@@ -125,20 +125,20 @@ class ModelRouter:
 # Singleton router
 _router = ModelRouter()
 
-# 重试配置
+# Retry configuration
 MAX_RETRIES = 2  # per-model retries (total attempts = retries × models)
-RETRY_BASE_DELAY = 1  # 秒
+RETRY_BASE_DELAY = 1  # Second
 
-# 全局并发控制：限制同时在飞的 LLM 请求数
+# Global concurrency control：limit the number of LLM asks flying at the same time
 _LLM_CONCURRENCY = int(os.getenv("LLM_MAX_CONCURRENCY", "5"))
 _semaphore = asyncio.Semaphore(_LLM_CONCURRENCY)
 
-# 缓存TTL
-LLM_CACHE_TTL = int(os.getenv("LLM_CACHE_TTL", "86400"))  # 24小时
+# CacheTTL
+LLM_CACHE_TTL = int(os.getenv("LLM_CACHE_TTL", "86400"))  # 24Hour
 
 
 # ---------------------------------------------------------------------------
-# 内部：对单个模型发起请求（含重试）
+# internal：Initiate an ask for a single Model（With retry）
 # ---------------------------------------------------------------------------
 
 async def _call_single_model(
@@ -191,24 +191,24 @@ async def _call_single_model(
 
             elif response.status_code == 429:
                 last_error = f"HTTP 429: Rate limited ({model})"
-                logger.warning(f"[{model}] 限流，尝试 {attempt + 1}/{max_retries}")
+                logger.warning(f"[{model}] rate limit，try {attempt + 1}/{max_retries}")
                 await asyncio.sleep(RETRY_BASE_DELAY * (2 ** attempt))
 
             else:
                 last_error = f"HTTP {response.status_code}: {response.text[:200]}"
-                logger.error(f"[{model}] API错误: {last_error}")
+                logger.error(f"[{model}] APImistake: {last_error}")
                 if attempt < max_retries - 1:
                     await asyncio.sleep(RETRY_BASE_DELAY * (2 ** attempt))
 
         except httpx.TimeoutException:
-            last_error = f"请求超时 ({model})"
-            logger.warning(f"[{model}] 超时，尝试 {attempt + 1}/{max_retries}")
+            last_error = f"ask timeout ({model})"
+            logger.warning(f"[{model}] time out，try {attempt + 1}/{max_retries}")
             if attempt < max_retries - 1:
                 await asyncio.sleep(RETRY_BASE_DELAY * (2 ** attempt))
 
         except Exception as e:
             last_error = f"{e.__class__.__name__}: {e} ({model})"
-            logger.error(f"[{model}] 异常: {e}，尝试 {attempt + 1}/{max_retries}")
+            logger.error(f"[{model}] abnormal: {e}，try {attempt + 1}/{max_retries}")
             if attempt < max_retries - 1:
                 await asyncio.sleep(RETRY_BASE_DELAY * (2 ** attempt))
 
@@ -218,7 +218,7 @@ async def _call_single_model(
 
 
 # ---------------------------------------------------------------------------
-# 公开接口
+# public interface
 # ---------------------------------------------------------------------------
 
 async def call_llm(
@@ -233,19 +233,19 @@ async def call_llm(
     max_fallback_models: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
-    调用大模型（支持多模型轮询 + 故障切换）
+    Call large Model（Support multi-model polling + failover）
 
     Args:
-        messages: 对话消息列表 [{"role": "system/user/assistant", "content": "..."}]
-        model: 指定模型名称。为 None 时使用模型池轮询
-        temperature: 温度参数
-        max_tokens: 最大生成token数
-        use_cache: 是否使用缓存
-        cache_prefix: 缓存key前缀
+        messages: Conversation message list [{"role": "system/user/assistant", "content": "..."}]
+        model: Specify Model name. is None When using model pool polling
+        temperature: Temperature parameters
+        max_tokens: Maximum number of generated tokens
+        use_cache: Whether to use Cache
+        cache_prefix: Cachekeyprefix
 
     Returns:
         {
-            "content": "模型回复内容",
+            "content": "Model reply content",
             "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
             "model": "model_name",
             "cached": False
@@ -258,7 +258,7 @@ async def call_llm(
     retries = int(MAX_RETRIES if max_retries is None else max_retries)
     retries = max(1, retries)
 
-    # ── LLM 隐私网关拦截 ──
+    # ── LLM privacy gateway interception ──
     from app.security.llm_gateway import gateway_intercept, restore_from_llm
     pii_mapping = None
     try:
@@ -266,7 +266,7 @@ async def call_llm(
     except ValueError as e:
         return {"content": "", "error": str(e), "usage": {}, "model": model or "", "cached": False}
 
-    # 检查缓存（用 messages hash，不含 model 名——任何模型的缓存都可命中）
+    # Check Cache（for messages hash，Does not contain model name - Cache of any model can be hit）
     cache_key = None
     if use_cache:
         cache_input = json.dumps({"messages": messages}, ensure_ascii=False)
@@ -276,10 +276,10 @@ async def call_llm(
             cached["cached"] = True
             return cached
 
-    # 选主模型
+    # Select the main model
     primary = await _router.next_model(caller_model=model)
 
-    # 尝试主模型
+    # try main Model
     try:
         result = await _call_single_model(
             primary,
@@ -294,15 +294,15 @@ async def call_llm(
             await cache_set(cache_key, result, ttl=LLM_CACHE_TTL)
         return result
     except RuntimeError as primary_err:
-        logger.warning(f"主模型 {primary} 失败: {primary_err}，尝试备选模型")
+        logger.warning(f"Primary Model {primary} failed: {primary_err}，try alternative Model")
 
-    # 故障切换：尝试其他模型
+    # failover：try other models
     fallbacks = await _router.get_fallback_models(primary)
     if max_fallback_models is not None:
         fallbacks = fallbacks[: max(0, int(max_fallback_models))]
     for fb_model in fallbacks:
         try:
-            logger.info(f"切换到备选模型: {fb_model}")
+            logger.info(f"Switch to alternative Model: {fb_model}")
             result = await _call_single_model(
                 fb_model,
                 messages,
@@ -316,14 +316,14 @@ async def call_llm(
                 await cache_set(cache_key, result, ttl=LLM_CACHE_TTL)
             return result
         except RuntimeError as fb_err:
-            logger.warning(f"备选模型 {fb_model} 也失败: {fb_err}")
+            logger.warning(f"Alternative Model {fb_model} also failed: {fb_err}")
             continue
 
-    # 所有模型都失败
+    # All models fail
     pool = _router.get_pool()
     return {
         "content": "",
-        "error": f"所有模型均调用失败（尝试了 {', '.join(pool)}）",
+        "error": f"All Model calls failed（Try {', '.join(pool)}）",
         "usage": {},
         "model": primary,
         "cached": False,
@@ -339,16 +339,16 @@ async def call_llm_stream(
     max_fallback_models: Optional[int] = None,
 ) -> AsyncGenerator[str, None]:
     """
-    流式调用大模型（用于SSE输出，支持多模型故障切换）
+    Streaming call to large Model（for SSE output，Support multiple Modelfailover）
 
     Args:
-        messages: 对话消息列表
-        model: 模型名称，为 None 时使用模型池轮询
-        temperature: 温度参数
-        max_tokens: 最大token数
+        messages: Conversation message list
+        model: Model name，None When using model pool polling
+        temperature: Temperature parameters
+        max_tokens: Maximum number of tokens
 
     Yields:
-        逐段返回的文本内容
+        Text content of Back paragraph by paragraph
     """
     settings = get_llm_settings()
     temperature = temperature if temperature is not None else settings["temperature"]
@@ -408,17 +408,17 @@ async def call_llm_stream(
                 return  # success, stop trying other models
 
         except Exception as e:
-            logger.warning(f"[{candidate}] 流式调用失败: {e}，尝试下一个模型")
+            logger.warning(f"[{candidate}] Streaming call failed: {e}，try next Model")
             _router.mark_unhealthy(candidate)
             continue
 
     # All models failed
-    yield "\n[错误: 所有模型流式调用均失败]"
+    yield "\n[mistake: All Model streaming calls fail]"
 
 
 async def call_llm_json(
     prompt: str,
-    system_prompt: str = "你是一个专业的职业规划助手。请严格按照要求输出JSON格式的结果。",
+    system_prompt: str = "You are a professional career planning assistant. Please strictly follow the requirements to output the results in JSON format..",
     model: Optional[str] = None,
     use_cache: bool = True,
     cache_prefix: str = "llm_json",
@@ -428,17 +428,17 @@ async def call_llm_json(
     max_fallback_models: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
-    调用大模型并解析JSON响应（便捷方法）
+    Call the big Model and parse the JSON response（Convenience method）
 
     Args:
-        prompt: 用户提示词
-        system_prompt: 系统提示词
-        model: 模型名称，为 None 时使用模型池轮询
-        use_cache: 是否使用缓存
-        cache_prefix: 缓存前缀
+        prompt: User prompt words
+        system_prompt: System prompt word
+        model: Model name，None When using model pool polling
+        use_cache: Whether to use Cache
+        cache_prefix: Cacheprefix
 
     Returns:
-        解析后的JSON字典，失败则返回包含error字段的字典
+        Parsed JSON dictionary，On failure, Back is a dictionary containing the error field.
     """
     messages = [
         {"role": "system", "content": system_prompt},
@@ -448,7 +448,7 @@ async def call_llm_json(
     result = await call_llm(
         messages=messages,
         model=model,
-        temperature=0.3,  # JSON输出用低温度
+        temperature=0.3,  # JSON output with low temperature
         max_tokens=max_tokens,
         use_cache=use_cache,
         cache_prefix=cache_prefix,
@@ -462,14 +462,14 @@ async def call_llm_json(
 
     content = result.get("content", "")
 
-    # 尝试提取JSON
+    # try to extract JSON
     try:
-        # 尝试直接解析
+        # try to parse directly
         return json.loads(content)
     except json.JSONDecodeError:
         pass
 
-    # 尝试从markdown代码块中提取
+    # Try to extract from markdown code block
     if "```json" in content:
         start = content.index("```json") + 7
         end = content.index("```", start)
@@ -485,4 +485,4 @@ async def call_llm_json(
         except json.JSONDecodeError:
             pass
 
-    return {"error": "无法解析LLM输出为JSON", "raw_content": content}
+    return {"error": "Unable to parse LLM output into JSON", "raw_content": content}

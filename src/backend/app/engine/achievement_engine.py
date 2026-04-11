@@ -1,5 +1,5 @@
 """
-成就引擎 - 成就种子数据、解锁检查
+achievementengine - achievement seed data, unlock check
 """
 import logging
 from datetime import timedelta
@@ -16,50 +16,50 @@ from app.database import AsyncSessionLocal
 
 logger = logging.getLogger(__name__)
 
-# ── 预定义成就列表 ──
+# ── Predefined achievement list ──
 ACHIEVEMENT_DEFS = [
-    # Task 类
-    {"key": "first_task", "name": "初出茅庐", "description": "完成第一个任务", "category": "task", "icon": "⭐", "coin_reward": 50, "condition_type": "tasks_completed", "condition_value": 1},
-    {"key": "tasks_5", "name": "小有成就", "description": "累计完成5个任务", "category": "task", "icon": "📋", "coin_reward": 80, "condition_type": "tasks_completed", "condition_value": 5},
-    {"key": "tasks_10", "name": "任务达人", "description": "累计完成10个任务", "category": "task", "icon": "📋", "coin_reward": 100, "condition_type": "tasks_completed", "condition_value": 10},
-    {"key": "tasks_25", "name": "勤勉之星", "description": "累计完成25个任务", "category": "task", "icon": "🌟", "coin_reward": 150, "condition_type": "tasks_completed", "condition_value": 25},
-    {"key": "tasks_50", "name": "效率专家", "description": "累计完成50个任务", "category": "task", "icon": "🏅", "coin_reward": 200, "condition_type": "tasks_completed", "condition_value": 50},
-    {"key": "tasks_100", "name": "百战百胜", "description": "累计完成100个任务", "category": "task", "icon": "💯", "coin_reward": 500, "condition_type": "tasks_completed", "condition_value": 100},
-    {"key": "streak_3", "name": "三连胜", "description": "连续3天完成任务", "category": "task", "icon": "🔥", "coin_reward": 80, "condition_type": "streak_days", "condition_value": 3},
-    {"key": "streak_7", "name": "周冠军", "description": "连续7天完成任务", "category": "task", "icon": "🔥", "coin_reward": 150, "condition_type": "streak_days", "condition_value": 7},
-    {"key": "streak_14", "name": "半月之星", "description": "连续14天完成任务", "category": "task", "icon": "🔥", "coin_reward": 300, "condition_type": "streak_days", "condition_value": 14},
-    {"key": "streak_30", "name": "月度传奇", "description": "连续30天完成任务", "category": "task", "icon": "🔥", "coin_reward": 500, "condition_type": "streak_days", "condition_value": 30},
-    # Social 类
-    {"key": "first_friend", "name": "初识", "description": "结交第一个好友", "category": "social", "icon": "🤝", "coin_reward": 50, "condition_type": "friends_count", "condition_value": 1},
-    {"key": "friends_3", "name": "小圈子", "description": "拥有3位好友", "category": "social", "icon": "👥", "coin_reward": 80, "condition_type": "friends_count", "condition_value": 3},
-    {"key": "friends_5", "name": "社交蝴蝶", "description": "拥有5位好友", "category": "social", "icon": "🦋", "coin_reward": 100, "condition_type": "friends_count", "condition_value": 5},
-    {"key": "friends_10", "name": "人脉广泛", "description": "拥有10位好友", "category": "social", "icon": "🌐", "coin_reward": 200, "condition_type": "friends_count", "condition_value": 10},
-    {"key": "friends_20", "name": "社交之王", "description": "拥有20位好友", "category": "social", "icon": "👑", "coin_reward": 400, "condition_type": "friends_count", "condition_value": 20},
-    {"key": "max_affinity", "name": "挚友", "description": "与某位好友亲密度达到100", "category": "social", "icon": "❤️", "coin_reward": 200, "condition_type": "max_affinity", "condition_value": 100},
-    # Career 类
-    {"key": "first_promotion", "name": "步步高升", "description": "获得第一次晋升", "category": "career", "icon": "📈", "coin_reward": 100, "condition_type": "career_level", "condition_value": 1},
-    {"key": "reach_mid", "name": "中流砥柱", "description": "晋升为中级员工", "category": "career", "icon": "📊", "coin_reward": 150, "condition_type": "career_level", "condition_value": 2},
-    {"key": "reach_senior", "name": "独当一面", "description": "晋升为高级员工", "category": "career", "icon": "💼", "coin_reward": 200, "condition_type": "career_level", "condition_value": 3},
-    {"key": "reach_manager", "name": "管理之才", "description": "晋升为经理", "category": "career", "icon": "🏢", "coin_reward": 300, "condition_type": "career_level", "condition_value": 4},
-    {"key": "reach_director", "name": "运筹帷幄", "description": "晋升为总监", "category": "career", "icon": "🏛️", "coin_reward": 500, "condition_type": "career_level", "condition_value": 5},
-    {"key": "reach_ceo", "name": "登峰造极", "description": "晋升为CEO", "category": "career", "icon": "👔", "coin_reward": 1000, "condition_type": "career_level", "condition_value": 6},
-    # Economy 类
-    {"key": "coins_500", "name": "小有积蓄", "description": "累计获得500金币", "category": "economy", "icon": "💰", "coin_reward": 50, "condition_type": "coins_earned", "condition_value": 500},
-    {"key": "coins_1000", "name": "千金之赏", "description": "累计获得1000金币", "category": "economy", "icon": "💰", "coin_reward": 100, "condition_type": "coins_earned", "condition_value": 1000},
-    {"key": "coins_5000", "name": "富甲一方", "description": "累计获得5000金币", "category": "economy", "icon": "💎", "coin_reward": 200, "condition_type": "coins_earned", "condition_value": 5000},
-    {"key": "coins_10000", "name": "万贯家财", "description": "累计获得10000金币", "category": "economy", "icon": "💎", "coin_reward": 500, "condition_type": "coins_earned", "condition_value": 10000},
-    # Explore 类
-    {"key": "first_event", "name": "初次参与", "description": "参加第一次公司活动", "category": "explore", "icon": "🎉", "coin_reward": 50, "condition_type": "events_joined", "condition_value": 1},
-    {"key": "events_5", "name": "活动积极分子", "description": "参加5次公司活动", "category": "explore", "icon": "🎊", "coin_reward": 100, "condition_type": "events_joined", "condition_value": 5},
-    {"key": "events_10", "name": "活动之星", "description": "参加10次公司活动", "category": "explore", "icon": "🌟", "coin_reward": 200, "condition_type": "events_joined", "condition_value": 10},
-    {"key": "visit_all_rooms", "name": "探索者", "description": "访问公司所有房间", "category": "explore", "icon": "🗺️", "coin_reward": 150, "condition_type": "rooms_visited", "condition_value": 1, "is_hidden": True},
-    {"key": "xp_500", "name": "经验丰富", "description": "累计获得500经验值", "category": "explore", "icon": "📖", "coin_reward": 100, "condition_type": "xp_earned", "condition_value": 500},
-    {"key": "xp_2000", "name": "学识渊博", "description": "累计获得2000经验值", "category": "explore", "icon": "📚", "coin_reward": 200, "condition_type": "xp_earned", "condition_value": 2000},
+    # Task kind
+    {"key": "first_task", "name": "fledgling", "description": "Complete the first Task", "category": "task", "icon": "⭐", "coin_reward": 50, "condition_type": "tasks_completed", "condition_value": 1},
+    {"key": "tasks_5", "name": "small achievement", "description": "Completed 5 Tasks in total", "category": "task", "icon": "📋", "coin_reward": 80, "condition_type": "tasks_completed", "condition_value": 5},
+    {"key": "tasks_10", "name": "Task expert", "description": "Completed a total of 10 Tasks", "category": "task", "icon": "📋", "coin_reward": 100, "condition_type": "tasks_completed", "condition_value": 10},
+    {"key": "tasks_25", "name": "Diligent Star", "description": "Completed 25 Tasks in total", "category": "task", "icon": "🌟", "coin_reward": 150, "condition_type": "tasks_completed", "condition_value": 25},
+    {"key": "tasks_50", "name": "efficiency expert", "description": "Completed a total of 50 Tasks", "category": "task", "icon": "🏅", "coin_reward": 200, "condition_type": "tasks_completed", "condition_value": 50},
+    {"key": "tasks_100", "name": "Victory in every battle", "description": "Completed 100 Tasks in total", "category": "task", "icon": "💯", "coin_reward": 500, "condition_type": "tasks_completed", "condition_value": 100},
+    {"key": "streak_3", "name": "three consecutive wins", "description": "Complete Task for 3 consecutive days", "category": "task", "icon": "🔥", "coin_reward": 80, "condition_type": "streak_days", "condition_value": 3},
+    {"key": "streak_7", "name": "Weekly champion", "description": "Complete Task for 7 consecutive days", "category": "task", "icon": "🔥", "coin_reward": 150, "condition_type": "streak_days", "condition_value": 7},
+    {"key": "streak_14", "name": "half moon star", "description": "Complete Task for 14 consecutive days", "category": "task", "icon": "🔥", "coin_reward": 300, "condition_type": "streak_days", "condition_value": 14},
+    {"key": "streak_30", "name": "Legend of the Month", "description": "Complete Task for 30 consecutive days", "category": "task", "icon": "🔥", "coin_reward": 500, "condition_type": "streak_days", "condition_value": 30},
+    # Social kind
+    {"key": "first_friend", "name": "First acquaintance", "description": "Make your first friend", "category": "social", "icon": "🤝", "coin_reward": 50, "condition_type": "friends_count", "condition_value": 1},
+    {"key": "friends_3", "name": "small circle", "description": "Have 3 friends", "category": "social", "icon": "👥", "coin_reward": 80, "condition_type": "friends_count", "condition_value": 3},
+    {"key": "friends_5", "name": "Social butterfly", "description": "Have 5 friends", "category": "social", "icon": "🦋", "coin_reward": 100, "condition_type": "friends_count", "condition_value": 5},
+    {"key": "friends_10", "name": "Well connected", "description": "Have 10 friends", "category": "social", "icon": "🌐", "coin_reward": 200, "condition_type": "friends_count", "condition_value": 10},
+    {"key": "friends_20", "name": "King of Social", "description": "Have 20 friends", "category": "social", "icon": "👑", "coin_reward": 400, "condition_type": "friends_count", "condition_value": 20},
+    {"key": "max_affinity", "name": "best friend", "description": "Reach 100 friendaffinity with someone", "category": "social", "icon": "❤️", "coin_reward": 200, "condition_type": "max_affinity", "condition_value": 100},
+    # Career kind
+    {"key": "first_promotion", "name": "promotion step by step", "description": "gain first promotion", "category": "career", "icon": "📈", "coin_reward": 100, "condition_type": "career_level", "condition_value": 1},
+    {"key": "reach_mid", "name": "mainstay", "description": "promoted toMid-level Staff", "category": "career", "icon": "📊", "coin_reward": 150, "condition_type": "career_level", "condition_value": 2},
+    {"key": "reach_senior", "name": "stand alone", "description": "promoted toSenior Staff", "category": "career", "icon": "💼", "coin_reward": 200, "condition_type": "career_level", "condition_value": 3},
+    {"key": "reach_manager", "name": "Talent of management", "description": "promoted toManager", "category": "career", "icon": "🏢", "coin_reward": 300, "condition_type": "career_level", "condition_value": 4},
+    {"key": "reach_director", "name": "strategizing", "description": "promoted toDirector", "category": "career", "icon": "🏛️", "coin_reward": 500, "condition_type": "career_level", "condition_value": 5},
+    {"key": "reach_ceo", "name": "Reach the pinnacle", "description": "promoted toCEO", "category": "career", "icon": "👔", "coin_reward": 1000, "condition_type": "career_level", "condition_value": 6},
+    # Economy kind
+    {"key": "coins_500", "name": "Small savings", "description": "Accumulated gain 500 gold coins", "category": "economy", "icon": "💰", "coin_reward": 50, "condition_type": "coins_earned", "condition_value": 500},
+    {"key": "coins_1000", "name": "Reward of Thousands of Gold", "description": "Accumulated gain1000 gold coins", "category": "economy", "icon": "💰", "coin_reward": 100, "condition_type": "coins_earned", "condition_value": 1000},
+    {"key": "coins_5000", "name": "The richest party", "description": "Accumulated gain 5000 gold coins", "category": "economy", "icon": "💎", "coin_reward": 200, "condition_type": "coins_earned", "condition_value": 5000},
+    {"key": "coins_10000", "name": "Vast wealth", "description": "Accumulated gain10000 gold coins", "category": "economy", "icon": "💎", "coin_reward": 500, "condition_type": "coins_earned", "condition_value": 10000},
+    # Explore kind
+    {"key": "first_event", "name": "first time participation", "description": "Participate in the first company activity", "category": "explore", "icon": "🎉", "coin_reward": 50, "condition_type": "events_joined", "condition_value": 1},
+    {"key": "events_5", "name": "Activity activist", "description": "Participated in 5 company activities", "category": "explore", "icon": "🎊", "coin_reward": 100, "condition_type": "events_joined", "condition_value": 5},
+    {"key": "events_10", "name": "Activity star", "description": "Participated in 10 company activities", "category": "explore", "icon": "🌟", "coin_reward": 200, "condition_type": "events_joined", "condition_value": 10},
+    {"key": "visit_all_rooms", "name": "explorer", "description": "Access to all company rooms", "category": "explore", "icon": "🗺️", "coin_reward": 150, "condition_type": "rooms_visited", "condition_value": 1, "is_hidden": True},
+    {"key": "xp_500", "name": "Experienced", "description": "Accumulated gain500 experience points", "category": "explore", "icon": "📖", "coin_reward": 100, "condition_type": "xp_earned", "condition_value": 500},
+    {"key": "xp_2000", "name": "knowledgeable", "description": "Accumulated gain2000 experience points", "category": "explore", "icon": "📚", "coin_reward": 200, "condition_type": "xp_earned", "condition_value": 2000},
 ]
 
 
 async def seed_achievements() -> None:
-    """种子成就数据到数据库"""
+    """Seed achievement data into Database"""
     async with AsyncSessionLocal() as db:
         for ach_def in ACHIEVEMENT_DEFS:
             result = await db.execute(
@@ -80,11 +80,11 @@ async def seed_achievements() -> None:
                 )
                 db.add(ach)
         await db.commit()
-    logger.info("成就种子数据初始化完成，共%d条定义", len(ACHIEVEMENT_DEFS))
+    logger.info("Achievement seed data initialization completed，Total %d msgs definitions", len(ACHIEVEMENT_DEFS))
 
 
 async def _get_agent_stat(db: AsyncSession, agent_id: int, condition_type: str) -> int:
-    """获取Agent的某项统计数值"""
+    """Get a certain statistical value of Agent"""
     result = await db.execute(
         select(AgentProfile).where(AgentProfile.id == agent_id)
     )
@@ -133,7 +133,7 @@ async def _get_agent_stat(db: AsyncSession, agent_id: int, condition_type: str) 
         return wallet.total_earned if wallet else 0
 
     elif condition_type == "streak_days":
-        # 计算连续完成任务的天数：从最近一天往回数
+        # Calculate the number of days of consecutive Complete Tasks：Counting backward from the most recent day
         days_result = await db.execute(
             select(distinct(cast(AgentTask.completed_at, Date)))
             .where(
@@ -156,7 +156,7 @@ async def _get_agent_stat(db: AsyncSession, agent_id: int, condition_type: str) 
         return streak
 
     elif condition_type == "events_joined":
-        # 统计action_log中参加活动的次数（action字段包含meeting等活动类型）
+        # Join in statistics action_log number of events（actionThe field contains activity types such as meetings）
         from app.models.agent_action_log import AgentActionLog
         event_result = await db.execute(
             select(sa_func.count(AgentActionLog.id)).where(
@@ -167,7 +167,7 @@ async def _get_agent_stat(db: AsyncSession, agent_id: int, condition_type: str) 
         return event_result.scalar() or 0
 
     elif condition_type == "rooms_visited":
-        # 统计访问过的不同房间（通过location字段去重）
+        # Statistics of different rooms visited（Deduplication through location field）
         from app.models.agent_action_log import AgentActionLog
         from app.models.company_room import CompanyRoom
         visited_result = await db.execute(
@@ -181,7 +181,7 @@ async def _get_agent_stat(db: AsyncSession, agent_id: int, condition_type: str) 
             select(sa_func.count(CompanyRoom.id))
         )
         total_rooms = total_rooms_result.scalar() or 1
-        # 返回 1 如果已访问全部房间，否则 0
+        # Back 1 If all rooms have been visited，Otherwise 0
         return 1 if visited_count >= total_rooms and total_rooms > 0 else 0
 
     return 0
@@ -194,17 +194,17 @@ async def check_achievements(
     **kwargs,
 ) -> list[dict]:
     """
-    检查并解锁新成就。
+    Check and unlock new achievements。
 
     Args:
-        db: 数据库会话
+        db: Databasesession
         agent_id: Agent ID
-        event_type: 触发事件类型 (task_complete/friendship/promotion/economy/explore)
+        event_type: Trigger event type (task_complete/friendship/promotion/economy/explore)
 
     Returns:
-        新解锁的成就列表
+        List of newly unlocked achievements
     """
-    # 根据事件类型过滤需要检查的成就 condition_type
+    # event typeFilter achievements that need to be checked condition_type
     event_to_conditions = {
         "task_complete": ["tasks_completed", "streak_days"],
         "friendship": ["friends_count", "max_affinity"],
@@ -214,7 +214,7 @@ async def check_achievements(
         "xp_gain": ["xp_earned"],
     }
     condition_types = event_to_conditions.get(event_type, [])
-    # 如果事件类型未知，检查所有
+    # if event typeUnknown，check all
     if not condition_types:
         condition_types = [
             "tasks_completed", "friends_count", "career_level",
@@ -222,13 +222,13 @@ async def check_achievements(
             "events_joined", "max_affinity", "xp_earned",
         ]
 
-    # 查询相关成就
+    # Query related achievements
     result = await db.execute(
         select(Achievement).where(Achievement.condition_type.in_(condition_types))
     )
     achievements = result.scalars().all()
 
-    # 已解锁成就
+    # Achievement unlocked
     unlocked_result = await db.execute(
         select(UserAchievement.achievement_id).where(
             UserAchievement.agent_id == agent_id,
@@ -244,11 +244,11 @@ async def check_achievements(
 
         current_value = await _get_agent_stat(db, agent_id, ach.condition_type)
         if current_value >= ach.condition_value:
-            # 解锁成就
+            # Unlock achievements
             ua = UserAchievement(agent_id=agent_id, achievement_id=ach.id)
             db.add(ua)
 
-            # 发放金币奖励
+            # Issue gold coin rewards
             profile_result = await db.execute(
                 select(AgentProfile).where(AgentProfile.id == agent_id)
             )
@@ -266,7 +266,7 @@ async def check_achievements(
                         amount=ach.coin_reward,
                         type="earn",
                         source="achievement",
-                        description=f"解锁成就「{ach.name}」",
+                        description=f"Unlock achievements「{ach.name}」",
                     ))
 
             newly_unlocked.append({
@@ -278,7 +278,7 @@ async def check_achievements(
                 "coin_reward": ach.coin_reward,
             })
 
-            logger.info("成就解锁: agent=%d achievement=%s", agent_id, ach.key)
+            logger.info("achievement unlocked: agent=%d achievement=%s", agent_id, ach.key)
 
     if newly_unlocked:
         await db.flush()
@@ -288,10 +288,10 @@ async def check_achievements(
 
 async def get_achievement_progress(db: AsyncSession, agent_id: int) -> list[dict]:
     """
-    获取所有成就的进度信息。
+    Get the progress information of all achievements。
 
     Returns:
-        包含所有成就及其进度的列表
+        A list containing all achievements and their progress
     """
     result = await db.execute(select(Achievement).order_by(Achievement.category, Achievement.condition_value))
     achievements = result.scalars().all()
@@ -302,7 +302,7 @@ async def get_achievement_progress(db: AsyncSession, agent_id: int) -> list[dict
     unlocked_map = {ua.achievement_id: ua for ua in unlocked_result.scalars().all()}
 
     progress_list = []
-    # 缓存stat查询结果
+    # Cachestat query results
     stat_cache: dict[str, int] = {}
 
     for ach in achievements:

@@ -1,5 +1,5 @@
 """
-邮箱验证令牌模型
+email verification token Model
 """
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.sql import func
@@ -7,7 +7,7 @@ from app.database import Base
 
 
 class EmailVerificationToken(Base):
-    """邮箱验证令牌表 — 用于注册时验证邮箱有效性"""
+    """email verification token table  Used to verify email validity when registering"""
     __tablename__ = "email_verification_tokens"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

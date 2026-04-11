@@ -39,10 +39,10 @@ function formatDuration(s: number) {
   return Math.round(s / 60) + 'm ' + Math.round(s % 60) + 's'
 }
 
-/** 解析Tasks描述中的地点/联系人元Stats */
+/** parse task descriptionLocation/Contact person metadata in */
 function parseTaskMeta(description: string): { location: string; contact: string } {
   if (!description) return { location: '', contact: '' }
-  const m = description.match(/^\[地点:([^|]+)\|联系:([^\]]+)\]/)
+  const m = description.match(/^\[Location:([^|]+)\|Contact:([^\]]+)\]/)
   if (m) return { location: m[1].trim(), contact: m[2].trim() }
   return { location: '', contact: '' }
 }
@@ -54,7 +54,7 @@ function parseTaskMeta(description: string): { location: string; contact: string
     <div v-if="currentTask" class="current-task cyber-card scan-lines">
       <div class="section-header">
         <span class="header-dot" style="background: var(--accent-cyan)"></span>
-        <span class="header-text">Current Task</span>
+        <span class="header-text">Current task</span>
         <span class="task-type-badge">{{ currentTask.task_type || 'project' }}</span>
       </div>
       <div class="task-name">{{ currentTask.name }}</div>
@@ -79,21 +79,21 @@ function parseTaskMeta(description: string): { location: string; contact: string
       </div>
 
       <div class="time-row">
-        <span>已用时 {{ formatDuration(currentTask.elapsed_s) }}</span>
-        <span>预计 {{ formatDuration(currentTask.estimated_duration_s) }}</span>
+        <span>Elapsed {{ formatDuration(currentTask.elapsed_s) }}</span>
+        <span>Expected {{ formatDuration(currentTask.estimated_duration_s) }}</span>
       </div>
 
       <!-- Speed Factors -->
       <div class="speed-factors" v-if="currentTask.speed_factors">
         <span class="factor-tag" v-for="(v, k) in currentTask.speed_factors" :key="k">
-          {{ k === 'work_speed' ? 'Work Speed' : k === 'tag_affinity' ? '标签匹配' : k === 'base_time' ? '基础时间' : '最终耗时' }}
+          {{ k === 'work_speed' ? 'Work Speed' : k === 'tag_affinity' ? 'tag match' : k === 'base_time' ? 'Basetime' : 'The final time consuming' }}
           <strong>{{ v }}</strong>
         </span>
       </div>
 
       <!-- Selection Reason -->
       <div class="selection-reason" v-if="currentTask.selection_reason">
-        <span class="reason-label">AI选择原因</span>
+        <span class="reason-label">Reasons for AI selection</span>
         <span class="reason-text">{{ currentTask.selection_reason }}</span>
       </div>
     </div>
@@ -101,20 +101,20 @@ function parseTaskMeta(description: string): { location: string; contact: string
     <div v-else class="no-task cyber-card">
       <div class="section-header">
         <span class="header-dot" style="background: var(--text-muted)"></span>
-        <span class="header-text">Current Task</span>
+        <span class="header-text">Current task</span>
       </div>
-      <p class="empty-text">AI selecting next task...</p>
+      <p class="empty-text">AI is selecting the next Task...</p>
     </div>
 
     <!-- Task Queue -->
     <div class="queue-section">
       <div class="section-header">
         <span class="header-dot" style="background: var(--accent-violet)"></span>
-        <span class="header-text">Task Queue</span>
-        <span class="queue-count">{{ taskQueue.length }}/3 items</span>
+        <span class="header-text">Task queue</span>
+        <span class="queue-count">{{ taskQueue.length }}/3 Item</span>
       </div>
 
-      <div v-if="taskQueue.length === 0" class="empty-text">No pending tasks</div>
+      <div v-if="taskQueue.length === 0" class="empty-text">No PendingTask</div>
 
       <div v-for="(task, i) in taskQueue" :key="task.task_id" class="queue-item" :style="{ animationDelay: Number(i) * 0.05 + 's' }">
         <div class="queue-left">
@@ -130,7 +130,7 @@ function parseTaskMeta(description: string): { location: string; contact: string
         </div>
         <div class="queue-right">
           <div class="score-badge" :style="{ borderColor: alignColor(task.mbti_alignment), color: alignColor(task.mbti_alignment) }">
-            {{ task.preference_score }}分
+            {{ task.preference_score }}point
           </div>
           <div class="queue-reason" :title="task.reason">{{ task.reason }}</div>
         </div>
@@ -141,8 +141,8 @@ function parseTaskMeta(description: string): { location: string; contact: string
     <div class="completed-section" v-if="completedTasks.length">
       <div class="section-header">
         <span class="header-dot" style="background: var(--accent-emerald)"></span>
-        <span class="header-text">Done</span>
-        <span class="queue-count">{{ completedTasks.length }} items</span>
+        <span class="header-text">Completed</span>
+        <span class="queue-count">{{ completedTasks.length }} Item</span>
       </div>
       <div v-for="task in completedTasks" :key="task.id" class="completed-item">
         <span class="check-icon">&#x2713;</span>

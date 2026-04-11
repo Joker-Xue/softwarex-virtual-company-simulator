@@ -1,5 +1,5 @@
 """
-成就系统API
+achievementSystem API
 """
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,18 +16,18 @@ from app.engine.achievement_engine import get_achievement_progress, check_achiev
 router = APIRouter()
 
 
-@router.get("/list", response_model=list[AchievementOut], summary="全部成就列表（含解锁状态）")
+@router.get("/list", response_model=list[AchievementOut], summary="List of all achievements（Contains unlock state）")
 async def list_achievements(
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """列出所有成就，标注当前用户的解锁状态和进度"""
+    """List all achievements，Mark Current User's unlocking state and progress"""
     result = await db.execute(
         select(AgentProfile).where(AgentProfile.user_id == user.id)
     )
     profile = result.scalar_one_or_none()
     if not profile:
-        raise HTTPException(404, "尚未创建角色")
+        raise HTTPException(404, "Profile has not been created yet")
 
     progress_list = await get_achievement_progress(db, profile.id)
 
@@ -36,7 +36,7 @@ async def list_achievements(
             id=p["id"],
             key=p["key"],
             name=p["name"] if not p["is_hidden"] or p["is_unlocked"] else "???",
-            description=p["description"] if not p["is_hidden"] or p["is_unlocked"] else "隐藏成就，完成后揭晓",
+            description=p["description"] if not p["is_hidden"] or p["is_unlocked"] else "Hide achievements，Revealed upon completion",
             category=p["category"],
             icon=p["icon"] if not p["is_hidden"] or p["is_unlocked"] else "❓",
             coin_reward=p["coin_reward"],
@@ -48,18 +48,18 @@ async def list_achievements(
     ]
 
 
-@router.get("/my", response_model=list[AchievementOut], summary="我的已解锁成就")
+@router.get("/my", response_model=list[AchievementOut], summary="My unlocked achievements")
 async def my_achievements(
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """列出当前用户已解锁的成就"""
+    """List Current UserUnlocked achievements"""
     result = await db.execute(
         select(AgentProfile).where(AgentProfile.user_id == user.id)
     )
     profile = result.scalar_one_or_none()
     if not profile:
-        raise HTTPException(404, "尚未创建角色")
+        raise HTTPException(404, "Profile has not been created yet")
 
     progress_list = await get_achievement_progress(db, profile.id)
 
@@ -81,22 +81,22 @@ async def my_achievements(
     ]
 
 
-@router.get("/progress", summary="成就进度详情")
+@router.get("/progress", summary="achievement progress details")
 async def achievement_progress(
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """获取所有成就的详细进度"""
+    """Get detailed progress of all achievements"""
     result = await db.execute(
         select(AgentProfile).where(AgentProfile.user_id == user.id)
     )
     profile = result.scalar_one_or_none()
     if not profile:
-        raise HTTPException(404, "尚未创建角色")
+        raise HTTPException(404, "Profile has not been created yet")
 
     progress_list = await get_achievement_progress(db, profile.id)
 
-    # 按分类分组
+    # Group by category
     categories: dict[str, list] = {}
     for p in progress_list:
         cat = p["category"]
@@ -106,7 +106,7 @@ async def achievement_progress(
             "id": p["id"],
             "key": p["key"],
             "name": p["name"] if not p["is_hidden"] or p["is_unlocked"] else "???",
-            "description": p["description"] if not p["is_hidden"] or p["is_unlocked"] else "隐藏成就",
+            "description": p["description"] if not p["is_hidden"] or p["is_unlocked"] else "Hide achievements",
             "icon": p["icon"] if not p["is_hidden"] or p["is_unlocked"] else "❓",
             "coin_reward": p["coin_reward"],
             "is_unlocked": p["is_unlocked"],

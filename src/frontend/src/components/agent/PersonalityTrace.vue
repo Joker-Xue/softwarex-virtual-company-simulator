@@ -24,7 +24,7 @@ const decisions = computed(() => {
 
 const actionWeights = computed(() => {
   const w = tendency.value?.action_probabilities || {}
-  const labels: Record<string, string> = { work: '工作', chat: '社交', rest: '休息', move_to: '走动', meeting: '会议' }
+  const labels: Record<string, string> = { work: 'Work', chat: 'Social', rest: 'Rest', move_to: 'walk around', meeting: 'Meeting' }
   return Object.entries(w)
     .map(([k, v]) => ({ action: k, label: labels[k] || k, pct: v as number }))
     .sort((a, b) => b.pct - a.pct)
@@ -51,10 +51,10 @@ function decisionColor(type: string) {
 function timeAgo(ts: string) {
   if (!ts) return ''
   const diff = (Date.now() - new Date(ts).getTime()) / 1000
-  if (diff < 60) return Math.round(diff) + '秒前'
-  if (diff < 3600) return Math.round(diff / 60) + '分钟前'
-  if (diff < 86400) return Math.round(diff / 3600) + '小时前'
-  return Math.round(diff / 86400) + '天前'
+  if (diff < 60) return Math.round(diff) + 's ago'
+  if (diff < 3600) return Math.round(diff / 60) + ' min ago'
+  if (diff < 86400) return Math.round(diff / 3600) + ' h ago'
+  return Math.round(diff / 86400) + ' d ago'
 }
 </script>
 
@@ -67,22 +67,22 @@ function timeAgo(ts: string) {
         <span class="mult-value" :class="{ boosted: multipliers.work_speed > 1 }">{{ multipliers.work_speed?.toFixed(2) }}x</span>
       </div>
       <div class="mult-item">
-        <span class="mult-label">社交加成</span>
+        <span class="mult-label">Social Bonus</span>
         <span class="mult-value" :class="{ boosted: multipliers.social_bonus > 1 }">{{ multipliers.social_bonus?.toFixed(2) }}x</span>
       </div>
       <div class="mult-item">
-        <span class="mult-label">经验倍率</span>
+        <span class="mult-label">XP Multiplier</span>
         <span class="mult-value" :class="{ boosted: multipliers.xp_bonus > 1 }">{{ multipliers.xp_bonus?.toFixed(2) }}x</span>
       </div>
       <div class="mult-item">
         <span class="mult-label">Career Tendency</span>
-        <span class="mult-value career">{{ multipliers.career_tendency === 'technical' ? 'Technical' : 'Management' }}</span>
+        <span class="mult-value career">{{ multipliers.career_tendency === 'technical' ? 'Technical Track' : 'Management Track' }}</span>
       </div>
     </div>
 
     <!-- Action Weight Bars -->
     <div class="weight-section">
-      <div class="section-title">Action Probability分布</div>
+      <div class="section-title">Behavior Probability Distribution</div>
       <div v-for="item in actionWeights" :key="item.action" class="weight-row">
         <span class="weight-label">{{ item.label }}</span>
         <div class="weight-track">
@@ -94,22 +94,22 @@ function timeAgo(ts: string) {
 
     <!-- Tendency Summary -->
     <div class="tendency-section">
-      <div class="tend-row"><span class="tend-label">最可能行为</span><span class="tend-value">{{ tendency.most_likely_action }}</span></div>
-      <div class="tend-row"><span class="tend-label">最不可能</span><span class="tend-value dim">{{ tendency.least_likely_action }}</span></div>
-      <div class="tend-row"><span class="tend-label">偏好Tasks</span><span class="tend-value">{{ (tendency.preferred_task_tags || []).join(', ') }}</span></div>
-      <div class="tend-row"><span class="tend-label">Events参与率</span><span class="tend-value">{{ ((tendency.event_join_rate || 0) * 100).toFixed(0) }}%</span></div>
+      <div class="tend-row"><span class="tend-label">Most Likely Action</span><span class="tend-value">{{ tendency.most_likely_action }}</span></div>
+      <div class="tend-row"><span class="tend-label">Least Likely</span><span class="tend-value dim">{{ tendency.least_likely_action }}</span></div>
+      <div class="tend-row"><span class="tend-label">Preferred Task Tags</span><span class="tend-value">{{ (tendency.preferred_task_tags || []).join(', ') }}</span></div>
+      <div class="tend-row"><span class="tend-label">Event Participation Rate</span><span class="tend-value">{{ ((tendency.event_join_rate || 0) * 100).toFixed(0) }}%</span></div>
     </div>
 
     <!-- Decision Timeline -->
     <div class="timeline-section">
-      <div class="section-title">决策时间线 <span class="timeline-count">{{ decisions.length }}</span></div>
+      <div class="section-title">Decision Timeline <span class="timeline-count">{{ decisions.length }}</span></div>
       <div class="timeline-list">
         <div v-for="(d, i) in decisions" :key="i" class="timeline-item" :style="{ animationDelay: i * 0.03 + 's' }">
           <div class="tl-icon" :style="{ color: decisionColor(d.type) }">{{ decisionIcon(d.type) }}</div>
           <div class="tl-content">
             <div class="tl-header">
               <span class="tl-type" :style="{ color: decisionColor(d.type) }">
-                {{ d.type === 'action_decision' ? '行为决策' : d.type === 'task_assign' ? 'Tasks分配' : d.type === 'task_complete' ? 'Tasks完成' : d.type === 'social' ? '社交互动' : d.type === 'schedule_decision' ? '日程执行' : d.type }}
+                {{ d.type === 'action_decision' ? 'Action Decision' : d.type === 'task_assign' ? 'Task Assignment' : d.type === 'task_complete' ? 'Task Completion' : d.type === 'social' ? 'Social Interaction' : d.type === 'schedule_decision' ? 'Schedule Execution' : d.type }}
               </span>
               <span class="tl-time">{{ timeAgo(d.tick_ts) }}</span>
             </div>
@@ -117,26 +117,26 @@ function timeAgo(ts: string) {
             <!-- Extra data for task_complete -->
             <div class="tl-tags" v-if="d.type === 'task_complete'">
               <span class="tl-tag">+{{ d.xp_earned }}XP</span>
-              <span class="tl-tag">速度{{ d.work_speed }}x</span>
+              <span class="tl-tag">Speed{{ d.work_speed }}x</span>
             </div>
             <div class="tl-tags" v-if="d.type === 'task_assign'">
-              <span class="tl-tag">偏好{{ d.preference_score }}分</span>
-              <span class="tl-tag" :style="{ color: d.alignment === 'high' ? 'var(--accent-emerald)' : d.alignment === 'low' ? 'var(--accent-rose)' : 'var(--accent-amber)' }">{{ d.alignment === 'high' ? '高匹配' : d.alignment === 'low' ? '低匹配' : '中等' }}</span>
+              <span class="tl-tag">Preference{{ d.preference_score }}point</span>
+              <span class="tl-tag" :style="{ color: d.alignment === 'high' ? 'var(--accent-emerald)' : d.alignment === 'low' ? 'var(--accent-rose)' : 'var(--accent-amber)' }">{{ d.alignment === 'high' ? 'High Match' : d.alignment === 'low' ? 'Low Match' : 'Medium' }}</span>
             </div>
             <div class="tl-tags" v-if="d.type === 'social'">
-              <span class="tl-tag">亲密度+{{ d.affinity_gain }}</span>
-              <span class="tl-tag">社交{{ d.social_multiplier }}x</span>
+              <span class="tl-tag">affinity+{{ d.affinity_gain }}</span>
+              <span class="tl-tag">Social{{ d.social_multiplier }}x</span>
             </div>
             <div class="tl-tags" v-if="d.type === 'action_decision' && d.probabilities">
-              <span class="tl-tag" v-for="(p, a) in d.probabilities" :key="a">{{ a === 'work' ? '工作' : a === 'chat' ? '社交' : a === 'rest' ? '休息' : a === 'move_to' ? '走动' : '会议' }}{{ p }}%</span>
+              <span class="tl-tag" v-for="(p, a) in d.probabilities" :key="a">{{ a === 'work' ? 'Work' : a === 'chat' ? 'Social' : a === 'rest' ? 'Rest' : a === 'move_to' ? 'walk around' : 'Meeting' }}{{ p }}%</span>
             </div>
           </div>
         </div>
-        <div v-if="decisions.length === 0" class="empty-text">等待AI产生第一条决策...</div>
+        <div v-if="decisions.length === 0" class="empty-text">Waiting for the AI to produce the first decision...</div>
       </div>
     </div>
   </div>
-  <div v-else class="trace-panel loading-text">加载性格TraceStats中...</div>
+  <div v-else class="trace-panel loading-text">Loading personality trace data...</div>
 </template>
 
 <style scoped>

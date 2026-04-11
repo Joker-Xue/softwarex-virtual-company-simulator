@@ -1,5 +1,5 @@
 """
-公司社交活动模型
+CompanySocialActivityModel
 """
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, JSON
 from sqlalchemy.sql import func
@@ -7,7 +7,7 @@ from app.database import Base
 
 
 class CompanyEvent(Base):
-    """公司活动表"""
+    """Company Activity Table"""
     __tablename__ = "company_events"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

@@ -1,10 +1,10 @@
 """
-Redis 缓存工具模块
+Redis Cache tool module
 
-功能：
-- 封装Redis连接和缓存读写
-- 支持TTL设置（默认1小时）
-- 支持JSON序列化/反序列化
+Function：
+- Encapsulate Redis connection and Cache reading and writing
+- Support TTL settings（default1Hour）
+- Supports JSON serialization/deserialization
 """
 import json
 import hashlib
@@ -18,17 +18,17 @@ try:
 except ImportError:
     REDIS_AVAILABLE = False
 
-# Redis 配置
+# Redis configuration
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-DEFAULT_TTL = int(os.getenv("CACHE_TTL", "3600"))  # 默认1小时
+DEFAULT_TTL = int(os.getenv("CACHE_TTL", "3600"))  # default1Hour
 
-# Redis 客户端（延迟初始化）
+# Redis client（Lazy initialization）
 _redis_client = None
 logger = logging.getLogger(__name__)
 
 
 async def get_redis():
-    """获取Redis客户端"""
+    """GetRedisclient"""
     global _redis_client
     if not REDIS_AVAILABLE:
         return None
@@ -40,7 +40,7 @@ async def get_redis():
                 encoding="utf-8",
                 decode_responses=True,
             )
-            # 测试连接
+            # TestsConnection
             await client.ping()
             _redis_client = client
         except Exception:
@@ -55,7 +55,7 @@ async def get_redis():
 
 
 async def close_redis():
-    """关闭全局 Redis 客户端（应用退出时调用）。"""
+    """Close overall situation Redis client（Called when the application exits）。"""
     global _redis_client
     client = _redis_client
     _redis_client = None
@@ -68,7 +68,7 @@ async def close_redis():
 
 
 def make_cache_key(prefix: str, *args, **kwargs) -> str:
-    """生成缓存key"""
+    """Generate Cachekey"""
     raw = f"{prefix}:{':'.join(str(a) for a in args)}"
     if kwargs:
         sorted_kwargs = sorted(kwargs.items())
@@ -77,13 +77,13 @@ def make_cache_key(prefix: str, *args, **kwargs) -> str:
 
 
 def make_hash_key(prefix: str, data: str) -> str:
-    """生成基于哈希的缓存key（用于LLM缓存）"""
+    """Generate hash-based Cachekey（for LLMCache）"""
     data_hash = hashlib.md5(data.encode()).hexdigest()
     return f"{prefix}:{data_hash}"
 
 
 async def cache_get(key: str) -> Optional[Any]:
-    """获取缓存"""
+    """GetCache"""
     client = await get_redis()
     if client is None:
         return None
@@ -97,7 +97,7 @@ async def cache_get(key: str) -> Optional[Any]:
 
 
 async def cache_set(key: str, value: Any, ttl: int = DEFAULT_TTL) -> bool:
-    """设置缓存"""
+    """Set up Cache"""
     client = await get_redis()
     if client is None:
         return False
@@ -109,7 +109,7 @@ async def cache_set(key: str, value: Any, ttl: int = DEFAULT_TTL) -> bool:
 
 
 async def cache_delete(key: str) -> bool:
-    """删除缓存"""
+    """Delete Cache"""
     client = await get_redis()
     if client is None:
         return False
@@ -121,7 +121,7 @@ async def cache_delete(key: str) -> bool:
 
 
 async def cache_clear_prefix(prefix: str) -> int:
-    """清除指定前缀的所有缓存"""
+    """Clear all Cache for the specified prefix"""
     client = await get_redis()
     if client is None:
         return 0

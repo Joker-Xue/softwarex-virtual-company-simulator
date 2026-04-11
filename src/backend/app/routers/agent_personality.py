@@ -1,5 +1,5 @@
 """
-性格轨迹API - 展示MBTI对AI决策的透明影响
+personalitytraceAPI - Demonstrating the transparent impact of MBTI on AI decision-making
 """
 import re
 import time
@@ -19,18 +19,18 @@ router = APIRouter()
 
 
 def _parse_task_meta(description: str) -> dict:
-    """解析任务描述中的地点和联系人元数据。
-    格式：[地点:XXX|联系:XXX] 原始描述
+    """parse task descriptionLocation and Contact metadata in。
+    Format：[Location:XXX|Contact:XXX] original description
     """
     if not description:
         return {"location": "", "contact": ""}
-    m = re.match(r'^\[地点:([^|]+)\|联系:([^\]]+)\]', description)
+    m = re.match(r'^\[Location:([^|]+)\|Contact:([^\]]+)\]', description)
     if m:
         return {"location": m.group(1).strip(), "contact": m.group(2).strip()}
     return {"location": "", "contact": ""}
 
 
-@router.get("/personality-trace", summary="获取性格轨迹")
+@router.get("/personality-trace", summary="Get Personality Trace")
 async def get_personality_trace(
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
@@ -38,7 +38,7 @@ async def get_personality_trace(
     result = await db.execute(select(AgentProfile).where(AgentProfile.user_id == user.id))
     agent = result.scalar_one_or_none()
     if not agent:
-        raise HTTPException(404, "尚未创建角色")
+        raise HTTPException(404, "Profile has not been created yet")
 
     mbti = agent.mbti or "ISTJ"
 
@@ -81,7 +81,7 @@ async def get_personality_trace(
 
     # Sort action weights for most/least likely
     sorted_actions = sorted(probabilities.items(), key=lambda x: -x[1])
-    action_labels = {"work": "工作", "chat": "社交", "rest": "休息", "move_to": "走动", "meeting": "会议"}
+    action_labels = {"work": "Work", "chat": "Social", "rest": "Rest", "move_to": "walk around", "meeting": "Meeting"}
 
     return {
         "mbti": mbti,
@@ -98,7 +98,7 @@ async def get_personality_trace(
     }
 
 
-@router.get("/task-status", summary="获取当前任务状态")
+@router.get("/task-status", summary="Get Current Task Status")
 async def get_task_status(
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
@@ -106,7 +106,7 @@ async def get_task_status(
     result = await db.execute(select(AgentProfile).where(AgentProfile.user_id == user.id))
     agent = result.scalar_one_or_none()
     if not agent:
-        raise HTTPException(404, "尚未创建角色")
+        raise HTTPException(404, "Profile has not been created yet")
 
     mbti = agent.mbti or "ISTJ"
     work_speed = get_work_speed(mbti)
@@ -160,7 +160,7 @@ async def get_task_status(
 
         tag_affinity_str = str(round(tag_affinity, 1)) + "x"
         if tag_affinity > 1.0:
-            tag_affinity_str += "(标签匹配)"
+            tag_affinity_str += "(tag match)"
 
         meta = _parse_task_meta(current_task_obj.description or "")
         current_task = {

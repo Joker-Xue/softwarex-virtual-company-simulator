@@ -1,4 +1,4 @@
-from app.prompts.agent_prompt import TASK_GENERATION_PROMPT
+﻿from app.prompts.agent_prompt import TASK_GENERATION_PROMPT
 
 PROMPT_VERSIONS = {
     "agent_task": {
@@ -17,10 +17,10 @@ ACTIVE_VERSIONS = {
 
 def get_prompt(module: str, version: str | None = None) -> dict:
     if module not in PROMPT_VERSIONS:
-        raise KeyError(f"未知 prompt 模块: {module}")
+        raise KeyError(f"Unknown prompt Module: {module}")
     version = version or ACTIVE_VERSIONS.get(module)
     if not version or version not in PROMPT_VERSIONS[module]:
-        raise KeyError(f"模块 {module} 不存在版本 {version}")
+        raise KeyError(f"Module {module} does not exist version {version}")
     return PROMPT_VERSIONS[module][version]
 
 

@@ -1,6 +1,6 @@
 """
-SVG 验证码生成 + 内存存储（带签名令牌兜底）
-纯 Python 实现，无需额外图片库依赖
+SVG Verification code generation + memory storage（Get the scoop with signed tokens）
+Pure Python implementation，No additional image library dependencies required
 """
 import uuid
 import time
@@ -10,24 +10,24 @@ import os
 
 from jose import jwt, ExpiredSignatureError, JWTError
 
-# 排除易混淆字符 0OIl1
+# Exclude confusing characters 0OIl1
 CHARSET = "".join(
     c for c in string.ascii_uppercase + string.digits
     if c not in "OIL01"
 )
 
-# 内存存储: captcha_id -> (answer, expire_timestamp)
+# Memory storage: captcha_id -> (answer, expire_timestamp)
 _store: dict[str, tuple[str, float]] = {}
 
 CAPTCHA_LENGTH = 4
-CAPTCHA_TTL = 300  # 5 分钟
+CAPTCHA_TTL = 300  # 5 minutes
 CAPTCHA_TOKEN_TYPE = "captcha"
 CAPTCHA_SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here-change-in-production")
 CAPTCHA_ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
 
 def _cleanup() -> None:
-    """清理过期验证码"""
+    """Clear expired verification codes"""
     now = time.time()
     expired = [k for k, (_, exp) in _store.items() if exp < now]
     for k in expired:
@@ -35,7 +35,7 @@ def _cleanup() -> None:
 
 
 def _build_signed_token(captcha_uuid: str, answer: str, expire_ts: float) -> str:
-    """构建可跨进程校验的签名令牌。"""
+    """Build signed tokens that can be verified across processes."""
     payload = {
         "cid": captcha_uuid,
         "ans": answer,
@@ -46,7 +46,7 @@ def _build_signed_token(captcha_uuid: str, answer: str, expire_ts: float) -> str
 
 
 def _verify_signed_token(captcha_id: str, code: str) -> bool:
-    """在本地内存未命中时，回退到签名令牌校验。"""
+    """On local memory miss，fallback to signed token verification."""
     try:
         payload = jwt.decode(
             captcha_id,
@@ -67,8 +67,8 @@ def _verify_signed_token(captcha_id: str, code: str) -> bool:
 
 def generate_captcha() -> tuple[str, str]:
     """
-    生成 SVG 验证码。
-    返回 (captcha_id, svg_string)
+    Generate SVG verification code。
+    Back (captcha_id, svg_string)
     """
     _cleanup()
 
@@ -76,7 +76,7 @@ def generate_captcha() -> tuple[str, str]:
     captcha_uuid = uuid.uuid4().hex
     expire_ts = time.time() + CAPTCHA_TTL
     captcha_id = _build_signed_token(captcha_uuid, answer, expire_ts)
-    # 保留内存记录用于单进程一次性消费；跨进程则回退签名验签。
+    # Keep memory records for one-time consumption by a single process；Cross-process fallback signature verification。
     _store[captcha_id] = (answer, expire_ts)
 
     width, height = 160, 50
@@ -86,7 +86,7 @@ def generate_captcha() -> tuple[str, str]:
         f'<rect width="{width}" height="{height}" fill="#f1f5f9"/>',
     ]
 
-    # 干扰线
+    # interference line
     for _ in range(5):
         x1, y1 = random.randint(0, width), random.randint(0, height)
         x2, y2 = random.randint(0, width), random.randint(0, height)
@@ -96,14 +96,14 @@ def generate_captcha() -> tuple[str, str]:
             f' stroke="{color}" stroke-width="{random.uniform(1,2):.1f}"/>'
         )
 
-    # 噪点
+    # Noise
     for _ in range(30):
         cx, cy = random.randint(0, width), random.randint(0, height)
         r = random.uniform(0.5, 1.5)
         color = f"rgb({random.randint(150,210)},{random.randint(150,210)},{random.randint(150,210)})"
         parts.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{color}"/>')
 
-    # 字符
+    # character
     spacing = width / (CAPTCHA_LENGTH + 1)
     for i, ch in enumerate(answer):
         x = spacing * (i + 1) + random.randint(-5, 5)
@@ -123,7 +123,7 @@ def generate_captcha() -> tuple[str, str]:
 
 def verify_captcha(captcha_id: str, code: str) -> bool:
     """
-    验证验证码（一次性，验证后立即删除）。
+    Verify verification code（Disposable，Delete immediately after verification）。
     """
     if not code:
         return False

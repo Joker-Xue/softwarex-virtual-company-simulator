@@ -1,5 +1,5 @@
 """
-任务调度引擎 - 过期任务检查与处理
+Task scheduling engine - expired task inspection and processing
 """
 import logging
 from datetime import datetime, timezone
@@ -17,21 +17,21 @@ logger = logging.getLogger(__name__)
 
 async def check_expired_tasks() -> dict:
     """
-    扫描并处理所有过期任务 - 每小时运行一次
+    Scan and process all expired tasks - run once per hour
 
-    流程：
-    1. 查找所有 status in (pending, in_progress) 且 deadline < now 的任务
-    2. 标记为 expired
-    3. 通过 extract_memory() 记录失败记忆
-    4. 跟踪连续失败次数
-    5. 如果连续3+次过期，记录警告记忆（importance=8）
+    process：
+    1. Find all status in (pending, in_progress) Task with deadline < now
+    2. mark is expired
+    3. by extract_memory() record failed memories
+    4. Track the number of consecutive failures
+    5. If it expires 3+ times in a row，Record warning Memories（importance=8）
     """
     now = datetime.now(timezone.utc)
     expired_count = 0
     warning_count = 0
 
     async with AsyncSessionLocal() as db:
-        # 查找所有过期任务
+        # Find all expired tasks
         result = await db.execute(
             select(AgentTask).where(
                 AgentTask.status.in_(["pending", "in_progress"]),
@@ -42,10 +42,10 @@ async def check_expired_tasks() -> dict:
         expired_tasks = result.scalars().all()
 
         if not expired_tasks:
-            logger.debug("无过期任务")
+            logger.debug("No expired tasks")
             return {"expired_count": 0, "warning_count": 0}
 
-        # 按 assignee 分组处理
+        # Group processing by assignee
         tasks_by_agent: dict[int, list[AgentTask]] = {}
         for task in expired_tasks:
             if task.assignee_id not in tasks_by_agent:
@@ -54,44 +54,44 @@ async def check_expired_tasks() -> dict:
 
         for agent_id, agent_tasks in tasks_by_agent.items():
             for task in agent_tasks:
-                # 标记为过期
+                # mark is expired
                 task.status = "expired"
                 expired_count += 1
 
-                # 记录失败记忆
+                # record failed memories
                 await extract_memory(
                     db, agent_id, "task_fail",
-                    f"任务「{task.title}」已过期未完成，截止时间为{task.deadline.strftime('%Y-%m-%d %H:%M')}",
+                    f"Task「{task.title}」Expired and not completed，The deadline is {task.deadline.strftime('%Y-%m-%d %H:%M')}",
                 )
 
-            # 检查连续过期次数
+            # Check the number of consecutive expirations
             consecutive_expired = await _count_consecutive_expired(db, agent_id)
             if consecutive_expired >= 3:
                 warning_count += 1
-                # 记录高重要度警告记忆
+                # Record high-severity warning Memories
                 from app.models.agent_memory import AgentMemory
                 warning_memory = AgentMemory(
                     agent_id=agent_id,
-                    content=f"警告：已连续{consecutive_expired}个任务过期未完成，工作表现需要改善！",
+                    content=f"warn：{consecutive_expired} consecutive tasks have expired and have not been completed.，Work performance needs improvement！",
                     memory_type="task",
                     importance=8,
                 )
                 db.add(warning_memory)
                 logger.warning(
-                    "Agent %d 连续 %d 个任务过期，已记录警告",
+                    "Agent %d %d consecutive tasks expired，Warning logged",
                     agent_id, consecutive_expired,
                 )
 
         await db.commit()
 
-    logger.info("过期任务检查完成: expired=%d, warnings=%d", expired_count, warning_count)
+    logger.info("Expired Task check completed: expired=%d, warnings=%d", expired_count, warning_count)
     return {"expired_count": expired_count, "warning_count": warning_count}
 
 
 async def _count_consecutive_expired(db: AsyncSession, agent_id: int) -> int:
     """
-    计算Agent最近连续过期任务数量。
-    从最近的任务往回数，直到遇到非expired状态的任务。
+    Calculate the number of recent consecutive expired tasks of the Agent。
+    Count backward from the most recent Task，Until a task in a non-expired state is encountered。
     """
     result = await db.execute(
         select(AgentTask.status)

@@ -1,36 +1,36 @@
 """
-语义化座位系统 - 将人物移动与办公室中有实际意义的位置绑定。
+Semantic seating system - Tie character movement to meaningful locations in the office.
 
-座位坐标与 companyMap.ts 中的家具布局完全对齐，公式：
+The seat coordinates are fully aligned with the furniture layout in companyMap.ts，formula：
   fx = room.x + room.width * item.rx
   fy = room.y + 30 + (room.height - 30) * item.ry
   encoded_y = canvas_y + (floor - 1) * FLOOR_Y_OFFSET
 
-职级规则：
-  career_level >= 6 (CEO)      → 常驻 ceo_desk（锚点），下属来CEO办公室 visitor 席
-  career_level == 5 (总监)     → 常驻 director_desk（锚点），下属来总监办公室 visitor 席
-  career_level <= 4            → 在本部门工位工作，会议去会议室，休息去咖啡厅/大厅
+Levelrules：
+  career_level >= 6 (CEO)      → anchored ceo_desk（anchor point），Subordinates come to the CEO Office visitor table
+  career_level == 5 (Director)     → anchored director_desk（anchor point），Subordinates come to the Director Office visitor table
+  career_level <= 4            → In this DepartmentdeskWork，MeetingMeeting Room，RestGo to Cafe/Lobby
 """
 
 import random
 
-FLOOR_Y_OFFSET = 700  # 与 agent_ai.py 保持一致
+FLOOR_Y_OFFSET = 700  # Consistent with agent_ai.py
 
 # ---------------------------------------------------------------------------
-# 座位定义表
-# 字段：floor, x, y（画布坐标），dept（归属部门），spot_type
-#   anchor  - 高管锚点，不可被其他人使用
-#   work    - 普通工位
-#   visitor - 高管办公室访客席
-#   rest    - 休息区（咖啡厅/大厅）
-#   meeting - 会议室座椅
-#   reception - 大厅前台/接待区
+# seat definition chart
+# Field：floor, x, y（canvas coordinates），dept（Belong toDepartment），spot_type
+#   anchor  - executive anchor，Not to be used by others
+#   work    - Ordinary desk
+#   visitor - executiveofficeVisitor's seat
+#   rest    - Rest area（Cafe/Lobby）
+#   meeting - Meeting room seat
+#   reception - Lobbyfront desk/reception area
 # ---------------------------------------------------------------------------
 SPOTS: dict[str, dict] = {
 
     # ══════════════════════════════════════════
-    # 1F  大厅 (lounge)  x=20, y=60, w=260, h=220
-    # 家具：sofa@0.25,0.45 | sofa@0.75,0.45 | table@0.5,0.45 | plant*2
+    # 1F  Lobby (lounge)  x=20, y=60, w=260, h=220
+    # furniture：sofa@0.25,0.45 | sofa@0.75,0.45 | table@0.5,0.45 | plant*2
     # ══════════════════════════════════════════
     "lobby_reception":  {"floor": 1, "x": 150, "y": 72,  "dept": "general", "spot_type": "reception"},
     "lobby_sofa_left":  {"floor": 1, "x": 85,  "y": 176, "dept": "general", "spot_type": "rest"},
@@ -38,8 +38,8 @@ SPOTS: dict[str, dict] = {
     "lobby_table":      {"floor": 1, "x": 150, "y": 176, "dept": "general", "spot_type": "rest"},
 
     # ══════════════════════════════════════════
-    # 1F  咖啡厅 (cafeteria)  x=320, y=60, w=260, h=220
-    # 家具：coffee_machine@0.5,0.15 | table@0.25,0.4 | table@0.75,0.4 | table@0.25,0.7 | table@0.75,0.7
+    # 1F  Cafe (cafeteria)  x=320, y=60, w=260, h=220
+    # furniture：coffee_machine@0.5,0.15 | table@0.25,0.4 | table@0.75,0.4 | table@0.25,0.7 | table@0.75,0.7
     # ══════════════════════════════════════════
     "cafe_counter":  {"floor": 1, "x": 450, "y": 118, "dept": "general", "spot_type": "rest"},
     "cafe_table_1":  {"floor": 1, "x": 385, "y": 166, "dept": "general", "spot_type": "rest"},
@@ -48,8 +48,8 @@ SPOTS: dict[str, dict] = {
     "cafe_table_4":  {"floor": 1, "x": 515, "y": 223, "dept": "general", "spot_type": "rest"},
 
     # ══════════════════════════════════════════
-    # 1F  HR部门 (office/hr)  x=20, y=340, w=560, h=220
-    # 家具 (office)：desk@0.2,0.35 | 0.5,0.35 | 0.8,0.35 | 0.2,0.65 | 0.5,0.65 | 0.8,0.65
+    # 1F  HR Department (office/hr)  x=20, y=340, w=560, h=220
+    # furniture (office)：desk@0.2,0.35 | 0.5,0.35 | 0.8,0.35 | 0.2,0.65 | 0.5,0.65 | 0.8,0.65
     # ══════════════════════════════════════════
     "hr_desk_1": {"floor": 1, "x": 132, "y": 436, "dept": "hr", "spot_type": "work"},
     "hr_desk_2": {"floor": 1, "x": 300, "y": 436, "dept": "hr", "spot_type": "work"},
@@ -57,12 +57,12 @@ SPOTS: dict[str, dict] = {
     "hr_desk_4": {"floor": 1, "x": 132, "y": 493, "dept": "hr", "spot_type": "work"},
     "hr_desk_5": {"floor": 1, "x": 300, "y": 493, "dept": "hr", "spot_type": "work"},
     "hr_desk_6": {"floor": 1, "x": 468, "y": 493, "dept": "hr", "spot_type": "work"},
-    # 面试/来访者席（中央靠近走廊处）
+    # Interview/Visitor Seat（Center near the corridor）
     "hr_interview": {"floor": 1, "x": 300, "y": 514, "dept": "hr", "spot_type": "visitor"},
 
     # ══════════════════════════════════════════
-    # 2F  工程部 (office/engineering)  x=20, y=60, w=155, h=280
-    # 家具 (office)：desk@0.2,0.35 | 0.5,0.35 | 0.8,0.35 | 0.2,0.65 | 0.5,0.65 | 0.8,0.65
+    # 2F  Engineering (office/engineering)  x=20, y=60, w=155, h=280
+    # furniture (office)：desk@0.2,0.35 | 0.5,0.35 | 0.8,0.35 | 0.2,0.65 | 0.5,0.65 | 0.8,0.65
     # ══════════════════════════════════════════
     "eng_desk_1": {"floor": 2, "x": 51,  "y": 177, "dept": "engineering", "spot_type": "work"},
     "eng_desk_2": {"floor": 2, "x": 97,  "y": 177, "dept": "engineering", "spot_type": "work"},
@@ -72,7 +72,7 @@ SPOTS: dict[str, dict] = {
     "eng_desk_6": {"floor": 2, "x": 144, "y": 252, "dept": "engineering", "spot_type": "work"},
 
     # ══════════════════════════════════════════
-    # 2F  市场部 (office/marketing)  x=185, y=60, w=175, h=130
+    # 2F  Marketing (office/marketing)  x=185, y=60, w=175, h=130
     # ══════════════════════════════════════════
     "marketing_desk_1": {"floor": 2, "x": 220, "y": 125, "dept": "marketing", "spot_type": "work"},
     "marketing_desk_2": {"floor": 2, "x": 272, "y": 125, "dept": "marketing", "spot_type": "work"},
@@ -82,7 +82,7 @@ SPOTS: dict[str, dict] = {
     "marketing_desk_6": {"floor": 2, "x": 325, "y": 155, "dept": "marketing", "spot_type": "work"},
 
     # ══════════════════════════════════════════
-    # 2F  产品部 (office/product)  x=185, y=200, w=175, h=140
+    # 2F  Product (office/product)  x=185, y=200, w=175, h=140
     # ══════════════════════════════════════════
     "product_desk_1": {"floor": 2, "x": 220, "y": 268, "dept": "product", "spot_type": "work"},
     "product_desk_2": {"floor": 2, "x": 272, "y": 268, "dept": "product", "spot_type": "work"},
@@ -92,7 +92,7 @@ SPOTS: dict[str, dict] = {
     "product_desk_6": {"floor": 2, "x": 325, "y": 301, "dept": "product", "spot_type": "work"},
 
     # ══════════════════════════════════════════
-    # 2F  财务部 (office/finance)  x=370, y=60, w=170, h=130
+    # 2F  Finance (office/finance)  x=370, y=60, w=170, h=130
     # ══════════════════════════════════════════
     "finance_desk_1": {"floor": 2, "x": 404, "y": 125, "dept": "finance", "spot_type": "work"},
     "finance_desk_2": {"floor": 2, "x": 455, "y": 125, "dept": "finance", "spot_type": "work"},
@@ -102,7 +102,7 @@ SPOTS: dict[str, dict] = {
     "finance_desk_6": {"floor": 2, "x": 506, "y": 155, "dept": "finance", "spot_type": "work"},
 
     # ══════════════════════════════════════════
-    # 2F  运营部 (office/operations)  x=370, y=200, w=170, h=140
+    # 2F  Operations (office/operations)  x=370, y=200, w=170, h=140
     # ══════════════════════════════════════════
     "ops_desk_1": {"floor": 2, "x": 404, "y": 268, "dept": "operations", "spot_type": "work"},
     "ops_desk_2": {"floor": 2, "x": 455, "y": 268, "dept": "operations", "spot_type": "work"},
@@ -112,8 +112,8 @@ SPOTS: dict[str, dict] = {
     "ops_desk_6": {"floor": 2, "x": 506, "y": 301, "dept": "operations", "spot_type": "work"},
 
     # ══════════════════════════════════════════
-    # 3F  会议室 (meeting)  x=20, y=60, w=560, h=160
-    # 家具：table@0.5,0.5 | chair@0.25,0.35 | chair@0.75,0.35 | chair@0.25,0.65 | chair@0.75,0.65 | screen@0.5,0.12
+    # 3F  Meeting Room (meeting)  x=20, y=60, w=560, h=160
+    # furniture：table@0.5,0.5 | chair@0.25,0.35 | chair@0.75,0.35 | chair@0.25,0.65 | chair@0.75,0.65 | screen@0.5,0.12
     # ══════════════════════════════════════════
     "meeting_chair_1": {"floor": 3, "x": 160, "y": 135, "dept": "general", "spot_type": "meeting"},
     "meeting_chair_2": {"floor": 3, "x": 240, "y": 135, "dept": "general", "spot_type": "meeting"},
@@ -125,8 +125,8 @@ SPOTS: dict[str, dict] = {
     "meeting_chair_8": {"floor": 3, "x": 440, "y": 175, "dept": "general", "spot_type": "meeting"},
 
     # ══════════════════════════════════════════
-    # 3F  总监办公室 (office/management)  x=20, y=280, w=260, h=260
-    # 家具 (office)：使用中央工位作为"总监座"锚点
+    # 3F  Director Office (office/management)  x=20, y=280, w=260, h=260
+    # furniture (office)：use central desk as"Director seat"anchor point
     # ══════════════════════════════════════════
     "director_desk":      {"floor": 3, "x": 150, "y": 390, "dept": "management", "spot_type": "anchor"},
     "director_visitor_1": {"floor": 3, "x": 72,  "y": 459, "dept": "management", "spot_type": "visitor"},
@@ -134,8 +134,8 @@ SPOTS: dict[str, dict] = {
     "director_visitor_3": {"floor": 3, "x": 228, "y": 459, "dept": "management", "spot_type": "visitor"},
 
     # ══════════════════════════════════════════
-    # 3F  CEO办公室 (ceo_office/management)  x=320, y=280, w=260, h=260
-    # 家具：desk@0.5,0.35 | bookshelf*2 | sofa@0.3,0.75 | plant
+    # 3F  CEO Office (ceo_office/management)  x=320, y=280, w=260, h=260
+    # furniture：desk@0.5,0.35 | bookshelf*2 | sofa@0.3,0.75 | plant
     # ══════════════════════════════════════════
     "ceo_desk":      {"floor": 3, "x": 450, "y": 390, "dept": "management", "spot_type": "anchor"},
     "ceo_sofa":      {"floor": 3, "x": 398, "y": 482, "dept": "management", "spot_type": "visitor"},
@@ -145,13 +145,13 @@ SPOTS: dict[str, dict] = {
 
 
 # ---------------------------------------------------------------------------
-# 预计算编码Y坐标（避免重复计算）
+# Precomputed encoded Y coordinate（Avoid double counting）
 # ---------------------------------------------------------------------------
 for _name, _s in SPOTS.items():
     _s["encoded_y"] = _s["y"] + (_s["floor"] - 1) * FLOOR_Y_OFFSET
 
 # ---------------------------------------------------------------------------
-# 按部门/类型分组的快查表
+# Quick lookup table grouped by Department/Type
 # ---------------------------------------------------------------------------
 _DEPT_WORK_SPOTS: dict[str, list[str]] = {}
 _REST_SPOTS: list[str] = []
@@ -177,7 +177,7 @@ for _name, _s in SPOTS.items():
     elif t == "meeting":
         _MEETING_SPOTS.append(_name)
 
-# HR reception 也算大厅社交区
+# HR reception Also considered a LobbySocial area
 _LOBBY_SPOTS.append("lobby_reception")
 
 
@@ -191,17 +191,17 @@ def _decode_canvas_y(encoded_y: int) -> int:
 
 
 # ---------------------------------------------------------------------------
-# 公开 API
+# Public API
 # ---------------------------------------------------------------------------
 
 def get_spot_pos(spot_name: str) -> tuple[int, int]:
-    """返回 (pos_x, encoded_pos_y) 用于直接写入 AgentProfile."""
+    """Back (pos_x, encoded_pos_y) For writing directly to AgentProfile."""
     s = SPOTS[spot_name]
     return (s["x"], s["encoded_y"])
 
 
 def get_spot_name_by_pos(pos_x: int, encoded_pos_y: int) -> str | None:
-    """根据坐标反查座位名称（完全匹配）。"""
+    """Check the seat name based on the coordinates（exact match）。"""
     for name, spot in SPOTS.items():
         if spot["x"] == pos_x and spot["encoded_y"] == encoded_pos_y:
             return name
@@ -209,14 +209,14 @@ def get_spot_name_by_pos(pos_x: int, encoded_pos_y: int) -> str | None:
 
 
 def get_work_spots(department: str) -> list[str]:
-    """返回指定部门的所有工位名称列表."""
+    """BackList of all desk names of the specified Department."""
     return list(_DEPT_WORK_SPOTS.get(department, []))
 
 
 def assign_work_spot(department: str, agent_id: int) -> str | None:
     """
-    为 agent 分配一个确定性工位（用 agent_id 取模保证同一 agent 总去同一桌）。
-    如果部门没有工位定义，返回 None。
+    Assign a deterministic desk to the agent（Use agent_id to take the model to ensure that the same agent always goes to the same table）。
+    If Department does not have a desk definition，Back None。
     """
     spots = _DEPT_WORK_SPOTS.get(department, [])
     if not spots:
@@ -225,21 +225,21 @@ def assign_work_spot(department: str, agent_id: int) -> str | None:
 
 
 def assign_rest_spot(agent_id: int | None = None) -> str:
-    """返回一个咖啡厅座位（可按 agent_id 确定性分配）。"""
+    """Back a Cafe seat（can be sorted by agent_id deterministic assignment）。"""
     if agent_id is not None:
         return _REST_SPOTS[agent_id % len(_REST_SPOTS)]
     return random.choice(_REST_SPOTS)
 
 
 def assign_lobby_spot(agent_id: int | None = None) -> str:
-    """返回一个大厅休闲位（可按 agent_id 确定性分配）。"""
+    """Back a Lobby leisure space（can be sorted by agent_id deterministic assignment）。"""
     if agent_id is not None:
         return _LOBBY_SPOTS[agent_id % len(_LOBBY_SPOTS)]
     return random.choice(_LOBBY_SPOTS)
 
 
 def assign_meeting_spot(agent_id: int | None = None) -> str:
-    """返回一个会议室座椅（如提供 agent_id 则确定性分配）."""
+    """BackaMeeting room seat（If agent_id is provided then deterministic assignment）."""
     if agent_id is not None:
         return _MEETING_SPOTS[agent_id % len(_MEETING_SPOTS)]
     return random.choice(_MEETING_SPOTS)
@@ -259,10 +259,10 @@ def get_anchor_spot(
     career_path: str | None = None,
 ) -> str | None:
     """
-    返回高管的锚点座位名称。
-    仅管理线角色可使用高管锚点：
+    Backexecutive anchor point seat name.
+    Only management line roles can use executive anchor：
     - CEO (level>=6) → ceo_desk
-    - 总监 (level==5) → director_desk
+    - Director (level==5) → director_desk
     """
     if not _is_management_track(department, career_path):
         return None
@@ -278,14 +278,14 @@ def is_anchor_role(
     department: str | None = None,
     career_path: str | None = None,
 ) -> bool:
-    """判断是否为常驻高管（仅管理线 level>=5）。"""
+    """JudgingWhether it is anchoredexecutive（Only manage lines level>=5）。"""
     return career_level >= 5 and _is_management_track(department, career_path)
 
 
 def get_visitor_spots(career_level: int) -> list[str]:
     """
-    返回拜访对应级别高管时可坐的访客席列表。
-    向CEO汇报 → CEO办公室访客席；向总监汇报 → 总监办公室访客席。
+    BackList of guest seats that can be seated when visiting the corresponding executive level。
+    CEOreport  CEO office visitor seat；Report to Director → Director office visitor seat。
     """
     if career_level >= 6:
         return ["ceo_sofa", "ceo_visitor_1", "ceo_visitor_2"]
@@ -295,29 +295,29 @@ def get_visitor_spots(career_level: int) -> list[str]:
 
 
 def spot_to_room_name(spot_name: str) -> str:
-    """将座位名映射为中文房间名，用于日志和记忆内容."""
+    """Map seat names to Chinese room names，Used for log and Memories content."""
     if spot_name.startswith("lobby_"):
-        return "大厅"
+        return "Lobby"
     if spot_name.startswith("cafe_"):
-        return "咖啡厅"
+        return "Cafe"
     if spot_name.startswith("hr_"):
-        return "HR部门"
+        return "HR Department"
     if spot_name.startswith("eng_"):
-        return "工程部"
+        return "Engineering"
     if spot_name.startswith("marketing_"):
-        return "市场部"
+        return "Marketing"
     if spot_name.startswith("product_"):
-        return "产品部"
+        return "Product"
     if spot_name.startswith("finance_"):
-        return "财务部"
+        return "Finance"
     if spot_name.startswith("ops_"):
-        return "运营部"
+        return "Operations"
     if spot_name.startswith("meeting_"):
-        return "会议室"
+        return "Meeting Room"
     if spot_name.startswith("director_"):
-        return "总监办公室"
+        return "Director Office"
     if spot_name.startswith("ceo_"):
-        return "CEO办公室"
+        return "CEO Office"
     return spot_name
 
 
@@ -327,9 +327,9 @@ def get_movable_spot_names(
     career_path: str | None = None,
 ) -> list[str]:
     """
-    返回该角色允许停留的座位集合。
-    - 默认：所有非锚点位
-    - 高管：额外允许自己的锚点
+    Back This role allows the collection of seats to stay.
+    - default：All non-anchor point bits
+    - executive：Additional permission for your own anchor point
     """
     spots = list(_NON_ANCHOR_SPOTS)
     anchor = get_anchor_spot(career_level, department, career_path)
@@ -346,8 +346,8 @@ def snap_to_nearest_spot(
     career_path: str | None = None,
 ) -> str:
     """
-    将任意坐标吸附到最近的合法语义座位。
-    优先在目标楼层内吸附；若目标楼层无候选，再回退全局。
+    Snap arbitrary coordinates to the nearest legal semantic seat。
+    Prioritize adsorption within the target floor；If there are no candidates for the target floor，fallbackoverall situation
     """
     target_floor = _decode_floor(encoded_y)
     target_canvas_y = _decode_canvas_y(encoded_y)
@@ -378,7 +378,7 @@ def get_task_target_spot(
     task_title: str | None,
 ) -> str:
     """
-    根据任务语义分配目标座位，保证人物落在有意义点位。
+    Assign target seats based on Task semantics，Make sure the characters land at meaningful points。
     """
     if is_anchor_role(career_level, department, career_path):
         anchor = get_anchor_spot(career_level, department, career_path)
@@ -386,10 +386,10 @@ def get_task_target_spot(
             return anchor
 
     text = ((task_type or "") + " " + (task_title or "")).lower()
-    meeting_keywords = ("meeting", "sync", "review", "汇报", "会议", "评审", "复盘", "培训")
-    hr_keywords = ("interview", "recruit", "hire", "onboard", "招聘", "面试", "入职")
-    social_keywords = ("social", "collab", "沟通", "协作", "社交", "团建")
-    rest_keywords = ("break", "lunch", "coffee", "休息", "午餐", "茶歇")
+    meeting_keywords = ("meeting", "sync", "review", "report", "Meeting", "Review", "Review", "Training")
+    hr_keywords = ("interview", "recruit", "hire", "onboard", "recruitment", "interview", "Onboarding")
+    social_keywords = ("social", "collab", "communicate", "cooperation", "Social", "Team Building")
+    rest_keywords = ("break", "lunch", "coffee", "Rest", "lunch", "break")
 
     if any(k in text for k in meeting_keywords):
         return assign_meeting_spot(agent_id)
@@ -416,10 +416,10 @@ def get_after_work_spot(
     career_path: str | None = None,
 ) -> str:
     """
-    下班后的停留点位分配。
-    为避免所有人堆叠在同一点，并保持多楼层可见性：
-    - 高管优先回自己的锚点办公室；
-    - 普通员工按 agent_id 在“部门工位 / 大厅 / 咖啡厅”三类点位确定性分散。
+    get off Allocation of stay points after work.
+    To avoid everyone stacking at the same point，and maintain multi-floor visibility：
+    - executive returns to his anchor point office first；
+    - regular Staff are deterministically dispersed at three types of locations: "Departmentdesk/Lobby/Cafe" according to agent_id.
     """
     anchor = get_anchor_spot(career_level, department, career_path)
     if anchor:

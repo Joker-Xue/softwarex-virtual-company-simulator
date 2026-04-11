@@ -1,5 +1,5 @@
 """
-虚拟公司自主模拟引擎 - 每30秒一个tick，驱动所有AI角色自主行为
+virtual company autonomous simulation engine - one tick every 30 seconds，Drive all AIRole autonomous behaviors
 """
 import asyncio
 import logging
@@ -118,7 +118,7 @@ def _event_action_for(event) -> str:
 
 
 def append_decision_log(agent, record: dict):
-    """追加决策记录到 daily_schedule JSON"""
+    """Append decision records to daily_schedule JSON"""
     schedule = agent.daily_schedule
     if not isinstance(schedule, list):
         schedule = []
@@ -148,7 +148,7 @@ def append_decision_log(agent, record: dict):
 # ---------------------------------------------------------------------------
 
 async def _update_event_statuses(db: AsyncSession):
-    """更新活动状态：upcoming→ongoing→finished，每个tick调用一次"""
+    """update event status：upcoming→ongoing→finished，Called once per tick"""
     now = datetime.now(timezone.utc)
 
     # upcoming → ongoing
@@ -175,10 +175,10 @@ async def _update_event_statuses(db: AsyncSession):
 
 def _place_agent_for_event(agent: AgentProfile, event) -> None:
     """
-    根据活动类型将Agent移到最合适的语义座位。
-    - 会议/研讨/培训类 → 会议室座椅（按参与序分配，不堆叠）
-    - CEO/总监          → 常驻自己办公室（下属来找他们）
-    - 社交/庆典类       → 大厅或咖啡厅
+    Move the Agent to the most appropriate semantic seat based on activity type。
+    - Conference/Seminar/Training → Meeting room seat（Assigned in order of participation，Not stacked）
+    - CEO/Director          → anchored own office（Subordinates come to them）
+    - Social/Celebration  Lobby or Cafe
     """
     agent_id = agent.id or 0
     career_level = agent.career_level or 0
@@ -186,10 +186,10 @@ def _place_agent_for_event(agent: AgentProfile, event) -> None:
     event_name = getattr(event, "name", "") or ""
 
     social_events = {"team_building", "tea_break", "welcome", "birthday", "holiday", "milestone", "dept_award"}
-    is_social = event_type in social_events or any(k in event_name for k in ["团建", "欢迎", "庆祝", "里程碑"])
+    is_social = event_type in social_events or any(k in event_name for k in ["Team Building", "Welcome", "Celebration", "Milestone"])
 
     if is_anchor_role(career_level, agent.department or "", agent.career_path or ""):
-        # CEO/总监：活动期间仍待在自己办公室，访客来此
+        # CEO/Director：Stay in your own office during the activity，Visitors come here
         anchor = get_anchor_spot(career_level, agent.department or "", agent.career_path or "")
         if anchor:
             px, py = get_spot_pos(anchor)
@@ -198,16 +198,16 @@ def _place_agent_for_event(agent: AgentProfile, event) -> None:
         return
 
     if is_social:
-        # 社交活动：大厅或咖啡厅
+        # SocialActivity：Lobby or Cafe
         if random.random() < 0.5:
             spot = assign_lobby_spot()
         else:
             spot = assign_rest_spot()
     else:
-        # 正式会议/培训：会议室座椅，按agent_id确定性分配
-        # 如果是向CEO/总监汇报，去对方办公室访客席
-        if event_type in {"milestone", "emergency"} or "汇报" in event_name:
-            # 重要事件：去CEO访客席
+        # Formal Meeting/Training：Meeting room seat，by agent_iddeterministic assignment
+        # If reporting to CEO/Director，Go to the other party's officeVisitor's seat
+        if event_type in {"milestone", "emergency"} or "report" in event_name:
+            # important events：Go to CEOVisitor's seat
             visitor_spots = get_visitor_spots(6)
             spot = visitor_spots[agent_id % len(visitor_spots)]
         else:
@@ -220,8 +220,8 @@ def _place_agent_for_event(agent: AgentProfile, event) -> None:
 
 async def _handle_event_attendance(db: AsyncSession, agent: AgentProfile) -> bool:
     """
-    检查进行中的活动，决定Agent是否参与并移动到对应地点。
-    返回 True 表示Agent正在参加活动，本tick跳过常规行为。
+    CheckIn Progressactivities，Determine whether the Agent participates and moves to the corresponding Location。
+    Back True Indicates that the Agent is joining the event，This tick skips the regular Behavior.
     """
     result = await db.execute(
         select(CompanyEvent).where(CompanyEvent.is_active == "ongoing")
@@ -230,14 +230,14 @@ async def _handle_event_attendance(db: AsyncSession, agent: AgentProfile) -> boo
     if not ongoing_events:
         return False
 
-    # 若 Agent 已在某活动的参与者中 → 维持在现场
+    # If the Agent is already a participant in an Activity  remain on site
     for event in ongoing_events:
         if agent.id in (event.participants or []):
             _place_agent_for_event(agent, event)
             agent.current_action = _event_action_for(event)
             return True
 
-    # Agent 尚未参加任何活动 → 用 MBTI 决策选出最感兴趣的活动
+    # Agent Have not participated in any activities yet  Use MBTI decision-making to select the activities you are most interested in
     best_event = None
     best_score = -1
     for event in ongoing_events:
@@ -252,16 +252,16 @@ async def _handle_event_attendance(db: AsyncSession, agent: AgentProfile) -> boo
     if not best_event:
         return False
 
-    # 加入活动
+    # Join Activity
     participants = list(best_event.participants or [])
     participants.append(agent.id)
     best_event.participants = participants
 
-    # 给予 XP 奖励
+    # Give XP reward
     if best_event.rewards_xp:
         agent.xp = (agent.xp or 0) + best_event.rewards_xp
 
-    # 移动到活动对应的语义座位
+    # Move to the semantic seat corresponding to the Activity
     _place_agent_for_event(agent, best_event)
 
     agent.current_action = _event_action_for(best_event)
@@ -278,7 +278,7 @@ async def _handle_event_attendance(db: AsyncSession, agent: AgentProfile) -> boo
 async def process_agent(db: AsyncSession, agent: AgentProfile):
     """Process one simulation tick for a single agent."""
 
-    # === 优先检查进行中的活动（高优先级覆盖常规行为）===
+    # === Prioritize CheckIn Progressactivities（High priority overrides regular Behavior）===
     try:
         event_attended = await _handle_event_attendance(db, agent)
         if event_attended:
@@ -422,7 +422,7 @@ async def _resolve_work(db: AsyncSession, agent: AgentProfile, mbti: str):
     # Extract memory
     title = task.title
     try:
-        content = "完成了任务「" + title + "」，获得" + str(xp_earned) + "XP"
+        content = "completed the task「" + title + "」，gain" + str(xp_earned) + "XP"
         await extract_memory(db, agent.id, "task_complete", content)
     except Exception:
         pass
@@ -473,7 +473,7 @@ async def _check_and_promote(db: AsyncSession, agent: AgentProfile):
             agent.career_path = get_auto_career_path(agent.mbti or "ISTJ")
         title = req.get("title", "Lv." + str(next_level))
         try:
-            await extract_memory(db, agent.id, "promotion", "晋升为" + title)
+            await extract_memory(db, agent.id, "promotion", "promoted to" + title)
         except Exception:
             pass
         logger.info("Agent %s (%s) promoted to level %d", agent.id, agent.nickname, next_level)
@@ -502,7 +502,7 @@ async def simulation_tick():
     global _tick_count
     _tick_count += 1
 
-    # 频道自动化：每10个tick（约5分钟）触发一次部门闲聊
+    # ChannelsAutomation：every 10 ticks（about 5minutes）Trigger a Department chat
     if _tick_count % 10 == 1:
         try:
             from app.engine.channel_engine import post_department_chatter, post_daily_announcement
@@ -512,7 +512,7 @@ async def simulation_tick():
         except Exception as e:
             logger.debug("Channel chatter schedule error: %s", e)
 
-    # 每天第一个tick（或每2880个tick≈24h）发布每日公告
+    # first tick every day（Or every 2880 ticks24h）Publish daily Announcement
     if _tick_count == 1 or _tick_count % 2880 == 1:
         try:
             from app.engine.channel_engine import post_daily_announcement
@@ -522,7 +522,7 @@ async def simulation_tick():
 
     async with AsyncSessionLocal() as db:
         try:
-            # 更新活动状态（upcoming→ongoing→finished）
+            # update event status（upcoming→ongoing→finished）
             try:
                 await _update_event_statuses(db)
             except Exception as e:
@@ -576,7 +576,7 @@ async def _simulation_loop():
     await asyncio.sleep(5)
     logger.info("Simulation loop started (interval=%ds)", _tick_interval)
 
-    # 启动时立即重置所有AI角色到正确楼层（修复旧 pos_y 数据缺少楼层偏移的问题）
+    # Immediately reset all AI characters to the correct floor upon startup（Fix the problem of missing floor offset in old pos_y data）
     try:
         from app.engine.npc_seeder import reset_npc_positions
         async with AsyncSessionLocal() as db:

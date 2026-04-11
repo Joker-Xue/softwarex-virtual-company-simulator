@@ -1,8 +1,8 @@
 """
-支柱1：数据分类分级引擎
+Pillar 1：data classification and classification engine
 
-四级分类体系，驱动加密、审计、访问控制决策。
-符合《个人信息保护法》(PIPL) 数据分类分级要求。
+four-level classification system，Drive encryption, auditing, and access control decisions.
+conform to《Personal Information Protection Act》(PIPL) data classification and grading requirements。
 """
 from enum import IntEnum
 from functools import wraps
@@ -12,16 +12,16 @@ from fastapi import HTTPException, status
 
 
 class DataLevel(IntEnum):
-    """数据敏感等级（值越大越敏感）"""
-    PUBLIC = 1        # 公开数据：岗位名称、游戏进度等
-    INTERNAL = 2      # 内部数据：文件路径、Agent消息、用户偏好
-    CONFIDENTIAL = 3  # 机密数据：邮箱、手机号、姓名、简历原文、对话内容
-    TOP_SECRET = 4    # 绝密数据：密码哈希、身份证号、银行卡号
+    """data sensitivity level（The larger the value, the more sensitive it is）"""
+    PUBLIC = 1        # public data：Job title、Game progress, etc.
+    INTERNAL = 2      # Internal data：File path, Agentinformation, User Preference
+    CONFIDENTIAL = 3  # Confidential data：email、Phone number、Name、Original resume、Conversation content
+    TOP_SECRET = 4    # Top secret data：passwordID numberbank card number
 
 
 # ---------------------------------------------------------------------------
-# 全局数据分类注册表
-# 映射: (表名, 字段名) -> DataLevel
+# overall situationdata classification register table
+# Mapping: (table name, Field name) -> DataLevel
 # ---------------------------------------------------------------------------
 DATA_CLASSIFICATION_REGISTRY: dict[tuple[str, str], DataLevel] = {
     # ── users ──
@@ -84,7 +84,7 @@ DATA_CLASSIFICATION_REGISTRY: dict[tuple[str, str], DataLevel] = {
     # ── agent_messages ──
     ("agent_messages", "content"): DataLevel.INTERNAL,
 
-    # ── job_portraits (公开数据) ──
+    # ── job_portraits (public data) ──
     ("job_infos", "job_title"): DataLevel.PUBLIC,
     ("job_infos", "job_category"): DataLevel.PUBLIC,
     ("job_infos", "salary_range"): DataLevel.PUBLIC,
@@ -109,12 +109,12 @@ DATA_CLASSIFICATION_REGISTRY: dict[tuple[str, str], DataLevel] = {
 
 
 def get_field_level(table: str, field: str) -> DataLevel:
-    """查询字段的敏感等级，未注册字段默认为 INTERNAL"""
+    """Query the sensitivity level of the field，Unregistered fields default to INTERNAL"""
     return DATA_CLASSIFICATION_REGISTRY.get((table, field), DataLevel.INTERNAL)
 
 
 def get_table_max_level(table: str) -> DataLevel:
-    """获取表中最高敏感等级"""
+    """Get the highest sensitivity level in the table"""
     levels = [
         level for (t, _), level in DATA_CLASSIFICATION_REGISTRY.items()
         if t == table
@@ -123,7 +123,7 @@ def get_table_max_level(table: str) -> DataLevel:
 
 
 def get_fields_by_level(level: DataLevel) -> list[tuple[str, str]]:
-    """获取指定等级的所有字段"""
+    """Get all fields at the specified level"""
     return [
         (table, field)
         for (table, field), lvl in DATA_CLASSIFICATION_REGISTRY.items()
@@ -133,18 +133,18 @@ def get_fields_by_level(level: DataLevel) -> list[tuple[str, str]]:
 
 def classify_access(min_level: DataLevel):
     """
-    路由级访问控制装饰器。
+    Route-level access control decorator。
 
-    检查当前用户是否有权访问指定敏感等级的数据。
-    - PUBLIC: 所有人可访问
-    - INTERNAL: 需要登录
-    - CONFIDENTIAL: 需要登录且为数据所有者
-    - TOP_SECRET: 仅管理员
+    Current UserDo you have permission to access data at a specified level of sensitivity?
+    - PUBLIC: Accessible to everyone
+    - INTERNAL: Login required
+    - CONFIDENTIAL: Requires login and data owner
+    - TOP_SECRET: managers only
     """
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            # 从 kwargs 中提取 current_user（FastAPI 依赖注入）
+            # Extract current_user from kwargs（FastAPI dependency injection）
             current_user = kwargs.get("current_user")
 
             if min_level == DataLevel.PUBLIC:
@@ -153,14 +153,14 @@ def classify_access(min_level: DataLevel):
             if min_level >= DataLevel.INTERNAL and current_user is None:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="需要登录才能访问此资源",
+                    detail="A login is required to access this resource",
                 )
 
             if min_level >= DataLevel.TOP_SECRET:
                 if not getattr(current_user, "is_admin", False):
                     raise HTTPException(
                         status_code=status.HTTP_403_FORBIDDEN,
-                        detail="权限不足：需要管理员权限",
+                        detail="Insufficient permissions：Requires manager permissions",
                     )
 
             return await func(*args, **kwargs)

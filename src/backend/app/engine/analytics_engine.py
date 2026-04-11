@@ -1,5 +1,5 @@
 """
-行为分析引擎 - 分析Agent行为模式并生成洞察
+Behavioranalyzeengine - Analyze Agent behavior patterns and generate insights
 """
 import logging
 from datetime import datetime, timedelta, timezone
@@ -19,19 +19,19 @@ logger = logging.getLogger(__name__)
 
 async def get_behavior_pattern(db: AsyncSession, agent_id: int) -> dict:
     """
-    分析Agent近30天的行为模式。
+    Analyze the Agent's behavior pattern in the past 30 days。
 
     Returns:
         {
             "activity_heatmap": [[hour, day, count], ...],
             "action_distribution": {"work": 40, "chat": 25, ...},
-            "insights": ["社交活跃度偏低...", ...],
+            "insights": ["Social activity is low...", ...],
             "mbti_comparison": {"my_work_pct": 40, "avg_work_pct": 35, ...}
         }
     """
     thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
 
-    # ── 每小时活跃度热力图 ──
+    # ── Heat map of activity per hour
     heatmap_result = await db.execute(
         select(
             extract("hour", AgentActionLog.created_at).label("hour"),
@@ -52,7 +52,7 @@ async def get_behavior_pattern(db: AsyncSession, agent_id: int) -> dict:
         for row in heatmap_result.all()
     ]
 
-    # ── 行为偏好分布 ──
+    # ── behavior preference distribution ──
     action_result = await db.execute(
         select(
             AgentActionLog.action,
@@ -67,13 +67,13 @@ async def get_behavior_pattern(db: AsyncSession, agent_id: int) -> dict:
     action_distribution = {row.action: row.count for row in action_result.all()}
     total_actions = sum(action_distribution.values()) or 1
 
-    # ── 行为百分比 ──
+    # ── Behavior percentage
     action_pct = {
         action: round(count / total_actions * 100, 1)
         for action, count in action_distribution.items()
     }
 
-    # ── 个性化建议 ──
+    # ── personalized suggestions ──
     insights = []
     work_pct = action_pct.get("work", 0)
     chat_pct = action_pct.get("chat", 0)
@@ -81,19 +81,19 @@ async def get_behavior_pattern(db: AsyncSession, agent_id: int) -> dict:
     meeting_pct = action_pct.get("meeting", 0)
 
     if chat_pct < 15:
-        insights.append("你的社交活动偏少，建议多参加公司活动或与同事聊天，提升人脉关系")
+        insights.append("Your SocialActivity is too low，It is recommended to attend more company events or chat with Colleague，Improve personal relationships")
     if work_pct > 60:
-        insights.append("你的工作强度较高，注意劳逸结合，适当休息可以提升效率")
+        insights.append("Your work intensity is higher，Pay attention to the balance between work and rest，Appropriate Rest can improve efficiency")
     if rest_pct < 10:
-        insights.append("休息时间不足，建议定期去咖啡厅放松一下")
+        insights.append("Insufficient Resttime，It is recommended to go to Cafe regularly to relax")
     if meeting_pct < 5 and work_pct > 40:
-        insights.append("你的会议参与度较低，适当参加会议可以提升协作效率和领导力")
+        insights.append("Your Meeting participation level is lower，join meetingCan improve collaboration efficiency and leadership")
     if chat_pct > 40:
-        insights.append("你的社交非常活跃！但也要注意保持足够的工作专注时间")
+        insights.append("Your Social is very active！But you should also pay attention to maintaining enough work concentration time")
     if not insights:
-        insights.append("你的工作生活节奏均衡，继续保持！")
+        insights.append("Your work life has a balanced rhythm，keep it up！")
 
-    # ── MBTI行为对比 ──
+    # ── MBTIBehavior comparison
     profile_result = await db.execute(
         select(AgentProfile).where(AgentProfile.id == agent_id)
     )
@@ -101,7 +101,7 @@ async def get_behavior_pattern(db: AsyncSession, agent_id: int) -> dict:
     mbti_comparison = {}
 
     if profile and profile.mbti:
-        # 查询同MBTI类型Agent的平均行为
+        # Query the average behavior of agents of the same MBTI type
         same_mbti_result = await db.execute(
             select(AgentProfile.id).where(
                 AgentProfile.mbti == profile.mbti,
@@ -147,7 +147,7 @@ async def get_behavior_pattern(db: AsyncSession, agent_id: int) -> dict:
 
 async def get_career_prediction(db: AsyncSession, agent_id: int) -> dict:
     """
-    基于当前数据预测晋升时间和职业轨迹。
+    Predict promotion time and career trace based on Current data。
     """
     from app.schemas.agent_social import CAREER_LEVELS
 
@@ -162,7 +162,7 @@ async def get_career_prediction(db: AsyncSession, agent_id: int) -> dict:
     current_xp = profile.xp or 0
     tasks_completed = profile.tasks_completed or 0
 
-    # 计算近7天的平均每日XP增长
+    # Calculate average daily XP gain over the last 7 days
     week_ago = datetime.now(timezone.utc) - timedelta(days=7)
     recent_xp_result = await db.execute(
         select(sa_func.sum(AgentTask.xp_reward)).where(
@@ -172,7 +172,7 @@ async def get_career_prediction(db: AsyncSession, agent_id: int) -> dict:
         )
     )
     weekly_xp = recent_xp_result.scalar() or 0
-    daily_xp_rate = weekly_xp / 7 if weekly_xp > 0 else 10  # 默认每日10XP
+    daily_xp_rate = weekly_xp / 7 if weekly_xp > 0 else 10  # default10XP per day
 
     recent_tasks_result = await db.execute(
         select(sa_func.count(AgentTask.id)).where(
@@ -184,7 +184,7 @@ async def get_career_prediction(db: AsyncSession, agent_id: int) -> dict:
     weekly_tasks = recent_tasks_result.scalar() or 0
     daily_task_rate = weekly_tasks / 7 if weekly_tasks > 0 else 0.5
 
-    # 预测每个未来等级
+    # Predict each future level
     predictions = []
     cumulative_days = 0
     for level in range(current_level + 1, 7):
@@ -199,18 +199,18 @@ async def get_career_prediction(db: AsyncSession, agent_id: int) -> dict:
 
         predictions.append({
             "level": level,
-            "title": req.get("title", "未知"),
+            "title": req.get("title", "Unknown"),
             "days_needed": round(days_needed, 1),
             "cumulative_days": round(cumulative_days, 1),
             "xp_required": req.get("xp_required", 0),
             "tasks_required": req.get("tasks_required", 0),
         })
 
-        # 模拟XP和任务增长
+        # Simulate XP and Task growth
         current_xp += xp_needed
         tasks_completed += tasks_needed
 
-    # 同级别排名
+    # Rank at the same level
     rank_result = await db.execute(
         select(sa_func.count(AgentProfile.id)).where(
             AgentProfile.career_level == current_level,
@@ -230,7 +230,7 @@ async def get_career_prediction(db: AsyncSession, agent_id: int) -> dict:
 
     return {
         "current_level": current_level,
-        "current_title": CAREER_LEVELS.get(current_level, {}).get("title", "未知"),
+        "current_title": CAREER_LEVELS.get(current_level, {}).get("title", "Unknown"),
         "daily_xp_rate": round(daily_xp_rate, 1),
         "daily_task_rate": round(daily_task_rate, 2),
         "predictions": predictions,

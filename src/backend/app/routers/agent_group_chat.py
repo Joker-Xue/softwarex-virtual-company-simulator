@@ -1,5 +1,5 @@
 """
-群聊与频道API
+Group Chat and ChannelsAPI
 """
 import asyncio
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -17,13 +17,13 @@ from app.models.agent_message import AgentMessage
 
 router = APIRouter()
 
-# 预置部门频道
+# PresetDepartmentChannels
 PRESET_CHANNELS = [
-    {"id": "dept_engineering", "name": "工程部频道", "type": "department"},
-    {"id": "dept_marketing", "name": "市场部频道", "type": "department"},
-    {"id": "dept_finance", "name": "财务部频道", "type": "department"},
-    {"id": "dept_hr", "name": "HR部门频道", "type": "department"},
-    {"id": "announcement", "name": "全公司公告", "type": "announcement"},
+    {"id": "dept_engineering", "name": "EngineeringChannels", "type": "department"},
+    {"id": "dept_marketing", "name": "MarketingChannels", "type": "department"},
+    {"id": "dept_finance", "name": "FinanceChannels", "type": "department"},
+    {"id": "dept_hr", "name": "HR DepartmentChannels", "type": "department"},
+    {"id": "announcement", "name": "Company-wide Announcement", "type": "announcement"},
 ]
 
 
@@ -60,11 +60,11 @@ async def _get_profile(user: User, db: AsyncSession) -> AgentProfile:
     )
     profile = result.scalar_one_or_none()
     if not profile:
-        raise HTTPException(404, "尚未创建角色")
+        raise HTTPException(404, "Profile has not been created yet")
     return profile
 
 
-@router.post("/group/create", summary="创建群聊")
+@router.post("/group/create", summary="Create group chat")
 async def create_group(
     body: GroupCreateRequest,
     user: User = Depends(get_current_active_user),
@@ -72,11 +72,11 @@ async def create_group(
 ):
     me = await _get_profile(user, db)
 
-    # 生成群聊ID
+    # Generate group chat ID
     import uuid
     group_id = f"grp_{uuid.uuid4().hex[:12]}"
 
-    # 验证成员存在
+    # Verify member exists
     member_ids = list(set(body.member_ids))
     if me.id not in member_ids:
         member_ids.append(me.id)
@@ -86,19 +86,19 @@ async def create_group(
     )
     members = result.scalars().all()
     if len(members) < 2:
-        raise HTTPException(400, "群聊至少需要2个成员")
+        raise HTTPException(400, "Group chat requires at least 2 members")
 
-    # 发送系统消息宣布群聊创建
+    # Send system information to announce the creation of group chat
     sys_msg = AgentMessage(
         sender_id=me.id,
         receiver_id=me.id,
-        content=f"{me.nickname} 创建了群聊「{body.name}」",
+        content=f'{me.nickname} created group chat "{body.name}"',
         msg_type="system",
         group_id=group_id,
     )
     db.add(sys_msg)
 
-    # 记录群元信息到第一条消息（简化方案，不需要额外表）
+    # Record group element Info to the first msgsinformation（Simplified solution，No additional table required）
     meta_msg = AgentMessage(
         sender_id=me.id,
         receiver_id=me.id,
@@ -117,7 +117,7 @@ async def create_group(
     }
 
 
-@router.post("/group/{group_id}/send", summary="群发消息")
+@router.post("/group/{group_id}/send", summary="Group Message")
 async def send_group_message(
     group_id: str,
     body: GroupMessageSend,
@@ -126,20 +126,20 @@ async def send_group_message(
 ):
     me = await _get_profile(user, db)
 
-    # 验证群聊存在
+    # Verify group chat exists
     result = await db.execute(
         select(AgentMessage).where(
             AgentMessage.group_id == group_id,
         ).limit(1)
     )
     if not result.scalar_one_or_none():
-        # 检查是否是预置频道
+        # Check whether it is a preset Channels
         if not any(ch["id"] == group_id for ch in PRESET_CHANNELS):
-            raise HTTPException(404, "群聊不存在")
+            raise HTTPException(404, "Group chat does not exist")
 
     msg = AgentMessage(
         sender_id=me.id,
-        receiver_id=None,  # 群消息receiver_id=None
+        receiver_id=None,  # informationreceiver_id=None
         content=sanitize_text(body.content),
         msg_type="text",
         group_id=group_id,
@@ -148,7 +148,7 @@ async def send_group_message(
     await db.flush()
     await db.refresh(msg)
 
-    # 部门频道：随机触发NPC回复
+    # DepartmentChannels：Randomly trigger NPC replies
     is_dept_channel = group_id.startswith("dept_")
     if is_dept_channel:
         department = group_id.replace("dept_", "")
@@ -167,7 +167,7 @@ async def send_group_message(
     }
 
 
-@router.get("/group/{group_id}/messages", summary="群消息历史")
+@router.get("/group/{group_id}/messages", summary="Group information history")
 async def get_group_messages(
     group_id: str,
     page: int = Query(1, ge=1),
@@ -187,7 +187,7 @@ async def get_group_messages(
     messages = list(result.scalars().all())
     messages.reverse()
 
-    # 获取发送者信息
+    # Get Sender Info
     sender_ids = list(set(m.sender_id for m in messages))
     sender_map = {}
     if sender_ids:
@@ -212,14 +212,14 @@ async def get_group_messages(
     ]
 
 
-@router.get("/groups", summary="我的群聊列表")
+@router.get("/groups", summary="My Group Chats")
 async def my_groups(
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
 ):
     me = await _get_profile(user, db)
 
-    # 查找我参与的群聊（发过消息的群）
+    # Find group chats I'm in（Groups that have sent information）
     result = await db.execute(
         select(AgentMessage.group_id)
         .where(
@@ -232,12 +232,12 @@ async def my_groups(
 
     groups = []
 
-    # 预置频道（根据部门自动加入）
+    # PresetChannels（Automatically join based on Department）
     for ch in PRESET_CHANNELS:
         if ch["type"] == "announcement" or (
             ch["type"] == "department" and ch["id"] == f"dept_{me.department}"
         ):
-            # 统计消息数
+            # Number of statistical information
             count_result = await db.execute(
                 select(sa_func.count(AgentMessage.id)).where(
                     AgentMessage.group_id == ch["id"]
@@ -251,11 +251,11 @@ async def my_groups(
                 "message_count": msg_count,
             })
 
-    # 自定义群聊
+    # Custom group chat
     for gid in my_group_ids:
         if any(ch["id"] == gid for ch in PRESET_CHANNELS):
             continue
-        # 获取群元信息
+        # Get Qunyuan Info
         meta_result = await db.execute(
             select(AgentMessage).where(
                 AgentMessage.group_id == gid,
@@ -288,9 +288,9 @@ async def my_groups(
 
 
 async def _trigger_channel_reply(group_id: str, user_sender_id: int, user_message: str, department: str):
-    """以50%概率触发NPC在频道中回复用户消息"""
+    """Trigger NPC to reply to user messages in Channels with 50% probability"""
     import random
-    if random.random() > 0.5:  # 50%概率回复，避免每条消息都有回复
+    if random.random() > 0.5:  # 50% probability of reply，Avoid replying to every msgsinformation
         return
     try:
         from app.engine.channel_engine import post_channel_reply

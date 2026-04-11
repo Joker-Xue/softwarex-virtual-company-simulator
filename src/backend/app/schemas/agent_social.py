@@ -1,5 +1,5 @@
 """
-虚拟Agent社交系统 - Pydantic Schemas
+Virtual AgentSocial System - Pydantic Schemas
 """
 from datetime import datetime
 from typing import Optional, List
@@ -8,40 +8,40 @@ from pydantic import BaseModel, Field, field_validator
 from app.utils.sanitize import validate_mbti, sanitize_text
 
 
-# ── 晋升体系常量 ──
+# ── Promotion system constants ──
 CAREER_LEVELS = {
-    0: {"title": "实习生", "tasks_required": 0, "xp_required": 0},
-    1: {"title": "初级员工", "tasks_required": 5, "xp_required": 100},
-    2: {"title": "中级员工", "tasks_required": 15, "xp_required": 350},
-    3: {"title": "高级员工", "tasks_required": 30, "xp_required": 800},
-    4: {"title": "经理", "tasks_required": 50, "xp_required": 1500},
-    5: {"title": "总监", "tasks_required": 80, "xp_required": 3000},
+    0: {"title": "Intern", "tasks_required": 0, "xp_required": 0},
+    1: {"title": "Junior Staff", "tasks_required": 5, "xp_required": 100},
+    2: {"title": "Mid-level Staff", "tasks_required": 15, "xp_required": 350},
+    3: {"title": "Senior Staff", "tasks_required": 30, "xp_required": 800},
+    4: {"title": "Manager", "tasks_required": 50, "xp_required": 1500},
+    5: {"title": "Director", "tasks_required": 80, "xp_required": 3000},
     6: {"title": "CEO", "tasks_required": 120, "xp_required": 5000},
 }
 
 DEPARTMENTS = ["engineering", "marketing", "finance", "hr"]
 
-# 双轨制职业路径（Lv.4+）
+# Dual career path（Lv.4+）
 CAREER_PATHS = {
     "management": {
-        4: {"title": "经理", "tasks_required": 50, "xp_required": 1500, "bonus_attrs": ["leadership", "communication"]},
-        5: {"title": "总监", "tasks_required": 80, "xp_required": 3000, "bonus_attrs": ["leadership", "communication"]},
+        4: {"title": "Manager", "tasks_required": 50, "xp_required": 1500, "bonus_attrs": ["leadership", "communication"]},
+        5: {"title": "Director", "tasks_required": 80, "xp_required": 3000, "bonus_attrs": ["leadership", "communication"]},
         6: {"title": "CEO", "tasks_required": 120, "xp_required": 5000, "bonus_attrs": ["leadership", "communication"]},
     },
     "technical": {
-        4: {"title": "技术专家", "tasks_required": 50, "xp_required": 1500, "bonus_attrs": ["technical", "creativity"]},
-        5: {"title": "首席工程师", "tasks_required": 80, "xp_required": 3000, "bonus_attrs": ["technical", "creativity"]},
+        4: {"title": "Technical Expert", "tasks_required": 50, "xp_required": 1500, "bonus_attrs": ["technical", "creativity"]},
+        5: {"title": "Principal Engineer", "tasks_required": 80, "xp_required": 3000, "bonus_attrs": ["technical", "creativity"]},
         6: {"title": "CTO", "tasks_required": 120, "xp_required": 5000, "bonus_attrs": ["technical", "creativity"]},
     },
 }
 
 
 def get_career_title(level: int, career_path: str = "management") -> str:
-    """根据等级和职业路径获取职称"""
+    """Obtain professional titles based on level and career path"""
     if level < 4:
-        return CAREER_LEVELS.get(level, {}).get("title", "未知")
+        return CAREER_LEVELS.get(level, {}).get("title", "Unknown")
     path_data = CAREER_PATHS.get(career_path, CAREER_PATHS["management"])
-    return path_data.get(level, {}).get("title", CAREER_LEVELS.get(level, {}).get("title", "未知"))
+    return path_data.get(level, {}).get("title", CAREER_LEVELS.get(level, {}).get("title", "Unknown"))
 
 
 # ── AgentProfile ──

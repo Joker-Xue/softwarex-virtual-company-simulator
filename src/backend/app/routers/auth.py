@@ -1,4 +1,4 @@
-from datetime import timedelta
+﻿from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.models.email_verification import EmailVerificationToken
 from app.models.user import User
 from app.schemas.user import UserResponse
 from app.utils.captcha import generate_captcha, verify_captcha
@@ -26,22 +27,39 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=6, max_length=100)
     full_name: str | None = Field(None, max_length=100)
+    verification_code: str = Field(..., min_length=6, max_length=6)
 
 
-@router.get("/captcha", summary="获取图形验证码")
+@router.get("/captcha", summary="Get Captcha")
 async def get_captcha():
     captcha_id, svg = generate_captcha()
-    return {"captcha_id": captcha_id, "svg": svg, "expires_in": 300}
+    return {
+        "captcha_id": captcha_id,
+        "svg": svg,
+        "expires_in": 300,
+    }
 
 
-@router.post("/register", summary="注册账号")
+@router.post("/register", summary="Register Account")
 async def register(request: RegisterRequest, db: AsyncSession = Depends(get_db)):
     existing = await db.execute(
         select(User).where((User.username == request.username) | (User.email == request.email))
     )
     if existing.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="用户已存在")
+        raise HTTPException(status_code=400, detail="User already exists")
 
+    verification = await db.execute(
+        select(EmailVerificationToken)
+        .where(EmailVerificationToken.email == request.email)
+        .order_by(EmailVerificationToken.created_at.desc())
+    )
+    token_row = verification.scalars().first()
+    if token_row is None or token_row.used or token_row.token != request.verification_code:
+        raise HTTPException(status_code=400, detail="Email verification code is invalid")
+    if token_row.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="email verification code has expired")
+
+    token_row.used = True
     user = User(
         username=request.username,
         email=request.email,
@@ -66,21 +84,23 @@ async def register(request: RegisterRequest, db: AsyncSession = Depends(get_db))
     }
 
 
-@router.post("/login", summary="用户登录")
+@router.post("/login", summary="User Login")
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
-    captcha_id: str = Query(""),
-    captcha_code: str = Query(""),
+    captcha_id: str = Query(...),
+    captcha_code: str = Query(...),
     db: AsyncSession = Depends(get_db),
 ):
-    if captcha_id and captcha_code:
-        if not verify_captcha(captcha_id, captcha_code):
-            raise HTTPException(status_code=400, detail="验证码错误")
+    if not verify_captcha(captcha_id, captcha_code):
+        raise HTTPException(status_code=400, detail="Verification code error")
 
     result = await db.execute(select(User).where(User.username == form_data.username))
     user = result.scalar_one_or_none()
     if user is None or not verify_password(form_data.password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="用户名或密码错误")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="wrong username or password",
+        )
 
     access_token = create_access_token(
         data={"sub": str(user.id)},
@@ -94,6 +114,6 @@ async def login(
     }
 
 
-@router.get("/me", response_model=UserResponse, summary="当前用户")
+@router.get("/me", response_model=UserResponse, summary="Current User")
 async def me(current_user: User = Depends(get_current_active_user)):
     return current_user

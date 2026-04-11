@@ -96,14 +96,14 @@ async function setSimSpeed(speed: number) {
       <div class="world-layout">
         <div class="canvas-area">
           <div class="canvas-header">
-            <h3>🏢 Virtual Company</h3>
+            <h3>🏢 virtual company</h3>
             <div class="header-controls">
               <div class="speed-controls">
-                <span class="speed-label">Sim Speed</span>
+                <span class="speed-label">SimulateSpeed</span>
                 <button v-for="s in [1, 2, 5]" :key="s" class="speed-btn" :class="{ active: simSpeed === s }" @click="setSimSpeed(s)">{{ s }}x</button>
               </div>
               <span class="ws-status" :class="{ online: store.wsConnected }">
-                {{ store.wsConnected ? '● Connected' : '○ Disconnected' }}
+                {{ store.wsConnected ? '● Connected' : '○ Not connected' }}
               </span>
             </div>
           </div>

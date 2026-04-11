@@ -1,10 +1,10 @@
 """
-MBTI 性格兼容性引擎 - 关系动力学 (C-17)
+MBTI PersonalityCompatibleSexEngine - Relationship Dynamics (C-17)
 
-基于MBTI理论计算两种性格类型之间的兼容性分数。
+Calculate the compatibility scores between two personality types based on MBTI theory。
 """
 
-# 所有16种MBTI类型
+# All 16 MBTItypes
 MBTI_TYPES = [
     "INTJ", "INTP", "ENTJ", "ENTP",
     "INFJ", "INFP", "ENFJ", "ENFP",
@@ -12,7 +12,7 @@ MBTI_TYPES = [
     "ISTP", "ISFP", "ESTP", "ESFP",
 ]
 
-# 高兼容性配对 (0.85-1.0) - 互补类型
+# Highly compatible pairing (0.85-1.0) - complementary type
 HIGH_COMPAT_PAIRS: dict[frozenset[str], float] = {
     frozenset({"INTJ", "ENTP"}): 0.95,
     frozenset({"INTJ", "ENFP"}): 0.90,
@@ -42,7 +42,7 @@ HIGH_COMPAT_PAIRS: dict[frozenset[str], float] = {
     frozenset({"ESFP", "ISTJ"}): 0.90,
 }
 
-# 低兼容性配对 (0.20-0.49) - 冲突类型
+# Low compatible pairing (0.20-0.49) - conflict type
 LOW_COMPAT_PAIRS: dict[frozenset[str], float] = {
     frozenset({"INTJ", "ESFP"}): 0.35,
     frozenset({"INTJ", "ESFJ"}): 0.40,
@@ -62,41 +62,41 @@ LOW_COMPAT_PAIRS: dict[frozenset[str], float] = {
     frozenset({"ESFP", "INTJ"}): 0.35,
 }
 
-# MBTI分组: 同组内为中等兼容性
+# MBTI: Mediumcompatible within the same group
 MBTI_GROUPS = {
-    "NT": {"INTJ", "INTP", "ENTJ", "ENTP"},     # 分析家
-    "NF": {"INFJ", "INFP", "ENFJ", "ENFP"},      # 外交家
-    "SJ": {"ISTJ", "ISFJ", "ESTJ", "ESFJ"},      # 守卫者
-    "SP": {"ISTP", "ISFP", "ESTP", "ESFP"},       # 探索者
+    "NT": {"INTJ", "INTP", "ENTJ", "ENTP"},     # analyze home
+    "NF": {"INFJ", "INFP", "ENFJ", "ENFP"},      # diplomat
+    "SJ": {"ISTJ", "ISFJ", "ESTJ", "ESFJ"},      # Defender
+    "SP": {"ISTP", "ISFP", "ESTP", "ESFP"},       # explorer
 }
 
-# 关系建议模板
+# Relationship Advice Template
 COMPATIBILITY_TIPS: dict[str, list[str]] = {
-    "极佳": [
-        "你们是天生的互补搭档，沟通高效且默契十足。",
-        "在项目合作中，你们能很好地弥补彼此的不足。",
-        "建议多安排协作任务，发挥1+1>2的效果。",
+    "excellent": [
+        "You are a natural complement to each other，Efficient communication and good understanding。",
+        "In project cooperation，You complement each other's shortcomings very well.",
+        "It is recommended to arrange more collaboration tasks，Play 1+1>2 effects。",
     ],
-    "良好": [
-        "你们的合作基础不错，有较多共同点。",
-        "在同类型项目中配合顺畅，适合做同组队友。",
-        "建议通过交流加深理解，进一步提升默契。",
+    "good": [
+        "Your cooperation base is good，have more in common。",
+        "Cooperate smoothly in Same type projects，Suitable for being teammates in the same group。",
+        "It is recommended to deepen understanding through communication，Further enhance tacit understanding。",
     ],
-    "一般": [
-        "你们的思维模式有一定差异，需要更多沟通。",
-        "在合作时注意换位思考，尊重对方的工作方式。",
-        "建议在非紧急项目中增加互动，逐步磨合。",
+    "generally": [
+        "There are certain differences in your thinking patterns，Need more communication。",
+        "When cooperating, pay attention to transposition Thinking，Respect each other's way of working。",
+        "Recommended to increase interaction in non-emergency projects，Gradually break in。",
     ],
-    "较低": [
-        "你们的性格差异较大，容易产生摩擦。",
-        "合作时需要特别注意沟通方式，避免冲突。",
-        "建议通过导师制或团建活动增进了解。",
+    "lower": [
+        "Your personalities are quite different，prone to friction。",
+        "When collaborating, special attention needs to be paid to communication methods，avoid conflict。",
+        "It is recommended to enhance understanding through mentorship or Team BuildingActivity.",
     ],
 }
 
 
 def _get_group(mbti: str) -> str | None:
-    """获取MBTI类型所属分组"""
+    """Get the group to which MBTItype belongs"""
     for group_name, members in MBTI_GROUPS.items():
         if mbti in members:
             return group_name
@@ -104,87 +104,87 @@ def _get_group(mbti: str) -> str | None:
 
 
 def _count_shared_dimensions(mbti_a: str, mbti_b: str) -> int:
-    """计算两个MBTI类型共享的维度数量 (0-4)"""
+    """Calculate the number of dimensions shared by two MBTI types (0-4)"""
     return sum(1 for a, b in zip(mbti_a, mbti_b) if a == b)
 
 
 def get_compatibility(mbti_a: str, mbti_b: str) -> float:
     """
-    计算两个MBTI类型的兼容性分数。
+    Calculate the compatibility scores of two MBTI types。
 
     Args:
-        mbti_a: 第一个MBTI类型 (如 "INTJ")
-        mbti_b: 第二个MBTI类型 (如 "ENTP")
+        mbti_a: The first MBTI type (like "INTJ")
+        mbti_b: Second MBTI type (like "ENTP")
 
     Returns:
-        0.0 到 1.0 之间的兼容性分数
+        0.0 1.0 Compatibility score between
     """
     mbti_a = mbti_a.upper().strip()
     mbti_b = mbti_b.upper().strip()
 
-    # 相同类型
+    # Same type
     if mbti_a == mbti_b:
         return 0.75
 
-    # 检查高兼容性配对
+    # Check for high-compatibility pairings
     pair = frozenset({mbti_a, mbti_b})
     if pair in HIGH_COMPAT_PAIRS:
         return HIGH_COMPAT_PAIRS[pair]
 
-    # 检查低兼容性配对
+    # Check for low-compatibility pairings
     if pair in LOW_COMPAT_PAIRS:
         return LOW_COMPAT_PAIRS[pair]
 
-    # 同组: 中等兼容性，根据共享维度微调
+    # In the same group: Mediumcompatible，Fine-tune based on shared dimensions
     group_a = _get_group(mbti_a)
     group_b = _get_group(mbti_b)
     shared = _count_shared_dimensions(mbti_a, mbti_b)
 
     if group_a == group_b and group_a is not None:
-        # 同组内: 0.60 - 0.80 基于共享维度
+        # Within the same group: 0.60 - 0.80 based on shared dimensions
         return 0.55 + shared * 0.07
 
-    # 其他情况: 根据共享维度计算
-    # 0个共享: 0.45, 1个: 0.52, 2个: 0.59, 3个: 0.66
+    # Other cases: Calculated based on shared dimensions
+    # 0 shares: 0.45, 1indivual: 0.52, 2indivual: 0.59, 3indivual: 0.66
     return 0.40 + shared * 0.08
 
 
 def get_compatibility_label(score: float) -> str:
     """
-    根据兼容性分数返回标签。
+    Back tag based on compatibility score。
 
     Args:
-        score: 0.0 到 1.0 的分数
+        score: 0.0 to a score of 1.0
 
     Returns:
-        "极佳" / "良好" / "一般" / "较低"
+        "excellent" / "good" / "generally" / "lower"
     """
     if score >= 0.85:
-        return "极佳"
+        return "excellent"
     elif score >= 0.60:
-        return "良好"
+        return "good"
     elif score >= 0.45:
-        return "一般"
+        return "generally"
     else:
-        return "较低"
+        return "lower"
 
 
 def get_compatibility_tips(mbti_a: str, mbti_b: str) -> str:
     """
-    根据两个MBTI类型返回关系建议。
+    Back relationship recommendations based on two MBTI types。
 
     Args:
-        mbti_a: 第一个MBTI类型
-        mbti_b: 第二个MBTI类型
+        mbti_a: The first MBTI type
+        mbti_b: Second MBTI type
 
     Returns:
-        关系建议文本
+        relationship advice text
     """
     score = get_compatibility(mbti_a, mbti_b)
     label = get_compatibility_label(score)
-    tips = COMPATIBILITY_TIPS.get(label, COMPATIBILITY_TIPS["一般"])
+    tips = COMPATIBILITY_TIPS.get(label, COMPATIBILITY_TIPS["generally"])
 
-    # 根据具体类型组合给出更细化的建议
+    # Give more detailed suggestions based on specific type combinations
     mbti_a = mbti_a.upper().strip()
     mbti_b = mbti_b.upper().strip()
     group_a = _get_group(mbti_a)
@@ -192,22 +192,22 @@ def get_compatibility_tips(mbti_a: str, mbti_b: str) -> str:
 
     base_tip = tips[0]
 
-    # 补充细节
+    # Additional details
     if group_a == "NT" and group_b == "NF":
-        base_tip += " 理性分析与情感洞察的结合能产生独特视角。"
+        base_tip += " The combination of rational analysis and Feeling insights can produce a unique perspective。"
     elif group_a == "NF" and group_b == "NT":
-        base_tip += " 情感洞察与理性分析的结合能产生独特视角。"
+        base_tip += " FeelingThe combination of insight and rational analysis creates a unique perspective。"
     elif group_a == "SJ" and group_b == "SP":
-        base_tip += " 稳健执行与灵活应变的组合在团队中很有价值。"
+        base_tip += " The combination of solid execution and flexibility is valuable in a team。"
     elif group_a == "SP" and group_b == "SJ":
-        base_tip += " 灵活应变与稳健执行的组合在团队中很有价值。"
+        base_tip += " The combination of flexibility and solid execution is valuable in a team。"
     elif group_a == "NT" and group_b == "SJ":
-        base_tip += " 战略思维与细节执行的搭配可以确保计划落地。"
+        base_tip += " The combination of strategic thinking and detailed execution can ensure the implementation of the plan。"
     elif group_a == "SJ" and group_b == "NT":
-        base_tip += " 细节执行与战略思维的搭配可以确保计划落地。"
+        base_tip += " The combination of detailed execution and strategic thinking can ensure the implementation of the plan."
     elif group_a == "NF" and group_b == "SP":
-        base_tip += " 理想主义与实用主义的碰撞能激发创新。"
+        base_tip += " The collision of idealism and pragmatism can inspire innovation。"
     elif group_a == "SP" and group_b == "NF":
-        base_tip += " 实用主义与理想主义的碰撞能激发创新。"
+        base_tip += " The collision of pragmatism and idealism can inspire innovation。"
 
     return base_tip

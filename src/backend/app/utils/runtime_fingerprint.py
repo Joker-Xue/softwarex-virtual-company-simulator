@@ -1,8 +1,8 @@
 """
-运行态行为指纹工具。
+Running Behavior fingerprint tool.
 
-用于确认当前进程加载的是哪一版虚拟公司行为逻辑，
-避免“代码已改但服务仍跑旧进程”造成误判。
+Used to confirm which version of virtual is loaded by the Current process companyBehaviorLogic，
+Avoid misjudgments caused by "the code has been changed but the service is still running the old process".
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ def _hash_source(obj: Any) -> str:
 
 def get_runtime_fingerprint() -> dict:
     """
-    返回关键函数源码摘要与策略版本号。
+    BackKey function source code summary and strategy version number。
     """
     parts = {
         "get_anchor_spot": _hash_source(named_spots.get_anchor_spot),

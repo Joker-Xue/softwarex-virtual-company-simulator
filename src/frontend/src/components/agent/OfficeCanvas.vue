@@ -72,8 +72,8 @@ function directionFromDelta(dx: number, dy: number): SpriteOptions['direction'] 
 // ---- Draw loop ----
 
 /**
- * 绘制静态元素到离屏canvas（地板、网格、房间）
- * 仅在 staticDirty 为 true 时重新绘制
+ * Draw static elements to off-screen canvas（floor、grid、Room）
+ * Redraw only when staticDirty is true
  */
 /** Draw a single furniture item inside a room */
 function drawFurniture(c: CanvasRenderingContext2D, room: RoomConfig, item: FurnitureItem) {
@@ -424,11 +424,11 @@ function drawStatic() {
 
   // ── Spot legend (bottom-right corner) ──
   const legendItems: Array<{ label: string; color: string }> = [
-    { label: 'Executive', color: SPOT_COLORS.anchor },
-    { label: 'Workstation',     color: SPOT_COLORS.work },
-    { label: 'Visitor',   color: SPOT_COLORS.visitor },
-    { label: 'Rest Area',   color: SPOT_COLORS.rest },
-    { label: 'Meeting',   color: SPOT_COLORS.meeting },
+    { label: 'executive anchor', color: SPOT_COLORS.anchor },
+    { label: 'desk',     color: SPOT_COLORS.work },
+    { label: "Visitor's seat",   color: SPOT_COLORS.visitor },
+    { label: 'Rest area',   color: SPOT_COLORS.rest },
+    { label: 'meeting chair',   color: SPOT_COLORS.meeting },
   ]
   const legendX = w - 72
   const legendStartY = h - 6 - legendItems.length * 14
@@ -470,7 +470,7 @@ function darkenHex(hex: string, amount: number): string {
 function draw() {
   if (!ctx || !canvasRef.value) return
 
-  // 帧率节流
+  // Frame rate throttling
   const now = performance.now()
   if (now - lastDrawTime < FRAME_INTERVAL) {
     animFrame = requestAnimationFrame(draw)
@@ -483,13 +483,13 @@ function draw() {
   ctx.clearRect(0, 0, w, h)
   tickCounter++
 
-  // 检测楼层变化，标记静态层需要重绘
+  // DetectionFloor changes，mark static layer needs to be redrawn
   if (store.currentFloor !== lastFloor) {
     staticDirty = true
     lastFloor = store.currentFloor
   }
 
-  // 绘制静态层（离屏canvas）
+  // Draw static layer（Off-screen canvas）
   if (staticDirty) {
     drawStatic()
   }
@@ -497,7 +497,7 @@ function draw() {
     ctx.drawImage(staticCanvas, 0, 0)
   }
 
-  // 绘制悬停高亮（动态，跟随鼠标）— neon highlight
+  // Draw a hover highlight（dynamic，follow mouse）— neon highlight
   for (const room of currentRooms.value) {
     if (hoveredRoom === room.name) {
       const rawHex = room.color.replace('#', '')
@@ -517,7 +517,7 @@ function draw() {
     }
   }
 
-  // ---- 绘制在线Profile (sprite版) ----
+  // ---- Draw online role (sprite version) ----
   const allAgents = [...store.onlineAgents]
   if (store.myProfile) {
     const myIdx = allAgents.findIndex(a => a.id === store.myProfile!.id)
@@ -530,10 +530,10 @@ function draw() {
   for (const agent of allAgents) {
     const id = agent.id
 
-    // ── 楼层过滤：pos_y 包含楼层偏移，解码出所在楼层 ──
+    // ── floor filter：pos_y Includes floor offset，Decode the floor ──
     const agentFloor = Math.floor(agent.pos_y / FLOOR_Y_OFFSET) + 1
     if (agentFloor !== store.currentFloor) {
-      // 该Profile不在当前楼层，清理其动画状态并跳过渲染
+      // This role is not on the Current floor，Clean its animationstate and skip rendering
       displayPositions.delete(id)
       prevPositions.delete(id)
       walkFrames.delete(id)
@@ -544,7 +544,7 @@ function draw() {
     presentIds.add(id)
 
     const targetX = agent.pos_x
-    const targetY = agent.pos_y % FLOOR_Y_OFFSET  // 解码画布y（去掉楼层偏移）
+    const targetY = agent.pos_y % FLOOR_Y_OFFSET  // Decoding canvasy（Remove floor offset）
     const color = AVATAR_COLORS[agent.avatar_key] || '#6366f1'
 
     // --- Interpolate display position toward target ---
@@ -647,7 +647,7 @@ function handleClick(e: MouseEvent) {
   const x = Math.round((e.clientX - rect.left) * scaleX)
   const y = Math.round((e.clientY - rect.top) * scaleY)
 
-  // 检查是否点击了其他Profile (use display positions for accurate hit-test)
+  // Check if other Roles are clicked (use display positions for accurate hit-test)
   const allAgents = store.onlineAgents
   for (const agent of allAgents) {
     if (agent.id === store.myProfile.id) continue
@@ -662,7 +662,7 @@ function handleClick(e: MouseEvent) {
     }
   }
 
-  // 否则移动
+  // Otherwise move
   store.moveAgent(x, y)
 }
 
@@ -704,7 +704,7 @@ function handleDblClick(e: MouseEvent) {
 onMounted(() => {
   if (canvasRef.value) {
     ctx = canvasRef.value.getContext('2d')
-    // 创建离屏canvas用于静态元素缓存
+    // Create an off-screen canvas for static element cache
     staticCanvas = document.createElement('canvas')
     staticCanvas.width = CANVAS_WIDTH
     staticCanvas.height = CANVAS_HEIGHT

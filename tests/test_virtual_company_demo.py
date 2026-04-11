@@ -1,13 +1,13 @@
 """
-虚拟公司 Demo 自动测试脚本
-测试内容：
-1. NPC种子系统（幂等性、数据完整性）
-2. 模拟引擎（tick执行、状态机流转）
-3. MBTI行为差异（工作/社交权重）
-4. 自动任务完成 + 晋升
-5. 模拟控制端点（status/speed/seed）
-6. 角色创建（强制实习生 + ai_enabled）
-7. 前端构建验证
+virtual company Demo Automatic Tests Script
+Tests content：
+1. NPCseed system（Idempotence、data integrity）
+2. Simulation engine（Tick execution, state machine transfer）
+3. MBTIBehaviorDifference（Work/Social weight）
+4. Automatic Task Completion + Promotion
+5. simulation control endpoints（status/speed/seed）
+6. Character creation（force Intern + ai_enabled）
+7. Front-end build verification
 """
 import asyncio
 import os
@@ -107,10 +107,10 @@ async def auth_token(client: AsyncClient):
 # ═══════════════════════════════════════════════════════════════
 
 class TestNPCSeeder:
-    """测试NPC种子系统"""
+    """TestsNPCseed system"""
 
     def test_npc_roster_complete(self):
-        """NPC名单应覆盖各级别"""
+        """The NPC list should cover all levels"""
         assert len(NPC_ROSTER) >= 12
         levels = {npc["career_level"] for npc in NPC_ROSTER}
         assert 1 in levels
@@ -121,7 +121,7 @@ class TestNPCSeeder:
         assert 6 in levels
 
     def test_npc_roster_departments(self):
-        """NPC应覆盖4个部门"""
+        """NPCShould cover 4 Departments"""
         depts = {npc["department"] for npc in NPC_ROSTER}
         assert "engineering" in depts
         assert "marketing" in depts
@@ -129,7 +129,7 @@ class TestNPCSeeder:
         assert "hr" in depts
 
     def test_npc_roster_mbti_valid(self):
-        """每个NPC的MBTI应为有效4字符"""
+        """Each NPC's MBTI should be valid 4 characters"""
         for npc in NPC_ROSTER:
             mbti = npc["mbti"]
             assert len(mbti) == 4
@@ -139,7 +139,7 @@ class TestNPCSeeder:
             assert mbti[3] in "JP"
 
     def test_npc_roster_xp_matches_level(self):
-        """每个NPC的tasks_completed和xp应满足其career_level要求"""
+        """Each NPC's tasks_completed and xp should meet its career_level requirements"""
         for npc in NPC_ROSTER:
             level = npc["career_level"]
             req = CAREER_LEVELS[level]
@@ -150,7 +150,7 @@ class TestNPCSeeder:
 
     @pytest.mark.asyncio
     async def test_seed_npcs_idempotent(self, client):
-        """seed_npcs应幂等，第二次调用返回0"""
+        """seed_npcs should be idempotent，Call Back0 for the second time"""
         resp1 = await client.post("/api/simulation/seed-npcs")
         assert resp1.status_code == 200
         count1 = resp1.json()["seeded"]
@@ -158,7 +158,7 @@ class TestNPCSeeder:
         resp2 = await client.post("/api/simulation/seed-npcs")
         assert resp2.status_code == 200
         count2 = resp2.json()["seeded"]
-        # 如果第一次已经seed了，第二次一定是0
+        # If it has been seeded for the first time，The second time must be 0
         if count1 > 0:
             assert count2 == 0
 
@@ -168,43 +168,43 @@ class TestNPCSeeder:
 # ══════════════════════════════════════════════���════════════════
 
 class TestMBTIMultipliers:
-    """测试MBTI性格对行为的影响"""
+    """TestsMBTIpersonality's impact on Behavior"""
 
     def test_introvert_works_faster(self):
-        """内向型工作效率应高于外向型"""
+        """Introversion typeWork speedShould be higher than Extraversion type"""
         assert get_work_speed("ISTJ") > get_work_speed("ESTJ")
         assert get_work_speed("INTJ") > get_work_speed("ENTJ")
 
     def test_extrovert_socializes_better(self):
-        """外向型社交加成应高于内向型"""
+        """Extraversion typeSocial BonusShould be higher than Introversion type"""
         assert get_social_bonus("ENFJ") > get_social_bonus("INFJ")
         assert get_social_bonus("ESTP") > get_social_bonus("ISTP")
 
     def test_intuitive_xp_bonus_on_hard_tasks(self):
-        """直觉型在高难度任务上应有XP加成"""
+        """IntuitionTypes should have an XP bonus on difficult missions"""
         assert get_xp_bonus("INTJ", 4) > get_xp_bonus("ISTJ", 4)
-        # 低难度任务应无差异（N bonus only on difficulty >= 3）
+        # There should be no difference between low difficulty tasks（N bonus only on difficulty >= 3）
         assert get_xp_bonus("INTJ", 1) >= 1.0
 
     def test_thinker_goes_technical(self):
-        """T型MBTI应自动选择技术路线"""
+        """TType MBTI should automatically select Technical Track"""
         assert get_auto_career_path("INTJ") == "technical"
         assert get_auto_career_path("ISTP") == "technical"
         assert get_auto_career_path("ENTJ") == "technical"
 
     def test_feeler_goes_management(self):
-        """F型MBTI应自动选择管理路线"""
+        """FType MBTI should automatically select Management Track"""
         assert get_auto_career_path("INFJ") == "management"
         assert get_auto_career_path("ESFJ") == "management"
         assert get_auto_career_path("ENFP") == "management"
 
     def test_work_speed_always_positive(self):
-        """所有MBTI类型的工作速度应为正数"""
+        """MBTItypeWork SpeedShould be a positive number"""
         for mbti in ["INTJ", "ENFP", "ISTP", "ESFJ", "XXXX"]:
             assert get_work_speed(mbti) > 0
 
     def test_social_bonus_always_positive(self):
-        """所有MBTI类型的社交加成应为正数"""
+        """All MBTI types Social BonusShould be a positive number"""
         for mbti in ["INTJ", "ENFP", "ISTP", "ESFJ"]:
             assert get_social_bonus(mbti) > 0
 
@@ -214,10 +214,10 @@ class TestMBTIMultipliers:
 # ═══════════════════════════════════════════════════════════════
 
 class TestSimulationLoop:
-    """测试模拟引擎核心逻辑"""
+    """Tests simulate the core logic of the engine"""
 
     def test_get_status(self):
-        """get_status应返回正确结构"""
+        """get_statusShould Back the correct structure"""
         status = get_status()
         assert "tick_count" in status
         assert "tick_interval" in status
@@ -225,7 +225,7 @@ class TestSimulationLoop:
         assert "running" in status
 
     def test_set_speed(self):
-        """set_speed应正确调整tick间隔"""
+        """set_speed should adjust tick intervals correctly"""
         set_speed(1)
         assert get_status()["tick_interval"] == 30
         set_speed(2)
@@ -238,9 +238,9 @@ class TestSimulationLoop:
         set_speed(1)
 
     def test_save_sim_state(self):
-        """_save_sim_state应正确写入和替换sim state"""
+        """_save_sim_state should correctly write and replace sim state"""
         class FakeAgent:
-            daily_schedule = [{"time": "09:00", "activity": "工作", "room_type": "office"}]
+            daily_schedule = [{"time": "09:00", "activity": "Work", "room_type": "office"}]
         agent = FakeAgent()
         _save_sim_state(agent, {"action_started_at": 12345})
         # Should have original schedule + sim state
@@ -257,11 +257,11 @@ class TestSimulationLoop:
 # ═══════════════════════════════════════════════════════════════
 
 class TestSimulationEndpoints:
-    """测试模拟控制API端点"""
+    """Tests simulation control API endpoint"""
 
     @pytest.mark.asyncio
     async def test_status_endpoint(self, client):
-        """GET /api/simulation/status 应返回正确结构"""
+        """GET /api/simulation/status Should Back the correct structure"""
         resp = await client.get("/api/simulation/status")
         assert resp.status_code == 200
         data = resp.json()
@@ -272,7 +272,7 @@ class TestSimulationEndpoints:
 
     @pytest.mark.asyncio
     async def test_speed_endpoint(self, client):
-        """POST /api/simulation/speed 应正确调整速度"""
+        """POST /api/simulation/speed Speed should be adjusted correctly"""
         resp = await client.post("/api/simulation/speed?multiplier=2")
         assert resp.status_code == 200
         data = resp.json()
@@ -282,7 +282,7 @@ class TestSimulationEndpoints:
 
     @pytest.mark.asyncio
     async def test_speed_validation(self, client):
-        """速度倍率应在0.5-10范围内"""
+        """Speed ratio should be in the range of 0.5-10"""
         resp = await client.post("/api/simulation/speed?multiplier=0.1")
         assert resp.status_code == 422
         resp = await client.post("/api/simulation/speed?multiplier=20")
@@ -290,7 +290,7 @@ class TestSimulationEndpoints:
 
     @pytest.mark.asyncio
     async def test_diagnostics_endpoint(self, client):
-        """GET /api/simulation/diagnostics 返回指纹与分布结构"""
+        """GET /api/simulation/diagnostics Back fingerprint and distribution structure"""
         resp = await client.get("/api/simulation/diagnostics")
         assert resp.status_code == 200
         data = resp.json()
@@ -305,7 +305,7 @@ class TestSimulationEndpoints:
 
     @pytest.mark.asyncio
     async def test_rebuild_npcs_endpoint(self, client):
-        """POST /api/simulation/rebuild-npcs 应返回重建报告"""
+        """POST /api/simulation/rebuild-npcs Should Back rebuild the report"""
         resp = await client.post("/api/simulation/rebuild-npcs")
         assert resp.status_code == 200
         payload = resp.json()
@@ -322,11 +322,11 @@ class TestSimulationEndpoints:
 # ═══════════════════════════════════════════════════════════════
 
 class TestProfileCreation:
-    """测试角色创建（强制实习生 + AI自动操控）"""
+    """TestsCharacter creation（force Intern + AI automatic control）"""
 
     @pytest.mark.asyncio
     async def test_create_profile_forced_intern(self, client, auth_token):
-        """创建角色应强制career_level=0"""
+        """create profileCareer_level should be mandatory=0"""
         resp = await client.post("/api/agent/profile", json={
             "nickname": "TestAgent_" + str(int(time.time()))[-4:],
             "mbti": "INTJ",
@@ -338,15 +338,15 @@ class TestProfileCreation:
             "attr_teamwork": 50,
             "attr_diligence": 50,
         }, headers={"Authorization": "Bearer " + auth_token})
-        if resp.status_code == 400 and "已创建" in resp.text:
+        if resp.status_code == 400 and "already created" in resp.text:
             # Profile already exists, get it
             resp = await client.get("/api/agent/profile",
                                     headers={"Authorization": "Bearer " + auth_token})
         assert resp.status_code == 200, resp.text
         data = resp.json()
         profile = data if "career_level" in data else data.get("data", data)
-        assert profile["career_level"] == 0, "新角色应从实习生(level 0)开始"
-        assert profile["ai_enabled"] is True, "新角色应默认AI操控"
+        assert profile["career_level"] == 0, "The new Role should start from Intern(level 0)start"
+        assert profile["ai_enabled"] is True, "New characters should be controlled by defaultAI"
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -354,11 +354,11 @@ class TestProfileCreation:
 # ═══════════════════════════════════════════════════════════════
 
 class TestPromotionLogic:
-    """测试晋升逻辑"""
+    """Tests promotion logic"""
 
     @pytest.mark.asyncio
     async def test_check_and_promote(self):
-        """满足条件时应自动晋升"""
+        """Should be automatically promoted when msgs requirements are met"""
         class FakeAgent:
             id = 999
             career_level = 0
@@ -375,11 +375,11 @@ class TestPromotionLogic:
         agent = FakeAgent()
         db = FakeDB()
         await _check_and_promote(db, agent)
-        assert agent.career_level == 1, "满足Lv.1条件(5tasks, 100xp)应晋升"
+        assert agent.career_level == 1, "Meet Lv.1 msgs piece(5tasks, 100xp)Should be promoted"
 
     @pytest.mark.asyncio
     async def test_no_promote_below_threshold(self):
-        """不满足条件时不应晋升"""
+        """You should not be promoted if you do not meet the msgs requirements"""
         class FakeAgent:
             id = 999
             career_level = 0
@@ -396,10 +396,10 @@ class TestPromotionLogic:
         agent = FakeAgent()
         db = FakeDB()
         await _check_and_promote(db, agent)
-        assert agent.career_level == 0, "未满足条件不应晋升"
+        assert agent.career_level == 0, "Unsatisfied msgs should not be promoted"
 
     def test_auto_career_path_at_level4(self):
-        """晋升到Lv.4时应根据MBTI自动选择路线"""
+        """When promoted to Level 4, the route should be automatically selected based on MBTI"""
         # T type → technical
         assert get_auto_career_path("INTJ") == "technical"
         # F type → management
@@ -411,20 +411,20 @@ class TestPromotionLogic:
 # ═══════════════════════════════════════════════════════════════
 
 class TestFrontendBuild:
-    """测试前端构建"""
+    """Tests front-end build"""
 
     def test_frontend_build_succeeds(self):
-        """前端build应无错误"""
+        """Front-end build should be error-free"""
         import subprocess
         subprocess.run(
             ["npm", "install"],
-            cwd=r"D:\林旭燊\2026服创赛\career-planner-merged\frontend",
+            cwd=str((__import__("pathlib").Path(__file__).resolve().parents[1] / "src" / "frontend")),
             capture_output=True, text=True, timeout=300,
             shell=True,
         )
         result = subprocess.run(
             ["npm", "run", "build-only"],
-            cwd=r"D:\林旭燊\2026服创赛\career-planner-merged\frontend",
+            cwd=str((__import__("pathlib").Path(__file__).resolve().parents[1] / "src" / "frontend")),
             capture_output=True, text=True, timeout=180,
             shell=True,
         )
@@ -436,17 +436,17 @@ class TestFrontendBuild:
 # ═══════════════════════════════════════════════════════════════
 
 class TestIntegration:
-    """集成测试"""
+    """Integrated Tests"""
 
     @pytest.mark.asyncio
     async def test_simulation_status_has_agents(self, client):
-        """种子后simulation status应显示agent"""
+        """After seeding the simulation status should showagent"""
         # Ensure NPCs are seeded
         await client.post("/api/simulation/seed-npcs")
         resp = await client.get("/api/simulation/status")
         assert resp.status_code == 200
         data = resp.json()
-        assert data["total_agents"] >= 12, "应至少有12个NPC agent"
+        assert data["total_agents"] >= 12, "There should be at least 12 NPC agents"
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -454,30 +454,30 @@ class TestIntegration:
 # ═══════════════════════════════════════════════════════════════
 
 class TestTransparentDecision:
-    """测试决策透明化"""
+    """Tests decision-making transparency"""
 
     def test_decide_action_returns_tuple(self):
-        """decide_action_simple应返回(action_dict, decision_record)元组"""
+        """decide_action_simpleBack(action_dict, decision_record)tuple"""
         # We test the weight computation directly
         weights = _get_mbti_weights("INTJ")
         assert isinstance(weights, dict)
         assert "work" in weights
-        # I型应增加工作权重
+        # Type I should increase Work weight
         assert weights["work"] > 30  # base is 30, I adds 15
 
     def test_mbti_weights_differ_by_type(self):
-        """不同MBTI的权重应明显不同"""
+        """The weightings of different MBTIs should be significantly different"""
         intj = _get_mbti_weights("INTJ")
         enfp = _get_mbti_weights("ENFP")
         # INTJ should have higher work weight
-        assert intj["work"] > enfp["work"], "INTJ工作权重应高于ENFP"
+        assert intj["work"] > enfp["work"], "INTJWork weight should be higher than ENFP"
         # ENFP should have higher chat weight
-        assert enfp["chat"] > intj["chat"], "ENFP社交权重应高于INTJ"
+        assert enfp["chat"] > intj["chat"], "ENFPSocial weight should be higher than INTJ"
 
     def test_decision_log_append(self):
-        """append_decision_log应正确追加和限制条数"""
+        """append_decision_log should correctly append and limit the number of msgs"""
         class FakeAgent:
-            daily_schedule = [{"time": "09:00", "activity": "工作", "room_type": "office"}]
+            daily_schedule = [{"time": "09:00", "activity": "Work", "room_type": "office"}]
 
         agent = FakeAgent()
         for i in range(55):
@@ -489,9 +489,9 @@ class TestTransparentDecision:
             if isinstance(item, dict) and "_decision_log" in item:
                 log = item["_decision_log"]
                 break
-        assert log is not None, "决策日志应存在"
-        assert len(log) <= 50, "决策日志应限制在50条以内"
-        assert log[-1]["index"] == 54, "最新记录应在末尾"
+        assert log is not None, "Decision log should exist"
+        assert len(log) <= 50, "Decision logs should be limited to 50 msgs"
+        assert log[-1]["index"] == 54, "The latest record should be at the end"
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -499,10 +499,10 @@ class TestTransparentDecision:
 # ═══════════════════════════════════════════════════════════════
 
 class TestTaskPreference:
-    """测试任务偏好排序"""
+    """TestsTask Preference Sorting"""
 
     def test_t_type_prefers_technical(self):
-        """T型应偏好技术类任务"""
+        """TPreference technical tasks"""
         class FakeAgent:
             mbti = "INTJ"
             attr_technical = 90
@@ -512,20 +512,20 @@ class TestTaskPreference:
 
         class TechTask:
             task_type = "technical"
-            title = "API性能优化"
+            title = "API performance optimization"
             difficulty = 3
 
         class SocialTask:
             task_type = "social"
-            title = "团队沟通会议"
+            title = "Team communicationMeeting"
             difficulty = 2
 
         scored = get_task_preference_scores(FakeAgent(), [TechTask(), SocialTask()])
-        assert scored[0][0].task_type == "technical", "INTJ应优先选择技术任务"
-        assert scored[0][1] > scored[1][1], "技术任务分数应更高"
+        assert scored[0][0].task_type == "technical", "INTJ should give priority to technologyTask"
+        assert scored[0][1] > scored[1][1], "technologyTask score should be higher"
 
     def test_f_type_prefers_social(self):
-        """F型应偏好社交类任务"""
+        """FType the PreferenceSocial class task"""
         class FakeAgent:
             mbti = "ENFJ"
             attr_technical = 40
@@ -535,19 +535,19 @@ class TestTaskPreference:
 
         class TechTask:
             task_type = "technical"
-            title = "代码审查"
+            title = "code review"
             difficulty = 2
 
         class SocialTask:
             task_type = "social"
-            title = "新人培训"
+            title = "Training for newcomers"
             difficulty = 2
 
         scored = get_task_preference_scores(FakeAgent(), [TechTask(), SocialTask()])
-        assert scored[0][0].task_type == "social", "ENFJ应优先选择社交任务"
+        assert scored[0][0].task_type == "social", "ENFJs should choose SocialTask first"
 
     def test_scores_include_reasons(self):
-        """偏好分数应包含理由字符串"""
+        """Preference score should include reason string"""
         class FakeAgent:
             mbti = "ISTP"
             attr_technical = 80
@@ -557,15 +557,15 @@ class TestTaskPreference:
 
         class Task:
             task_type = "technical"
-            title = "调试Bug"
+            title = "Debugging Bugs"
             difficulty = 2
 
         scored = get_task_preference_scores(FakeAgent(), [Task()])
         assert len(scored) == 1
         _, score, reason, alignment = scored[0]
-        assert score > 50, "匹配的任务应高于基础分50"
+        assert score > 50, "The matching Task should have a score higher than the Base score of 50"
         assert isinstance(reason, str)
-        assert len(reason) > 0, "应有理由说明"
+        assert len(reason) > 0, "There should be a reason to explain"
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -573,11 +573,11 @@ class TestTaskPreference:
 # ═══════════════════════════════════════════════════════════════
 
 class TestEventDecision:
-    """测试AI活动决策"""
+    """TestsAIactivity decisions"""
 
     @pytest.mark.asyncio
     async def test_dynamic_event_creation_uses_upcoming_ongoing_finished_states(self):
-        """动态事件创建后只能使用 upcoming/ongoing/finished 状态。"""
+        """After a dynamic event is created, it can only use upcoming/ongoing/finished state."""
 
         class FakeResult:
             def __init__(self, *, scalar=None, scalar_one_or_none=None, first=None, items=None):
@@ -641,7 +641,7 @@ class TestEventDecision:
         assert all(event.is_active != "active" for event in fake_db.added)
 
     def test_extrovert_joins_social_event(self):
-        """E型应倾向参加社交活动"""
+        """EPrefers Participate in SocialActivities"""
         class Agent:
             mbti = "ENFP"
             current_action = "idle"
@@ -650,14 +650,14 @@ class TestEventDecision:
 
         class Event:
             event_type = "team_building"
-            name = "周五团建"
+            name = "FridayTeam Building"
 
         joined, interest, reason = should_join_event(Agent(), Event())
-        assert joined is True, "ENFP应参加团建"
+        assert joined is True, "ENFP should join Team Building"
         assert interest >= 50
 
     def test_introvert_avoids_social(self):
-        """I型应倾向回避社交活动"""
+        """IPrefers AvoidSocialActivity"""
         class Agent:
             mbti = "INTJ"
             current_action = "work"
@@ -666,15 +666,15 @@ class TestEventDecision:
 
         class Event:
             event_type = "team_building"
-            name = "周五团建"
+            name = "FridayTeam Building"
 
         joined, interest, reason = should_join_event(Agent(), Event())
         # INTJ working: base 50 - 20(I social) - 15(J working) + 4(comm/10) = 19
-        assert joined is False, "工作中的INTJ应拒绝团建"
+        assert joined is False, "WorkingINTJ should rejectTeam Building"
         assert interest < 50
 
     def test_introvert_joins_tech_event(self):
-        """I型应参加技术活动"""
+        """Type I should participate in technologyActivity"""
         class Agent:
             mbti = "INTP"
             current_action = "idle"
@@ -683,15 +683,15 @@ class TestEventDecision:
 
         class Event:
             event_type = "tech_talk"
-            name = "技术分享会"
+            name = "tech sharing"
 
         joined, interest, reason = should_join_event(Agent(), Event())
         # base 50 + 20(I tech) + 15(T tech) + 9(tech/10) = 94
-        assert joined is True, "INTP应参加技术分享"
+        assert joined is True, "INTP should participate in tech sharing"
         assert interest >= 70
 
     def test_conflict_resolution(self):
-        """冲突活动应选择兴趣度更高的"""
+        """Conflict activities should select preference Score higher"""
         class Agent:
             mbti = "INTJ"
             current_action = "idle"
@@ -700,18 +700,18 @@ class TestEventDecision:
 
         class SocialEvent:
             event_type = "team_building"
-            name = "团建活动"
+            name = "Team BuildingActivity"
 
         class TechEvent:
             event_type = "tech_talk"
-            name = "技术分享"
+            name = "tech sharing"
 
         chosen, comparison = resolve_event_conflict(Agent(), SocialEvent(), TechEvent())
-        assert chosen.name == "技术分享", "INTJ应选择技术分享而非团建"
-        assert "兴趣度" in comparison
+        assert chosen.name == "tech sharing", "INTJ should choose tech sharing instead of Team Building"
+        assert "preference score" in comparison
 
     def test_reason_includes_mbti(self):
-        """决策理由应包含MBTI维度说明"""
+        """The rationale for the decision should include a description of the MBTI dimensions"""
         class Agent:
             mbti = "ESFJ"
             current_action = "idle"
@@ -720,28 +720,28 @@ class TestEventDecision:
 
         class Event:
             event_type = "team_building"
-            name = "团建"
+            name = "Team Building"
 
         _, _, reason = should_join_event(Agent(), Event())
-        assert "E型" in reason, "理由应提及E型"
+        assert "Type E" in reason, "Reasons should be mentioned for Type E"
 
     def test_event_participation_maps_social_events_to_chat(self):
-        """社交活动应映射为 chat 行为。"""
-        event = SimpleNamespace(event_type="team_building", name="周五团建")
+        """SocialActivity should be mapped to chat Behavior."""
+        event = SimpleNamespace(event_type="team_building", name="FridayTeam Building")
         assert _event_action_for(event) == "chat"
 
     def test_event_participation_maps_formal_events_to_meeting(self):
-        """正式活动应映射为 meeting 行为。"""
-        event = SimpleNamespace(event_type="training", name="技术培训")
+        """Formal Activity should be mapped to meeting Behavior."""
+        event = SimpleNamespace(event_type="training", name="technologyTraining")
         assert _event_action_for(event) == "meeting"
 
     def test_event_participation_maps_emergency_events_to_work(self):
-        """紧急事件应映射为 work 行为。"""
-        event = SimpleNamespace(event_type="emergency", name="紧急动员")
+        """Emergency events should be mapped to work Behavior."""
+        event = SimpleNamespace(event_type="emergency", name="Emergency Mobilization")
         assert _event_action_for(event) == "work"
 
     def test_dynamic_event_interval_is_configurable(self):
-        """动态事件轮询间隔应支持环境变量配置。"""
+        """Dynamic event polling intervals should support environment variable configuration。"""
         with patch.dict(os.environ, {"DYNAMIC_EVENT_INTERVAL_SECONDS": "120"}):
             assert _env_int("DYNAMIC_EVENT_INTERVAL_SECONDS", 3600) == 120
 
@@ -751,11 +751,11 @@ class TestEventDecision:
 # ═══════════════════════════════════════════════════════════════
 
 class TestPersonalityTraceAPI:
-    """测试性格轨迹API"""
+    """TestspersonalitytraceAPI"""
 
     @pytest.mark.asyncio
     async def test_personality_trace_endpoint(self, client, auth_token):
-        """GET /api/agent/personality-trace 应返回完整性格数据"""
+        """GET /api/agent/personality-trace Should Back complete personality data"""
         resp = await client.get("/api/agent/personality-trace",
                                 headers={"Authorization": "Bearer " + auth_token})
         if resp.status_code == 404:
@@ -773,7 +773,7 @@ class TestPersonalityTraceAPI:
 
     @pytest.mark.asyncio
     async def test_task_status_endpoint(self, client, auth_token):
-        """GET /api/agent/task-status 应返回任务状态"""
+        """GET /api/agent/task-status Should BackTaskstate"""
         resp = await client.get("/api/agent/task-status",
                                 headers={"Authorization": "Bearer " + auth_token})
         if resp.status_code == 404:

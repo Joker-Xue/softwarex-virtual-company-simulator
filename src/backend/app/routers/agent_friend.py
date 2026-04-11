@@ -1,5 +1,5 @@
 """
-好友系统API
+friendSystem API
 """
 import asyncio
 from datetime import datetime, timezone
@@ -22,7 +22,7 @@ router = APIRouter()
 
 
 async def _npc_auto_accept(friendship_id: int):
-    """NPC自动通过好友申请（5秒延迟，模拟对方审核）"""
+    """NPC automatically applies through friend（5 seconds delay，Simulate counterparty review）"""
     await asyncio.sleep(5)
     async with AsyncSessionLocal() as db:
         try:
@@ -39,14 +39,14 @@ async def _npc_auto_accept(friendship_id: int):
             friendship.accepted_at = datetime.now(timezone.utc)
             await db.commit()
 
-            # 获取NPC昵称用于通知
+            # Get NPCNickname for notification
             npc_result = await db.execute(
                 select(AgentProfile).where(AgentProfile.id == friendship.to_id)
             )
             npc = npc_result.scalar_one_or_none()
             npc_nickname = npc.nickname if npc else "NPC"
 
-            # 推送好友通过通知给申请人
+            # Push friend to notify the applicant
             try:
                 from app.routers.agent_ws import manager
                 await manager.send_to(friendship.from_id, {
@@ -64,12 +64,12 @@ async def _npc_auto_accept(friendship_id: int):
 
 
 def _detect_role(my_level: int, friend_level: int) -> str:
-    """检测导师/学员关系: 如果职级差距 >= 2，较高者为mentor，较低者为mentee"""
+    """Detection Tutor/Student Relationship: If Level Gap >= 2，The higher one is mentor，The lower one is mentee"""
     diff = friend_level - my_level
     if diff >= 2:
-        return "mentor"   # 对方是我的导师
+        return "mentor"   # The other person is my mentor
     elif diff <= -2:
-        return "mentee"   # 对方是我的学员
+        return "mentee"   # The other party is my student
     return ""
 
 
@@ -79,31 +79,31 @@ async def _get_profile(user: User, db: AsyncSession) -> AgentProfile:
     )
     profile = result.scalar_one_or_none()
     if not profile:
-        raise HTTPException(404, "尚未创建角色")
+        raise HTTPException(404, "Profile has not been created yet")
     return profile
 
 
-@router.post("/request/{agent_id}", summary="发送好友请求")
+@router.post("/request/{agent_id}", summary="Send Friend Request")
 async def send_request(
     agent_id: int,
     request: Request,
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
 ):
-    # 限流：每用户每小时10次
+    # rate limit：10 times per user per hour
     await check_rate_limit(f"friend_req:{user.id}", max_calls=10, window_seconds=3600)
 
     me = await _get_profile(user, db)
     if me.id == agent_id:
-        raise HTTPException(400, "不能添加自己为好友")
+        raise HTTPException(400, "Can't add myself as friend")
 
-    # 检查目标存在
+    # Check target exists
     result = await db.execute(select(AgentProfile).where(AgentProfile.id == agent_id))
     target = result.scalar_one_or_none()
     if not target:
-        raise HTTPException(404, "目标角色不存在")
+        raise HTTPException(404, "Target profile does not exist")
 
-    # 检查是否已有关系
+    # Check if there is an existing relationship
     result = await db.execute(
         select(AgentFriendship).where(
             or_(
@@ -115,23 +115,23 @@ async def send_request(
     existing = result.scalar_one_or_none()
     if existing:
         if existing.status == "accepted":
-            raise HTTPException(400, "已经是好友了")
+            raise HTTPException(400, "Already a friend")
         if existing.status == "pending":
-            raise HTTPException(400, "已有待处理的好友请求")
+            raise HTTPException(400, "There is already a pending friend request")
 
     friendship = AgentFriendship(from_id=me.id, to_id=agent_id)
     db.add(friendship)
     await db.flush()
     await db.commit()
 
-    # NPC自动通过：如果对方是AI角色，10秒后自动接受
+    # NPC passes automatically：If the opponent is an AI character，Automatically accept after 10 seconds
     if target.ai_enabled:
         asyncio.create_task(_npc_auto_accept(friendship.id))
 
-    return {"message": "好友请求已发送", "id": friendship.id}
+    return {"message": "friendaskSend", "id": friendship.id}
 
 
-@router.post("/accept/{friendship_id}", summary="接受好友请求")
+@router.post("/accept/{friendship_id}", summary="acceptfriendask")
 async def accept_request(
     friendship_id: int,
     user: User = Depends(get_current_active_user),
@@ -147,35 +147,35 @@ async def accept_request(
     )
     friendship = result.scalar_one_or_none()
     if not friendship:
-        raise HTTPException(404, "好友请求不存在")
+        raise HTTPException(404, "friendRequest does not exist")
 
     friendship.status = "accepted"
     friendship.accepted_at = datetime.now(timezone.utc)
     await db.flush()
 
-    # 提取社交记忆（双方都记录）
-    # 获取发起方昵称
+    # ExtractSocialMemories（Both sides record）
+    # Get the Nickname of the initiator
     sender_result = await db.execute(
         select(AgentProfile).where(AgentProfile.id == friendship.from_id)
     )
     sender = sender_result.scalar_one_or_none()
-    sender_name = sender.nickname if sender else f"角色#{friendship.from_id}"
+    sender_name = sender.nickname if sender else f"Role#{friendship.from_id}"
 
     await extract_memory(
         db, me.id, "friendship",
-        f"接受了{sender_name}的好友请求，成为好友",
+        f"accept{sender_name}friend request，become friends",
         related_agent_id=friendship.from_id,
     )
     await extract_memory(
         db, friendship.from_id, "friendship",
-        f"{me.nickname}接受了好友请求，成为好友",
+        f"{me.nickname}acceptfriendask，become friends",
         related_agent_id=me.id,
     )
 
-    return {"message": "已接受好友请求"}
+    return {"message": "Friend request has been accepted"}
 
 
-@router.post("/reject/{friendship_id}", summary="拒绝好友请求")
+@router.post("/reject/{friendship_id}", summary="rejectfriendask")
 async def reject_request(
     friendship_id: int,
     user: User = Depends(get_current_active_user),
@@ -191,14 +191,14 @@ async def reject_request(
     )
     friendship = result.scalar_one_or_none()
     if not friendship:
-        raise HTTPException(404, "好友请求不存在")
+        raise HTTPException(404, "friendRequest does not exist")
 
     friendship.status = "rejected"
     await db.flush()
-    return {"message": "已拒绝好友请求"}
+    return {"message": "Rejected friend request"}
 
 
-@router.get("/list", response_model=list[FriendshipOut], summary="好友列表")
+@router.get("/list", response_model=list[FriendshipOut], summary="Friend List")
 async def friend_list(
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
@@ -218,7 +218,7 @@ async def friend_list(
         r = await db.execute(select(AgentProfile).where(AgentProfile.id == friend_id))
         friend = r.scalar_one_or_none()
 
-        # 计算MBTI兼容性
+        # Calculate MBTI compatibility
         compat_score = 0.0
         compat_label = ""
         role = ""
@@ -252,16 +252,16 @@ async def friend_list(
     return out
 
 
-@router.get("/compatibility/{agent_id}", summary="好友兼容性详情")
+@router.get("/compatibility/{agent_id}", summary="friendcompatible sex details")
 async def friend_compatibility(
     agent_id: int,
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """获取与指定好友的详细MBTI兼容性信息"""
+    """Get detailed MBTI compatible information with the specified friend"""
     me = await _get_profile(user, db)
 
-    # 确认是好友
+    # Confirmed to be a friend
     result = await db.execute(
         select(AgentFriendship).where(
             or_(
@@ -273,13 +273,13 @@ async def friend_compatibility(
     )
     friendship = result.scalar_one_or_none()
     if not friendship:
-        raise HTTPException(404, "好友关系不存在")
+        raise HTTPException(404, "friendrelationship does not exist")
 
-    # 获取好友profile
+    # Get friendprofile
     r = await db.execute(select(AgentProfile).where(AgentProfile.id == agent_id))
     friend = r.scalar_one_or_none()
     if not friend:
-        raise HTTPException(404, "好友角色不存在")
+        raise HTTPException(404, "friendrole does not exist")
 
     mbti_a = me.mbti or "ISTJ"
     mbti_b = friend.mbti or "ISTJ"
@@ -300,7 +300,7 @@ async def friend_compatibility(
     )
 
 
-@router.get("/pending", summary="待处理的好友请求")
+@router.get("/pending", summary="Pendingfriend request")
 async def pending_requests(
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
@@ -327,7 +327,7 @@ async def pending_requests(
     return out
 
 
-@router.delete("/{friendship_id}", summary="删除好友")
+@router.delete("/{friendship_id}", summary="delete friend")
 async def delete_friend(
     friendship_id: int,
     user: User = Depends(get_current_active_user),
@@ -342,14 +342,14 @@ async def delete_friend(
     )
     friendship = result.scalar_one_or_none()
     if not friendship:
-        raise HTTPException(404, "好友关系不存在")
+        raise HTTPException(404, "friendrelationship does not exist")
 
     await db.delete(friendship)
     await db.flush()
-    return {"message": "已删除好友"}
+    return {"message": "friend deleted"}
 
 
-@router.get("/sent", summary="我发出的好友申请（含状态）")
+@router.get("/sent", summary="The friend application I sent（Contains status）")
 async def sent_requests(
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),
@@ -377,7 +377,7 @@ async def sent_requests(
     return out
 
 
-@router.get("/received", summary="收到的所有好友申请（含状态）")
+@router.get("/received", summary="All friend requests received（Contains status）")
 async def received_requests(
     user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db),

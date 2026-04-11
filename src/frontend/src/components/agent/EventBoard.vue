@@ -64,31 +64,31 @@ function computeLocalDecision(mbti: string, event: any, agent: any): EventDecisi
   const etype = event.event_type || ''
   const ename = event.name || ''
 
-  const isSocial = ['team_building', 'tea_break', 'welcome', 'birthday'].includes(etype) || ename.includes('团建') || ename.includes('社交')
-  const isTech = ['tech_talk', 'training', 'workshop'].includes(etype) || ename.includes('技术') || ename.includes('培训')
+  const isSocial = ['team_building', 'tea_break', 'welcome', 'birthday'].includes(etype) || ename.includes('Team Building') || ename.includes('Social')
+  const isTech = ['tech_talk', 'training', 'workshop'].includes(etype) || ename.includes('technology') || ename.includes('Training')
 
   if (mbti[0] === 'E') {
-    if (isSocial) { interest += 30; reasons.push('E型社交偏好+30') }
-    else { interest += 5; reasons.push('E型基础+5') }
+    if (isSocial) { interest += 30; reasons.push('E type social preference +30') }
+    else { interest += 5; reasons.push('E type Base+5') }
   } else {
-    if (isSocial) { interest -= 20; reasons.push('I型回避社交-20') }
-    if (isTech) { interest += 20; reasons.push('I型偏好技术+20') }
+    if (isSocial) { interest -= 20; reasons.push('I type social avoidance -20') }
+    if (isTech) { interest += 20; reasons.push('IType Preference Technology +20') }
   }
 
-  if (mbti[2] === 'T' && isTech) { interest += 15; reasons.push('T型技术兴趣+15') }
-  if (mbti[2] === 'F' && isSocial) { interest += 15; reasons.push('F型协作偏好+15') }
+  if (mbti[2] === 'T' && isTech) { interest += 15; reasons.push('T type technical interest +15') }
+  if (mbti[2] === 'F' && isSocial) { interest += 15; reasons.push('F type collaboration preference +15') }
 
-  if (mbti[3] === 'J' && agent.current_action === 'work') { interest -= 15; reasons.push('J型不愿打断-15') }
-  if (mbti[3] === 'P') { interest += 10; reasons.push('P型随性+10') }
+  if (mbti[3] === 'J' && agent.current_action === 'work') { interest -= 15; reasons.push('J type unwilling to interrupt -15') }
+  if (mbti[3] === 'P') { interest += 10; reasons.push('P type casual +10') }
 
   const comm = agent.attr_communication || 50
-  if (isSocial) { const b = Math.floor(comm / 10); interest += b; reasons.push('沟通力' + comm + '+' + b) }
+  if (isSocial) { const b = Math.floor(comm / 10); interest += b; reasons.push('Communication' + comm + '+' + b) }
 
   interest = Math.max(0, Math.min(100, interest))
   return {
     joined: interest >= 50,
     interest_score: interest,
-    reason: reasons.join(', ') + ' → 兴趣度' + interest + '%',
+    reason: reasons.join(', ') + ' → preference score' + interest + '%',
   }
 }
 
@@ -105,22 +105,22 @@ function formatTime(iso: string): string {
 function getCountdown(iso: string): string {
   const target = new Date(iso).getTime()
   const diff = target - now.value
-  if (diff <= 0) return '即将开始'
+  if (diff <= 0) return 'starting soon'
   const mins = Math.floor(diff / 60000)
   const hrs = Math.floor(mins / 60)
-  if (hrs > 0) return `${hrs}h${mins % 60}m后`
-  return `${mins}m后`
+  if (hrs > 0) return `${hrs}h${mins % 60}mafter`
+  return `${mins}mafter`
 }
 
 function getStatusLabel(is_active: string): string {
-  return { upcoming: '即将开始', ongoing: 'Active', finished: '已结束', active: 'Active' }[is_active] || is_active
+  return { upcoming: 'starting soon', ongoing: 'In Progress', finished: 'ended', active: 'In Progress' }[is_active] || is_active
 }
 
 const typeLabels: Record<string, string> = {
-  tea_break: '下午茶', team_building: '团建', birthday: '生日会',
-  holiday: '节日Events', milestone: 'Milestone', dept_award: 'Dept Award',
-  emergency: '紧急动员', welcome: '新人欢迎', tech_talk: '技术分享',
-  training: '培训', workshop: '研讨会',
+  tea_break: 'Afternoon Tea', team_building: 'Team Building', birthday: 'Birthday Party',
+  holiday: 'Holiday Event', milestone: 'Milestone', dept_award: 'Department Award',
+  emergency: 'Emergency Mobilization', welcome: 'Welcome', tech_talk: 'tech sharing',
+  training: 'Training', workshop: 'Workshop',
 }
 const typeColors: Record<string, string> = {
   tea_break: 'var(--accent-amber)', team_building: 'var(--accent-violet)',
@@ -134,11 +134,11 @@ const typeColors: Record<string, string> = {
   <div class="event-panel">
     <div class="section-header">
       <span class="header-dot" style="background: var(--accent-violet)"></span>
-      <span class="header-text">AIEvents决策</span>
-      <span class="event-count">{{ events.length }} items</span>
+      <span class="header-text">AIactivity decisions</span>
+      <span class="event-count">{{ events.length }} Item</span>
     </div>
 
-    <div v-if="events.length === 0" class="empty-text">No events yet</div>
+    <div v-if="events.length === 0" class="empty-text">No Activity</div>
 
     <div v-for="event in events" :key="event.id" class="event-card cyber-card"
       :class="{ 'card-ongoing': event.is_active === 'ongoing' || event.is_active === 'active', 'card-finished': event.is_active === 'finished' }">
@@ -186,7 +186,7 @@ const typeColors: Record<string, string> = {
       <!-- Decision -->
       <div v-if="event.agent_decision" class="decision-row">
         <span class="decision-tag" :class="{ joined: event.agent_decision.joined, rejected: !event.agent_decision.joined }">
-          {{ event.agent_decision.joined ? '✓ AI: Join' : '✗ AI: Skip' }}
+          {{ event.agent_decision.joined ? '✓ AI decision-making participation' : '✗ AI decision reject' }}
         </span>
         <div class="interest-bar">
           <div class="interest-track">
@@ -202,7 +202,7 @@ const typeColors: Record<string, string> = {
 
       <div class="event-meta">
         <span v-if="event.rewards_xp">+{{ event.rewards_xp }}XP</span>
-        <span v-if="event.rewards_coins">+{{ event.rewards_coins }}Coins</span>
+        <span v-if="event.rewards_coins">+{{ event.rewards_coins }}gold</span>
       </div>
     </div>
   </div>
