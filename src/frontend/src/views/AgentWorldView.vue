@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAgentWorldStore } from '@/stores/agentWorld'
 import type { CompanyRoom } from '@/stores/agentWorld'
@@ -8,6 +8,7 @@ import AgentPanel from '@/components/agent/AgentPanel.vue'
 import PromotionModal from '@/components/agent/PromotionModal.vue'
 import RoomInterior from '@/components/agent/RoomInterior.vue'
 import request from '@/utils/request'
+import { deriveAgentWorldConnectionStatus } from './agentWorldConnectionStatus.js'
 
 const router = useRouter()
 const store = useAgentWorldStore()
@@ -16,6 +17,15 @@ const promotionData = ref<{ level: number; title: string } | null>(null)
 const activeRoom = ref<CompanyRoom | null>(null)
 const showRoomInterior = ref(false)
 const simSpeed = ref(1)
+const initialized = ref(false)
+
+const connectionStatus = computed(() =>
+  deriveAgentWorldConnectionStatus({
+    hasProfile: store.hasProfile,
+    initialized: initialized.value,
+    wsConnected: store.wsConnected,
+  }),
+)
 
 onMounted(async () => {
   try {
@@ -28,6 +38,7 @@ onMounted(async () => {
     await store.fetchOnlineAgents()
     store.connectWS()
     await Promise.all([store.fetchTasks(), store.fetchFriends(), store.fetchUnread(), store.fetchMap()])
+    initialized.value = true
   } catch (e) {
     console.error('AgentWorld init error:', e)
     router.replace('/agent-setup')
@@ -102,8 +113,8 @@ async function setSimSpeed(speed: number) {
                 <span class="speed-label">SimulateSpeed</span>
                 <button v-for="s in [1, 2, 5]" :key="s" class="speed-btn" :class="{ active: simSpeed === s }" @click="setSimSpeed(s)">{{ s }}x</button>
               </div>
-              <span class="ws-status" :class="{ online: store.wsConnected }">
-                {{ store.wsConnected ? '● Connected' : '○ Not connected' }}
+              <span class="ws-status" :class="{ online: connectionStatus.connected }">
+                {{ connectionStatus.label }}
               </span>
             </div>
           </div>
