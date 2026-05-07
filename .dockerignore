@@ -1,0 +1,9 @@
+.DS_Store
+.git
+.pytest_cache
+__pycache__
+*.pyc
+node_modules
+src/frontend/node_modules
+src/frontend/dist
+output

@@ -429,7 +429,7 @@ onUnmounted(() => {
 .room-info {
   display: flex;
   gap: 16px;
-  font-size: 13px;
+  font-size: 15px;
   color: rgba(226,232,240,0.7);
 }
 .info-item {
@@ -442,7 +442,7 @@ onUnmounted(() => {
   width: 100%;
   text-align: center;
   color: #22d3ee;
-  font-size: 12px;
+  font-size: 14px;
   border-top: 1px dashed rgba(34,211,238,0.25);
   padding-top: 8px;
 }

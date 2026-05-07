@@ -1,0 +1,31 @@
+{
+  "title": "Virtual Company Simulator for Career Planner",
+  "upload_type": "software",
+  "description": "SoftwareX submission artifact for the Career Planner virtual-company simulator. The archive includes a reviewer-friendly Docker Compose deployment path: run `docker compose up --build` from the repository root, then open the frontend at http://localhost:5174 and the backend API at http://localhost:8000.",
+  "creators": [
+    {
+      "name": "Xue, Joker"
+    },
+    {
+      "name": "Career Planner Team"
+    }
+  ],
+  "version": "1.1.0",
+  "doi": "10.5281/zenodo.20053671",
+  "license": "MIT",
+  "keywords": [
+    "virtual company",
+    "agent simulation",
+    "career planning",
+    "mbti",
+    "softwarex",
+    "docker compose"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/Joker-Xue/softwarex-virtual-company-simulator",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ]
+}

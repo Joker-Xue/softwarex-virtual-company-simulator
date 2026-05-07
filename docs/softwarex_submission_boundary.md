@@ -33,11 +33,11 @@ This note defines the exact code and assets that should be included in the publi
 
 ### Frontend minimum demo
 
-- `frontend/src/views/AgentWorldView.vue`
-- `frontend/src/stores/agentWorld.ts`
-- `frontend/src/utils/websocket.ts`
-- `frontend/src/constants/companyMap.ts`
-- actually used simulator UI components under `frontend/src/components/agent/`
+- `src/frontend/src/views/AgentWorldView.vue`
+- `src/frontend/src/stores/agentWorld.ts`
+- `src/frontend/src/utils/websocket.ts`
+- `src/frontend/src/constants/companyMap.ts`
+- actually used simulator UI components under `src/frontend/src/components/agent/`
 - required simulator styles, sprites, and related frontend utilities
 
 ### Runtime and startup assets
@@ -46,8 +46,8 @@ This note defines the exact code and assets that should be included in the publi
 - `scripts/start_backend.cmd`
 - `scripts/start_frontend.cmd`
 - `requirements.txt`
-- `frontend/package.json`
-- `frontend/package-lock.json` if present
+- `src/frontend/package.json`
+- `src/frontend/package-lock.json` if present
 - `docker-compose.yml` if the container path is supported
 - `.env.example`
 
@@ -111,10 +111,10 @@ The current monorepo already contains the core simulator paths needed for the pu
 - `app/routers/agent_personality.py`
 - `app/routers/agent_ws.py`
 - `app/routers/agent_world.py`
-- `frontend/src/views/AgentWorldView.vue`
-- `frontend/src/stores/agentWorld.ts`
-- `frontend/src/utils/websocket.ts`
-- `frontend/src/constants/companyMap.ts`
+- `src/frontend/src/views/AgentWorldView.vue`
+- `src/frontend/src/stores/agentWorld.ts`
+- `src/frontend/src/utils/websocket.ts`
+- `src/frontend/src/constants/companyMap.ts`
 - `tests/test_virtual_company_demo.py`
 - `tests/test_virtual_company_upgrade.py`
 

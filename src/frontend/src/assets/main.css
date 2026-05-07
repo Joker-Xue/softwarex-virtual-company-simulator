@@ -157,9 +157,9 @@ a:hover {
   font-weight: 600;
   color: var(--color-text-primary);
 }
-.markdown-body h1 { font-size: 21px; }
-.markdown-body h2 { font-size: 19px; }
-.markdown-body h3 { font-size: 17px; }
+.markdown-body h1 { font-size: 23px; }
+.markdown-body h2 { font-size: 21px; }
+.markdown-body h3 { font-size: 19px; }
 .markdown-body p { margin: 6px 0; line-height: 1.6; }
 .markdown-body ul, .markdown-body ol { padding-left: 20px; margin: 6px 0; }
 .markdown-body li { margin: 4px 0; line-height: 1.6; }
@@ -168,7 +168,7 @@ a:hover {
   color: #60A5FA;
   padding: 2px 6px;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 16px;
   font-family: 'Fira Code', 'Consolas', monospace;
 }
 .markdown-body pre {

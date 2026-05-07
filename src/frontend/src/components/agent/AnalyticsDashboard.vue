@@ -357,7 +357,7 @@ onUnmounted(() => {
   border-radius: var(--radius-md);
   background: var(--bg-card);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-muted);
   font-family: var(--font-body);
   transition: all var(--duration-base);
@@ -395,7 +395,7 @@ onUnmounted(() => {
 }
 .stat-row {
   text-align: center;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-muted);
   margin-top: 4px;
 }
@@ -407,10 +407,10 @@ onUnmounted(() => {
 
 /* ── Social Metrics ── */
 .metric-list { display: flex; flex-direction: column; gap: 14px; }
-.metric-item { display: flex; align-items: center; gap: 8px; }
-.metric-label { font-size: 12px; color: var(--text-muted); width: 70px; flex-shrink: 0; }
+.metric-item { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.metric-label { font-size: 14px; color: var(--text-muted); width: 104px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .metric-value {
-  font-size: 12px; font-weight: 600; width: 40px; text-align: right;
+  font-size: 14px; font-weight: 600; width: 40px; text-align: right;
   font-family: var(--font-mono);
 }
 .metric-cyan {
@@ -456,7 +456,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: 15px;
 }
 .friend-rank {
   color: var(--accent-cyan); font-weight: 700; width: 28px;
@@ -481,13 +481,13 @@ onUnmounted(() => {
   transition: width 0.6s var(--ease-out-expo);
 }
 .affinity-val {
-  font-size: 12px; color: var(--text-muted); width: 30px; text-align: right;
+  font-size: 14px; color: var(--text-muted); width: 30px; text-align: right;
   font-family: var(--font-mono);
 }
 
 /* ── Room List ── */
 .room-list { display: flex; flex-direction: column; gap: 8px; }
-.room-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.room-row { display: flex; align-items: center; gap: 8px; font-size: 14px; }
 .room-name {
   width: 70px; color: var(--text-primary);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -508,7 +508,7 @@ onUnmounted(() => {
 }
 
 /* ── Leaderboard ── */
-.leaderboard { font-size: 12px; }
+.leaderboard { font-size: 14px; }
 .lb-header, .lb-row {
   display: flex;
   align-items: center;
@@ -542,9 +542,9 @@ onUnmounted(() => {
   color: var(--accent-violet); text-shadow: 0 0 8px rgba(167,139,250,0.4);
 }
 
-.lb-rank { width: 40px; text-align: center; font-family: var(--font-mono); }
-.lb-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lb-dept { width: 60px; text-align: center; color: var(--text-muted); }
+.lb-rank { width: 40px; text-align: center; font-family: var(--font-mono); flex-shrink: 0; }
+.lb-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-dept { width: 76px; text-align: center; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lb-level {
   width: 40px; text-align: center; color: var(--accent-violet);
   font-weight: 600; font-family: var(--font-mono);
@@ -558,7 +558,7 @@ onUnmounted(() => {
 .empty-hint {
   text-align: center;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 15px;
   padding: 40px 0;
 }
 </style>

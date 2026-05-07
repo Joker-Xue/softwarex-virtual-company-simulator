@@ -419,7 +419,7 @@ async function fetchSalaryInfo() {
   font-family: var(--font-body);
 }
 .back-btn {
-  font-size: 13px; color: var(--accent-cyan); cursor: pointer;
+  font-size: 15px; color: var(--accent-cyan); cursor: pointer;
   text-shadow: 0 0 6px rgba(34,211,238,0.3);
   transition: color var(--duration-fast);
 }
@@ -428,34 +428,35 @@ async function fetchSalaryInfo() {
 .avatar {
   width: 48px; height: 48px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 20px; font-weight: 700; flex-shrink: 0;
+  color: #fff; font-size: 22px; font-weight: 700; flex-shrink: 0;
   border: 2px solid rgba(255,255,255,0.15);
 }
-.header-info { flex: 1; }
+.header-info { flex: 1; min-width: 0; }
 .nickname {
-  font-size: 18px; font-weight: 700; color: var(--text-primary);
+  font-size: 20px; font-weight: 700; color: var(--text-primary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.meta { display: flex; gap: 8px; align-items: center; margin-top: 2px; }
+.meta { display: flex; gap: 8px; align-items: center; min-width: 0; margin-top: 2px; }
 .level-badge {
-  font-family: var(--font-mono); font-size: 11px; padding: 1px 8px;
+  font-family: var(--font-mono); font-size: 13px; padding: 1px 8px;
   border-radius: 8px; background: rgba(251,191,36,0.1);
   color: var(--accent-amber); font-weight: 600;
   border: 1px solid rgba(251,191,36,0.25);
   text-shadow: 0 0 6px rgba(251,191,36,0.3);
 }
-.dept { font-size: 12px; color: var(--text-muted); }
+.dept { font-size: 14px; color: var(--text-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mbti-tag { margin-top: 4px; }
 .attrs-section { display: flex; flex-direction: column; gap: 8px; }
-.attr-bar { display: flex; align-items: center; gap: 8px; }
-.bar-label { width: 48px; font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+.attr-bar { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.bar-label { width: 92px; font-size: 14px; color: var(--text-muted); flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bar-track { flex: 1; }
 .bar-fill { transition: width 0.3s; }
 .bar-val {
-  width: 28px; font-size: 12px; font-weight: 600; text-align: right;
+  width: 28px; font-size: 14px; font-weight: 600; text-align: right;
   color: var(--accent-cyan); font-family: var(--font-mono);
 }
 .level-progress { }
-.progress-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.progress-label { font-size: 14px; color: var(--text-muted); margin-bottom: 4px; }
 .level-progress :deep(.el-progress-bar__outer) {
   background: rgba(34,211,238,0.08) !important;
 }
@@ -465,14 +466,14 @@ async function fetchSalaryInfo() {
 }
 .status-row {
   display: flex; justify-content: space-between;
-  font-size: 12px; color: var(--text-muted);
+  font-size: 14px; color: var(--text-muted);
 }
 .action-btns { display: flex; gap: 8px; }
 
 /* Tabs */
 .profile-tabs { margin-bottom: -8px; }
 .profile-tabs :deep(.el-tabs__item) {
-  font-size: 13px; color: var(--text-muted) !important;
+  font-size: 15px; color: var(--text-muted) !important;
   font-family: var(--font-body);
   transition: color var(--duration-base), text-shadow var(--duration-base);
 }
@@ -500,7 +501,7 @@ async function fetchSalaryInfo() {
   box-shadow: none !important;
 }
 .memory-filter :deep(.el-input__inner) { color: var(--text-primary) !important; }
-.memory-count { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
+.memory-count { font-size: 14px; color: var(--text-muted); font-family: var(--font-mono); }
 
 .memory-timeline-wrap {
   max-height: 320px; overflow-y: auto; padding-right: 4px;
@@ -511,21 +512,21 @@ async function fetchSalaryInfo() {
   padding: 8px 10px;
 }
 .memory-content {
-  font-size: 13px; color: var(--text-primary); line-height: 1.5;
+  font-size: 15px; color: var(--text-primary); line-height: 1.5;
   margin-bottom: 4px;
 }
 .memory-meta { display: flex; align-items: center; gap: 8px; }
 .memory-type-tag {
-  font-size: 10px; color: #fff; padding: 1px 6px;
+  font-size: 12px; color: #fff; padding: 1px 6px;
   border-radius: 4px; font-weight: 600;
 }
 .memory-importance {
-  font-size: 12px; color: var(--accent-amber); letter-spacing: 1px;
+  font-size: 14px; color: var(--accent-amber); letter-spacing: 1px;
   text-shadow: 0 0 6px rgba(251,191,36,0.3);
 }
 .memory-empty {
   text-align: center; padding: 24px 0;
-  font-size: 13px; color: var(--text-muted);
+  font-size: 15px; color: var(--text-muted);
 }
 .memory-pagination { display: flex; justify-content: center; margin-top: 4px; }
 .memory-pagination :deep(.el-pagination) { --el-pagination-bg-color: transparent; }
@@ -541,7 +542,7 @@ async function fetchSalaryInfo() {
   border-left-color: var(--border-dim);
 }
 .memory-timeline-wrap :deep(.el-timeline-item__timestamp) {
-  color: var(--text-muted) !important; font-family: var(--font-mono); font-size: 11px;
+  color: var(--text-muted) !important; font-family: var(--font-mono); font-size: 13px;
 }
 
 /* Schedule styles */
@@ -553,7 +554,7 @@ async function fetchSalaryInfo() {
   border-left-color: rgba(34,211,238,0.15);
 }
 .schedule-item {
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center; gap: 8px; min-width: 0;
   padding: 4px 8px; border-radius: var(--radius-sm);
   transition: all 0.2s;
 }
@@ -562,18 +563,19 @@ async function fetchSalaryInfo() {
   background: rgba(34,211,238,0.06);
 }
 .schedule-time {
-  font-size: 13px; font-weight: 600; color: var(--text-primary);
+  font-size: 15px; font-weight: 600; color: var(--text-primary);
   min-width: 42px; font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
-.schedule-activity { font-size: 13px; }
+.schedule-activity { font-size: 15px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .schedule-room-tag {
-  font-size: 10px; padding: 0 6px; border-radius: 4px;
+  font-size: 12px; padding: 0 6px; border-radius: 4px;
   background: rgba(34,211,238,0.06); color: var(--text-muted);
   border: 1px solid var(--border-dim); line-height: 18px;
+  max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .schedule-current-tag {
-  font-size: 10px; padding: 0 6px; border-radius: 6px;
+  font-size: 12px; padding: 0 6px; border-radius: 6px;
   background: rgba(34,211,238,0.15); color: var(--accent-cyan);
   border: 1px solid rgba(34,211,238,0.3);
   font-weight: 600; line-height: 18px;
@@ -581,7 +583,7 @@ async function fetchSalaryInfo() {
 }
 .schedule-empty {
   text-align: center; padding: 24px 0;
-  font-size: 13px; color: var(--text-muted);
+  font-size: 15px; color: var(--text-muted);
 }
 
 /* Salary styles */
@@ -594,15 +596,15 @@ async function fetchSalaryInfo() {
   border: 1px solid var(--border-glow);
   margin-bottom: 12px;
 }
-.salary-label { font-size: 13px; color: var(--text-muted); }
+.salary-label { font-size: 15px; color: var(--text-muted); }
 .salary-amount {
-  font-size: 20px; font-weight: 700; color: var(--accent-amber);
+  font-size: 22px; font-weight: 700; color: var(--accent-amber);
   font-family: var(--font-mono);
   text-shadow: 0 0 10px rgba(251,191,36,0.4);
 }
 .salary-details { }
 .salary-row {
-  display: flex; justify-content: space-between; font-size: 13px;
+  display: flex; justify-content: space-between; font-size: 15px;
   padding: 4px 0; color: var(--text-muted);
 }
 .salary-row span:last-child {
@@ -610,12 +612,12 @@ async function fetchSalaryInfo() {
   font-family: var(--font-mono);
 }
 .salary-history h4 {
-  font-size: 13px; color: var(--text-muted); margin: 0 0 8px;
+  font-size: 15px; color: var(--text-muted); margin: 0 0 8px;
   font-family: var(--font-display); letter-spacing: 0.5px;
 }
 .salary-log-item {
   display: flex; gap: 8px; align-items: center; padding: 6px 0;
-  border-bottom: 1px solid var(--border-dim); font-size: 12px;
+  border-bottom: 1px solid var(--border-dim); font-size: 14px;
 }
 .log-desc { flex: 1; color: var(--text-primary); }
 .log-amount {
@@ -623,16 +625,16 @@ async function fetchSalaryInfo() {
   font-family: var(--font-mono);
   text-shadow: 0 0 6px rgba(52,211,153,0.3);
 }
-.log-date { color: var(--text-muted); font-size: 11px; font-family: var(--font-mono); }
-.salary-empty { text-align: center; padding: 24px 0; font-size: 13px; color: var(--text-muted); }
+.log-date { color: var(--text-muted); font-size: 13px; font-family: var(--font-mono); }
+.salary-empty { text-align: center; padding: 24px 0; font-size: 15px; color: var(--text-muted); }
 
 /* MBTI Influence */
 .mbti-influence { margin-top: 16px; padding: 12px; background: rgba(167,139,250,0.05); border: 1px solid rgba(167,139,250,0.15); border-radius: 6px; }
-.influence-title { font-family: var(--font-display); font-size: 11px; color: var(--accent-violet); letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase; }
+.influence-title { font-family: var(--font-display); font-size: 13px; color: var(--accent-violet); letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase; }
 .influence-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.inf-item { display: flex; justify-content: space-between; padding: 4px 0; }
-.inf-label { font-family: var(--font-body); font-size: 11px; color: var(--text-muted); }
-.inf-value { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--text-primary); }
+.inf-item { display: flex; justify-content: space-between; gap: 8px; min-width: 0; padding: 4px 0; }
+.inf-label { font-family: var(--font-body); font-size: 13px; color: var(--text-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inf-value { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--text-primary); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .inf-value.boosted { color: var(--accent-cyan); }
 .inf-value.career { color: var(--accent-violet); }
 </style>

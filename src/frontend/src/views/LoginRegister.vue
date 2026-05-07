@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
@@ -10,10 +10,77 @@ const loading = ref(false)
 const username = ref('')
 const email = ref('')
 const password = ref('')
+const verificationCode = ref('')
+const sendingCode = ref(false)
+const codeCountdown = ref(0)
+const captchaId = ref('')
+const captchaCode = ref('')
+const captchaSvg = ref('')
+let countdownTimer: ReturnType<typeof setInterval> | null = null
+
+function extractApiError(error: any, fallback: string) {
+  const detail = error?.response?.data?.detail
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) {
+    return detail
+      .map((item) => {
+        const loc = Array.isArray(item.loc) ? item.loc[item.loc.length - 1] : ''
+        return loc ? `${loc}: ${item.msg}` : item.msg
+      })
+      .filter(Boolean)
+      .join('; ') || fallback
+  }
+  return fallback
+}
+
+function startCountdown() {
+  codeCountdown.value = 60
+  if (countdownTimer) clearInterval(countdownTimer)
+  countdownTimer = setInterval(() => {
+    codeCountdown.value -= 1
+    if (codeCountdown.value <= 0 && countdownTimer) {
+      clearInterval(countdownTimer)
+      countdownTimer = null
+    }
+  }, 1000)
+}
+
+async function fetchCaptcha() {
+  try {
+    const { data } = await request.get('/api/auth/captcha')
+    captchaId.value = data.captcha_id
+    captchaSvg.value = data.svg || data.captcha_svg || ''
+    captchaCode.value = ''
+  } catch {
+    ElMessage.error('Failed to load captcha')
+  }
+}
+
+async function sendVerificationCode() {
+  if (!email.value) {
+    ElMessage.warning('Please enter email first')
+    return
+  }
+  sendingCode.value = true
+  try {
+    const { data } = await request.post('/api/auth/send-verification-code', { email: email.value })
+    if (data?.verification_code) {
+      verificationCode.value = data.verification_code
+      ElMessage.success(`Reviewer mode code: ${data.verification_code}`)
+    } else {
+      ElMessage.success('Verification code sent. Please check your email')
+    }
+    startCountdown()
+  } catch (e: any) {
+    ElMessage.error(extractApiError(e, 'Failed to send verification code'))
+  } finally {
+    sendingCode.value = false
+  }
+}
 
 async function handleLogin() {
-  if (!username.value || !password.value) {
-    ElMessage.warning('Please enter username and password')
+  if (!username.value || !password.value || !captchaCode.value) {
+    ElMessage.warning('Please enter username, password and captcha')
     return
   }
   loading.value = true
@@ -21,20 +88,27 @@ async function handleLogin() {
     const params = new URLSearchParams()
     params.append('username', username.value)
     params.append('password', password.value)
-    const { data } = await request.post('/api/auth/login', params)
+    const { data } = await request.post('/api/auth/login', params, {
+      params: {
+        captcha_id: captchaId.value,
+        captcha_code: captchaCode.value,
+      },
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    })
     localStorage.setItem('token', data.access_token)
     localStorage.setItem('user', JSON.stringify(data.user))
     ElMessage.success('Login successful')
     router.push('/agent-world')
   } catch (e: any) {
-    ElMessage.error(e.response?.data?.detail || 'Login failed')
+    ElMessage.error(extractApiError(e, 'Login failed'))
+    fetchCaptcha()
   } finally {
     loading.value = false
   }
 }
 
 async function handleRegister() {
-  if (!username.value || !email.value || !password.value) {
+  if (!username.value || !email.value || !password.value || !verificationCode.value) {
     ElMessage.warning('Please fill in all required fields')
     return
   }
@@ -44,17 +118,28 @@ async function handleRegister() {
       username: username.value,
       email: email.value,
       password: password.value,
+      verification_code: verificationCode.value,
     })
     localStorage.setItem('token', data.access_token)
     localStorage.setItem('user', JSON.stringify(data.user))
     ElMessage.success('Registration successful')
     router.push('/agent-world')
   } catch (e: any) {
-    ElMessage.error(e.response?.data?.detail || 'Registration failed')
+    ElMessage.error(extractApiError(e, 'Registration failed'))
   } finally {
     loading.value = false
   }
 }
+
+watch(mode, (value) => {
+  if (value === 'login' && !captchaSvg.value) fetchCaptcha()
+})
+
+onMounted(fetchCaptcha)
+
+onBeforeUnmount(() => {
+  if (countdownTimer) clearInterval(countdownTimer)
+})
 </script>
 
 <template>
@@ -85,9 +170,28 @@ async function handleRegister() {
           <input v-model="email" type="email" placeholder="Enter email" />
         </div>
 
+        <div v-if="mode === 'register'" class="field">
+          <label>Verification Code</label>
+          <div class="inline-field">
+            <input v-model="verificationCode" maxlength="6" placeholder="Email code" @keyup.enter="handleRegister()" />
+            <button class="mini-btn" :disabled="sendingCode || codeCountdown > 0" @click="sendVerificationCode">
+              {{ codeCountdown > 0 ? `${codeCountdown}s` : (sendingCode ? 'Sending' : 'Send') }}
+            </button>
+          </div>
+          <p class="reviewer-note">Reviewer mode is enabled. Use verification code <strong>000000</strong>.</p>
+        </div>
+
         <div class="field">
           <label>Password</label>
           <input v-model="password" type="password" placeholder="Enter password" @keyup.enter="mode === 'login' ? handleLogin() : handleRegister()" />
+        </div>
+
+        <div v-if="mode === 'login'" class="field">
+          <label>Captcha</label>
+          <div class="captcha-row">
+            <input v-model="captchaCode" maxlength="4" placeholder="Code" @keyup.enter="handleLogin()" />
+            <button class="captcha-box" type="button" @click="fetchCaptcha" v-html="captchaSvg || 'Refresh'" />
+          </div>
         </div>
 
         <button class="submit-btn" :disabled="loading" @click="mode === 'login' ? handleLogin() : handleRegister()">
@@ -135,13 +239,13 @@ async function handleRegister() {
 }
 
 .title {
-  text-align: center; font-size: 28px; font-weight: 800;
+  text-align: center; font-size: 30px; font-weight: 800;
   font-family: 'Orbitron', monospace; letter-spacing: 4px;
   color: #00ffd5; margin: 0 0 4px;
   text-shadow: 0 0 20px rgba(0,255,213,.4);
 }
 .subtitle {
-  text-align: center; font-size: 12px; color: rgba(255,255,255,.4);
+  text-align: center; font-size: 14px; color: rgba(255,255,255,.4);
   letter-spacing: 2px; margin: 0 0 32px;
 }
 
@@ -151,7 +255,7 @@ async function handleRegister() {
 }
 .tab {
   flex: 1; padding: 10px; border: none; cursor: pointer;
-  font-family: 'Orbitron', monospace; font-size: 13px; letter-spacing: 2px;
+  font-family: 'Orbitron', monospace; font-size: 15px; letter-spacing: 2px;
   background: transparent; color: rgba(255,255,255,.4); transition: all .2s;
 }
 .tab.active {
@@ -161,23 +265,69 @@ async function handleRegister() {
 
 .field { margin-bottom: 20px; }
 .field label {
-  display: block; font-size: 11px; color: rgba(255,255,255,.5);
+  display: block; font-size: 13px; color: rgba(255,255,255,.5);
   letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase;
 }
 .field input {
   width: 100%; padding: 12px 16px; box-sizing: border-box;
   background: rgba(0,255,255,.04); border: 1px solid rgba(0,255,255,.15);
-  border-radius: 8px; color: #e0e0e0; font-size: 14px; outline: none;
+  border-radius: 8px; color: #e0e0e0; font-size: 16px; outline: none;
   transition: border-color .2s;
 }
 .field input:focus { border-color: rgba(0,255,255,.4); }
 .field input::placeholder { color: rgba(255,255,255,.2); }
 
+.inline-field,
+.captcha-row {
+  display: grid;
+  grid-template-columns: 1fr 128px;
+  gap: 10px;
+}
+
+.mini-btn,
+.captcha-box {
+  min-height: 46px;
+  border: 1px solid rgba(0,255,255,.25);
+  border-radius: 8px;
+  background: rgba(0,255,255,.08);
+  color: #00ffd5;
+  cursor: pointer;
+}
+
+.mini-btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.reviewer-note {
+  margin: 8px 0 0;
+  color: rgba(0,255,213,.78);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.reviewer-note strong {
+  color: #00ffd5;
+  font-family: 'Orbitron', monospace;
+  letter-spacing: 1px;
+}
+
+.captcha-box {
+  padding: 0;
+  overflow: hidden;
+}
+
+.captcha-box :deep(svg) {
+  display: block;
+  width: 100%;
+  height: 46px;
+}
+
 .submit-btn {
   width: 100%; padding: 14px; margin-top: 8px;
   background: linear-gradient(135deg, rgba(0,255,255,.15), rgba(0,255,213,.1));
   border: 1px solid rgba(0,255,255,.3); border-radius: 8px;
-  color: #00ffd5; font-family: 'Orbitron', monospace; font-size: 14px;
+  color: #00ffd5; font-family: 'Orbitron', monospace; font-size: 16px;
   letter-spacing: 3px; cursor: pointer; transition: all .2s;
 }
 .submit-btn:hover:not(:disabled) {

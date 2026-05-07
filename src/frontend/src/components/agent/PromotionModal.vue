@@ -60,24 +60,24 @@ onMounted(() => {
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 .promo-icon {
-  font-size: 56px;
+  font-size: 58px;
   margin-bottom: 8px;
   filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.5));
 }
 .promo-title {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 800;
   font-family: var(--font-display);
   letter-spacing: 2px;
 }
 .promo-level {
-  font-size: 36px;
+  font-size: 38px;
   font-weight: 900;
   font-family: var(--font-display);
   margin: 8px 0 4px;
 }
 .promo-level-number {
-  font-size: 48px;
+  font-size: 50px;
   font-weight: 900;
   font-family: var(--font-mono);
   color: var(--accent-amber);
@@ -85,7 +85,7 @@ onMounted(() => {
   margin: 4px 0 12px;
 }
 .promo-desc {
-  font-size: 16px;
+  font-size: 18px;
   font-family: var(--font-body);
   color: var(--text-secondary);
 }

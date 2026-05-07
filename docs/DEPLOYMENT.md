@@ -2,9 +2,11 @@
 
 This guide is written for SoftwareX reviewers and maintainers who need a reliable way to start the virtual-company simulator locally.
 
+Permanent archive DOI: [10.5281/zenodo.20053671](https://doi.org/10.5281/zenodo.20053671). The `v1.1.0` DOI release is intended to be run through the Docker one-command path below.
+
 ## Preferred Local Topology
 
-- Frontend host: `http://localhost:5173`
+- Frontend host: `http://localhost:5174`
 - Backend host: `http://localhost:8000`
 - Database: PostgreSQL on `localhost:5432`
 - Cache and auxiliary services: Redis on `localhost:6379`
@@ -13,13 +15,36 @@ Do not mix `localhost` and `127.0.0.1` in default configuration files unless a t
 
 ## Prerequisites
 
+- Docker Desktop with Docker Compose for the one-command reviewer path
 - Python 3.11+
 - Node.js 20+
 - npm 10+
 - PostgreSQL 15+
 - Redis 7+
 
-## Configuration
+## One-Command Docker Startup
+
+From the repository root:
+
+```bash
+docker compose up --build
+```
+
+This starts the complete interactive stack:
+
+- PostgreSQL on `localhost:5432`
+- Redis on `localhost:6379`
+- FastAPI backend on `http://localhost:8000`
+- Vue frontend on `http://localhost:5174`
+
+The Docker path is the recommended reviewer path for reproducing the full interactive system.
+
+The public Docker path runs in reviewer mode by default. During registration,
+request a verification code and enter `000000`. For a real SMTP-backed flow,
+set `REVIEWER_MODE=false` and provide local `SMTP_*` values in `.env` before
+starting Docker. See `docs/REVIEWER_MODE.md` for the reviewer-mode note.
+
+## Manual Configuration
 
 1. Copy `.env.example` to `.env`.
 2. Update at least:
@@ -27,10 +52,22 @@ Do not mix `localhost` and `127.0.0.1` in default configuration files unless a t
    - `ENCRYPTION_KEY_V1`
    - `LLM_API_KEY`
    - `TIANAPI_KEY`
-3. Keep `CORS_ORIGINS` aligned with the canonical frontend origin:
+   - `SMTP_HOST`
+   - `SMTP_PORT`
+   - `SMTP_USER`
+   - `SMTP_PASSWORD`
+   - `SMTP_FROM`
+3. For public reviewer deployment without SMTP, keep:
 
 ```env
-CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+REVIEWER_MODE=true
+REVIEWER_VERIFICATION_CODE=000000
+```
+
+4. Keep `CORS_ORIGINS` aligned with the canonical frontend origin:
+
+```env
+CORS_ORIGINS=http://localhost:5174,http://127.0.0.1:5174
 ```
 
 Optional simulator tuning:
@@ -101,7 +138,7 @@ Manual fallback:
 ```bash
 npm install
 cd src/frontend
-npm run dev -- --host localhost --port 5173
+npm run dev -- --host localhost --port 5174
 ```
 
 The frontend should target:
@@ -123,26 +160,21 @@ What it does:
 - verifies Python, Node.js, and npm
 - installs backend dependencies if needed
 - installs frontend dependencies if `node_modules` is missing
-- checks ports `8000` and `5173`
+- checks ports `8000` and `5174`
 - starts backend and frontend in separate windows
 - waits for `/api/simulation/rebuild-npcs` and `/api/simulation/diagnostics` to appear in OpenAPI before reporting success
 
 If the launcher fails the route gate, close old backend windows and rerun it.
 
-## Docker Compose Option
+## Docker Compose Details
 
-`docker-compose.yml` can be used when you want containerized infrastructure or a containerized backend:
+`docker-compose.yml` is configured as a full-stack reviewer path:
 
 ```bash
-docker compose up -d db redis api
+docker compose up --build
 ```
 
-The current reviewer recommendation is still local frontend plus either:
-
-- local PostgreSQL and Redis, or
-- `docker compose up -d db redis`
-
-The `nginx` service is optional for manuscript review and is not required to reproduce the simulator experiments.
+It builds and starts `db`, `redis`, `api`, and `frontend`. Health checks gate service readiness so the frontend waits for the API, and the API waits for PostgreSQL and Redis.
 
 ## Reviewer Smoke Test
 
@@ -153,6 +185,7 @@ curl http://localhost:8000/health
 curl http://localhost:8000/api/simulation/status
 curl -X POST http://localhost:8000/api/simulation/rebuild-npcs
 curl http://localhost:8000/api/simulation/diagnostics
+curl -I http://localhost:5174
 ```
 
 Acceptance criteria:
@@ -164,7 +197,7 @@ Acceptance criteria:
 
 ### Frontend opens but APIs fail
 
-- Confirm the browser origin is `http://localhost:5173`.
+- Confirm the browser origin is `http://localhost:5174`.
 - Confirm backend CORS uses `localhost` origins and not only `127.0.0.1`.
 - Re-run:
 

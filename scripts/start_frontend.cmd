@@ -19,6 +19,6 @@ if errorlevel 1 (
 set "VITE_API_BASE=http://localhost:8000"
 set "FRONTEND_PROJECT_ROOT=%FRONTEND_DIR%"
 echo [INFO] Starting frontend in %FRONTEND_DIR%
-npm run dev -- --host localhost --port 5173
+npm run dev -- --host localhost --port 5174
 exit /b %errorlevel%
 

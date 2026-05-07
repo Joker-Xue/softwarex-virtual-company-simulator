@@ -106,7 +106,7 @@ if not exist "%FRONTEND_DIR%\node_modules" (
 echo [CHECK] Ports
 call :check_port 8000 "backend"
 if errorlevel 1 exit /b 1
-call :check_port 5173 "frontend"
+call :check_port 5174 "frontend"
 if errorlevel 1 exit /b 1
 
 echo [CHECK] Bootstrap scripts
@@ -177,10 +177,10 @@ echo.
 echo ============================================
 echo   Stack started
 echo ============================================
-echo Frontend: http://localhost:5173
+echo Frontend: http://localhost:5174
 echo Backend:  http://localhost:8000
 echo Docs:     http://localhost:8000/docs
-echo Alt loopback (also supported): http://127.0.0.1:5173
+echo Alt loopback (also supported): http://127.0.0.1:5174
 echo.
 echo Close the two spawned terminal windows to stop the stack
 echo.

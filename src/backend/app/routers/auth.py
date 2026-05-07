@@ -1,4 +1,6 @@
-﻿from datetime import datetime, timedelta, timezone
+﻿import os
+import random
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -11,6 +13,7 @@ from app.models.email_verification import EmailVerificationToken
 from app.models.user import User
 from app.schemas.user import UserResponse
 from app.utils.captcha import generate_captcha, verify_captcha
+from app.utils.mail import send_verification_email
 from app.utils.security import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,
@@ -21,6 +24,9 @@ from app.utils.security import (
 
 router = APIRouter()
 
+REVIEWER_MODE = os.getenv("REVIEWER_MODE", "false").lower() == "true"
+REVIEWER_VERIFICATION_CODE = os.getenv("REVIEWER_VERIFICATION_CODE", "000000")
+
 
 class RegisterRequest(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
@@ -28,6 +34,10 @@ class RegisterRequest(BaseModel):
     password: str = Field(..., min_length=6, max_length=100)
     full_name: str | None = Field(None, max_length=100)
     verification_code: str = Field(..., min_length=6, max_length=6)
+
+
+class SendVerificationCodeRequest(BaseModel):
+    email: EmailStr
 
 
 @router.get("/captcha", summary="Get Captcha")
@@ -38,6 +48,49 @@ async def get_captcha():
         "svg": svg,
         "expires_in": 300,
     }
+
+
+@router.post("/send-verification-code", summary="Send registration email verification code")
+async def send_verification_code(
+    request: SendVerificationCodeRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    existing = await db.execute(select(User).where(User.email == request.email))
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="Email is already registered")
+
+    cutoff = datetime.now(timezone.utc) - timedelta(seconds=60)
+    recent = await db.execute(
+        select(EmailVerificationToken).where(
+            EmailVerificationToken.email == request.email,
+            EmailVerificationToken.created_at > cutoff,
+        )
+    )
+    if recent.scalar_one_or_none():
+        raise HTTPException(status_code=429, detail="Please wait 60 seconds before requesting another code")
+
+    token_value = REVIEWER_VERIFICATION_CODE if REVIEWER_MODE else str(random.randint(100000, 999999))
+    verification = EmailVerificationToken(
+        email=request.email,
+        token=token_value,
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=5),
+        used=False,
+    )
+    db.add(verification)
+    await db.commit()
+
+    if REVIEWER_MODE:
+        return {
+            "message": "Reviewer verification code generated.",
+            "verification_code": token_value,
+        }
+
+    try:
+        await send_verification_email(request.email, token_value)
+    except Exception:
+        raise HTTPException(status_code=503, detail="Email delivery failed. Please check SMTP configuration.")
+
+    return {"message": "Verification code sent. Please check your email."}
 
 
 @router.post("/register", summary="Register Account")

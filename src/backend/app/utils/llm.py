@@ -252,6 +252,14 @@ async def call_llm(
         }
     """
     settings = get_llm_settings()
+    if not settings["api_key"]:
+        return {
+            "content": "",
+            "error": "LLM_API_KEY is not configured",
+            "usage": {},
+            "model": model or settings["model"],
+            "cached": False,
+        }
     temperature = temperature if temperature is not None else settings["temperature"]
     max_tokens = max_tokens or settings["max_tokens"]
     request_timeout_s = float(request_timeout_s or 90.0)
@@ -351,6 +359,9 @@ async def call_llm_stream(
         Text content of Back paragraph by paragraph
     """
     settings = get_llm_settings()
+    if not settings["api_key"]:
+        yield "\n[mistake: LLM_API_KEY is not configured]"
+        return
     temperature = temperature if temperature is not None else settings["temperature"]
     max_tokens = max_tokens or settings["max_tokens"]
     request_timeout_s = float(request_timeout_s or 120.0)

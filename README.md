@@ -1,8 +1,16 @@
 # Virtual Company Simulator for Career Planner
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20053671.svg)](https://doi.org/10.5281/zenodo.20053671)
+
 This repository stage contains the virtual-company simulator and reproducibility assets prepared for a SoftwareX submission. The artifact focuses on an AI-driven office world in which MBTI-shaped agents work, socialize, join company events, and evolve through a shared simulation loop exposed through a FastAPI backend and a Vue 3 frontend.
 
-The formal SoftwareX submission release for this public artifact is `v1.0.1`.
+The formal SoftwareX submission release for this public artifact is `v1.1.0`.
+
+Permanent archive DOI: [10.5281/zenodo.20053671](https://doi.org/10.5281/zenodo.20053671). The archived artifact includes a Docker Compose one-command deployment path:
+
+```bash
+docker compose up --build
+```
 
 The public SoftwareX package should be curated from the simulator boundary documented in `docs/softwarex_submission_boundary.md`. This staging branch still lives inside the private monorepo so that the simulator can be stabilized, documented, and exported cleanly.
 
@@ -36,7 +44,7 @@ flowchart LR
 app/
   engine/                 simulation loop, event engine, NPC seeding, MBTI logic
   routers/                simulation, world, personality, websocket endpoints
-frontend/
+src/frontend/
   src/views/AgentWorldView.vue
   src/stores/agentWorld.ts
   src/utils/websocket.ts
@@ -50,7 +58,8 @@ tests/                    virtual-company regression coverage
 
 ## Requirements
 
-- Windows 10/11 or a compatible environment capable of running the provided batch launchers
+- Docker Desktop with Docker Compose for the one-command reviewer path
+- Windows 10/11 or a compatible environment capable of running the provided batch launchers for manual local startup
 - Python 3.11+
 - Node.js 20+
 - PostgreSQL 15+
@@ -58,7 +67,43 @@ tests/                    virtual-company regression coverage
 
 ## Quick Start
 
-### 1. Create local configuration
+### 1. Start the full stack with Docker
+
+From the repository root:
+
+```bash
+docker compose up --build
+```
+
+Canonical Docker URLs:
+
+- Frontend: `http://localhost:5174`
+- Backend: `http://localhost:8000`
+- OpenAPI docs: `http://localhost:8000/docs`
+
+The public Docker path runs in reviewer mode by default. During registration,
+request a verification code and enter `000000`. For a real SMTP-backed flow,
+set `REVIEWER_MODE=false` and provide local `SMTP_*` values in `.env` before
+starting Docker. See `docs/REVIEWER_MODE.md` for the reviewer-mode note.
+
+### 2. Run reviewer smoke checks
+
+After startup, verify:
+
+```bash
+curl http://localhost:8000/health
+curl http://localhost:8000/api/simulation/status
+curl -X POST http://localhost:8000/api/simulation/rebuild-npcs
+curl http://localhost:8000/api/simulation/diagnostics
+curl -I http://localhost:5174
+```
+
+The NPC recovery acceptance gate is:
+
+- `distribution.by_floor` includes non-zero population on `2F`
+- `gates.top1_hotspot_ratio_lt_0_40` is `true`
+
+### 3. Optional manual local configuration
 
 Copy `.env.example` to `.env` and fill in at least:
 
@@ -66,54 +111,43 @@ Copy `.env.example` to `.env` and fill in at least:
 - `ENCRYPTION_KEY_V1`
 - `LLM_API_KEY`
 - `TIANAPI_KEY`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASSWORD`
+- `SMTP_FROM`
 
-Keep `CORS_ORIGINS` on canonical localhost origins such as `http://localhost:5173`.
+`SMTP_PASSWORD` should be the mailbox authorization code, not the mailbox login password.
 
-### 2. Install dependencies
+For public reviewer deployment without SMTP, keep:
+
+```env
+REVIEWER_MODE=true
+REVIEWER_VERIFICATION_CODE=000000
+```
+
+Keep `CORS_ORIGINS` on canonical localhost origins such as `http://localhost:5174`.
+
+### 4. Optional manual local startup
 
 ```bash
 python -m pip install -r requirements.txt
 npm install
 ```
 
-### 3. Start the stack
-
-Preferred reviewer path:
+Manual startup is also supported on Windows:
 
 ```bat
 start.bat
-```
-
-This launcher verifies Python, Node.js, npm, bootstrap scripts, and the required simulation endpoints before reporting success.
-
-Manual startup is also supported:
-
-```bat
 scripts\start_backend.cmd
 scripts\start_frontend.cmd
 ```
 
 Canonical local URLs:
 
-- Frontend: `http://localhost:5173`
+- Frontend: `http://localhost:5174`
 - Backend: `http://localhost:8000`
 - OpenAPI docs: `http://localhost:8000/docs`
-
-## Reviewer Smoke Checks
-
-After startup, verify:
-
-```bash
-curl http://localhost:8000/health
-curl http://localhost:8000/api/simulation/status
-curl http://localhost:8000/api/simulation/diagnostics
-curl -X POST http://localhost:8000/api/simulation/rebuild-npcs
-```
-
-The NPC recovery acceptance gate is:
-
-- `distribution.by_floor` includes non-zero population on `2F`
-- `gates.top1_hotspot_ratio_lt_0_40` is `true`
 
 ## Simulator API Summary
 
@@ -130,6 +164,8 @@ The NPC recovery acceptance gate is:
 ## Experiments
 
 Formal reproduction scripts live in `experiments/` and current baselines live in `results/`.
+
+These scripts are the experiment-only reproduction mode. They are separate from the full interactive Docker stack above; behavior consistency and ablation can run as lightweight Python-only checks, while tick benchmark and live availability checks use the simulator runtime.
 
 Run all four manuscript-facing experiments:
 

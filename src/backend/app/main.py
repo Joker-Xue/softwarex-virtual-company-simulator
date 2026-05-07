@@ -93,14 +93,14 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(
     title="Virtual Company Simulator API",
-    version="1.0.0",
+    version="1.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,
 )
 
 allowed_origins = parse_cors_origins_from_env(
-    os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+    os.getenv("CORS_ORIGINS", "http://localhost:5174,http://127.0.0.1:5174")
 )
 app.add_middleware(
     CORSMiddleware,

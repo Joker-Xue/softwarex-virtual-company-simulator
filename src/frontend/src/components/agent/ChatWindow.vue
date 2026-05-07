@@ -177,20 +177,20 @@ function currentGroupName() {
 <style scoped>
 .chat-window { display:flex; flex-direction:column; height:100%; min-height:400px; font-family:var(--font-body); }
 .chat-select { padding:8px 0; overflow-y:auto; }
-.hint { text-align:center; color:var(--text-muted); font-size:13px; }
+.hint { text-align:center; color:var(--text-muted); font-size: 15px; }
 .mode-switch { display:flex; gap:4px; margin-bottom:10px; background:var(--bg-card); border-radius:var(--radius-md); padding:3px; border:1px solid var(--border-dim); }
-.mode-switch button { flex:1; border:none; background:none; padding:6px; font-size:13px; border-radius:var(--radius-sm); cursor:pointer; color:var(--text-muted); font-family:var(--font-body); transition:all var(--duration-base); }
+.mode-switch button { flex:1; border:none; background:none; padding:6px; font-size: 15px; border-radius:var(--radius-sm); cursor:pointer; color:var(--text-muted); font-family:var(--font-body); transition:all var(--duration-base); }
 .mode-switch button.active { background:transparent; color:var(--accent-cyan); font-weight:600; border-bottom:2px solid var(--accent-cyan); text-shadow:0 0 8px rgba(34,211,238,0.4); }
-.chat-friend-item { padding:10px 12px; border-radius:var(--radius-sm); cursor:pointer; font-size:14px; display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--border-dim); transition:background var(--duration-base); }
+.chat-friend-item { padding:10px 12px; border-radius:var(--radius-sm); cursor:pointer; font-size: 16px; display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--border-dim); transition:background var(--duration-base); }
 .chat-friend-item:hover { background:var(--bg-hover); }
 .friend-name { font-weight:600; flex:1; color:var(--text-primary); }
-.friend-meta { font-size:11px; color:var(--accent-violet); font-family:var(--font-mono); }
-.group-icon { font-size:16px; }
-.msg-count { font-size:11px; color:var(--text-muted); font-family:var(--font-mono); }
+.friend-meta { font-size: 13px; color:var(--accent-violet); font-family:var(--font-mono); }
+.group-icon { font-size: 18px; }
+.msg-count { font-size: 13px; color:var(--text-muted); font-family:var(--font-mono); }
 .unread-dot {
   min-width: 18px; height: 18px; padding: 0 5px;
   border-radius: 9px; background: var(--accent-rose);
-  color: #fff; font-size: 11px; font-weight: 700;
+  color: #fff; font-size: 13px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   font-family: var(--font-mono);
   box-shadow: 0 0 8px rgba(251,113,133,0.5);
@@ -201,23 +201,23 @@ function currentGroupName() {
   50% { box-shadow: 0 0 12px rgba(251,113,133,0.8); }
 }
 .chat-header { display:flex; align-items:center; gap:12px; padding-bottom:10px; border-bottom:1px solid var(--border-dim); margin-bottom:8px; }
-.back { font-size:13px; color:var(--accent-cyan); cursor:pointer; text-shadow:0 0 6px rgba(34,211,238,0.3); }
-.chat-with { font-weight:600; font-size:14px; color:var(--text-primary); }
+.back { font-size: 15px; color:var(--accent-cyan); cursor:pointer; text-shadow:0 0 6px rgba(34,211,238,0.3); }
+.chat-with { font-weight:600; font-size: 16px; color:var(--text-primary); }
 .messages { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; background:var(--bg-card); border-radius:var(--radius-sm); padding:8px; }
 .msg-row { display:flex; flex-direction:column; max-width:80%; }
 .msg-row.mine { align-self:flex-end; align-items:flex-end; }
-.sender-name { font-size:11px; color:var(--accent-violet); margin-bottom:2px; font-weight:500; display:flex; align-items:center; gap:4px; }
-.ai-badge { display:inline-block; font-size:9px; padding:1px 4px; background:rgba(167,139,250,0.15); color:var(--accent-violet); border:1px solid rgba(167,139,250,0.3); border-radius:3px; font-family:var(--font-mono); }
-.msg-bubble { padding:8px 12px; border-radius:var(--radius-md); font-size:14px; background:rgba(167,139,250,0.04); color:var(--text-primary); border-left:3px solid var(--accent-violet); word-break:break-word; display:flex; align-items:flex-start; gap:6px; }
+.sender-name { font-size: 13px; color:var(--accent-violet); margin-bottom:2px; font-weight:500; display:flex; align-items:center; gap:4px; }
+.ai-badge { display:inline-block; font-size: 11px; padding:1px 4px; background:rgba(167,139,250,0.15); color:var(--accent-violet); border:1px solid rgba(167,139,250,0.3); border-radius:3px; font-family:var(--font-mono); }
+.msg-bubble { padding:8px 12px; border-radius:var(--radius-md); font-size: 16px; background:rgba(167,139,250,0.04); color:var(--text-primary); border-left:3px solid var(--accent-violet); word-break:break-word; display:flex; align-items:flex-start; gap:6px; }
 .msg-row.mine .msg-bubble { background:rgba(34,211,238,0.06); border-left:none; border-right:3px solid var(--accent-cyan); }
-.msg-time { font-size:10px; color:var(--text-muted); margin-top:2px; font-family:var(--font-mono); }
+.msg-time { font-size: 12px; color:var(--text-muted); margin-top:2px; font-family:var(--font-mono); }
 .typing-row { opacity:0.7; }
 .typing-bubble { gap:4px; padding:10px 14px; border-left-color:rgba(167,139,250,0.4); min-width:52px; }
 .typing-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent-violet); animation:typing-bounce 1.2s infinite; }
 .typing-dot:nth-child(2) { animation-delay:0.2s; }
 .typing-dot:nth-child(3) { animation-delay:0.4s; }
 @keyframes typing-bounce { 0%,60%,100% { transform:translateY(0); opacity:0.5; } 30% { transform:translateY(-4px); opacity:1; } }
-.readonly-hint { padding:10px 12px; border-top:1px solid var(--border-dim); font-size:12px; color:var(--text-muted); text-align:center; }
+.readonly-hint { padding:10px 12px; border-top:1px solid var(--border-dim); font-size: 14px; color:var(--text-muted); text-align:center; }
 .chat-input { display:flex; gap:8px; padding-top:10px; border-top:1px solid var(--accent-cyan); box-shadow:0 -2px 8px rgba(34,211,238,0.08); }
 .chat-input .el-input { flex:1; }
 .chat-input :deep(.el-input__wrapper) { background:var(--bg-card) !important; border-color:var(--border-dim) !important; box-shadow:none !important; }

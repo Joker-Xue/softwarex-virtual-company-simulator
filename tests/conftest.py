@@ -22,7 +22,7 @@ os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@lo
 os.environ.setdefault("LLM_API_KEY", "test-key")
 os.environ.setdefault("LLM_BASE_URL", "https://www.aiping.cn/api/v1")
 os.environ.setdefault("LLM_MODEL", "deepseek-chat")
-os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000")
+os.environ.setdefault("CORS_ORIGINS", "http://localhost:5174,http://127.0.0.1:5174")
 os.environ.setdefault("ENCRYPTION_KEY_V1", "jvurkchh5gXqh0MLRewhx8eBHrOFJexqrlWv9HKF4/c=")
 os.environ.setdefault("TIANAPI_KEY", "test-tianapi-key")
 os.environ["TESTING"] = "1"

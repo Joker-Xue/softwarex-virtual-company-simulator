@@ -333,7 +333,7 @@ export function drawNameLabel(
   level?: number
 ): void {
   ctx.save()
-  const fontSize = 10
+  const fontSize = 12
   ctx.font = `bold ${fontSize}px "Microsoft YaHei", sans-serif`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'bottom'
@@ -389,7 +389,7 @@ export function drawActionBubble(
   progress?: number
 ): void {
   ctx.save()
-  const fontSize = 10
+  const fontSize = 12
   ctx.font = `${fontSize}px "Microsoft YaHei", sans-serif`
   const tw = ctx.measureText(text).width
   const paddingX = 6

@@ -42,7 +42,7 @@ if defined UVICORN_PID (
     exit /b 1
 )
 
-set "CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173"
+set "CORS_ORIGINS=http://localhost:5174,http://127.0.0.1:5174"
 echo [INFO] Starting backend with %PYTHON_EXE%
 "%PYTHON_EXE%" -m uvicorn app.main:app --host localhost --port 8000 --reload
 exit /b %errorlevel%
