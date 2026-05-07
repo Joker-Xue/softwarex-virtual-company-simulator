@@ -2,7 +2,7 @@
 
 This guide is written for SoftwareX reviewers and maintainers who need a reliable way to start the virtual-company simulator locally.
 
-Permanent archive DOI: [10.5281/zenodo.20053671](https://doi.org/10.5281/zenodo.20053671). The `v1.1.0` DOI release is intended to be run through the Docker one-command path below.
+Permanent archive DOI: [10.5281/zenodo.20053670](https://doi.org/10.5281/zenodo.20053670). The `v1.2.0` DOI release is intended to be run through the Docker one-command path below.
 
 ## Preferred Local Topology
 

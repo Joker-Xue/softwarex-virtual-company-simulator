@@ -93,7 +93,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(
     title="Virtual Company Simulator API",
-    version="1.1.0",
+    version="1.2.0",
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,

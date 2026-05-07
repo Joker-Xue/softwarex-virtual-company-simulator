@@ -1,12 +1,12 @@
 # Virtual Company Simulator for Career Planner
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20053671.svg)](https://doi.org/10.5281/zenodo.20053671)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20053670.svg)](https://doi.org/10.5281/zenodo.20053670)
 
 This repository stage contains the virtual-company simulator and reproducibility assets prepared for a SoftwareX submission. The artifact focuses on an AI-driven office world in which MBTI-shaped agents work, socialize, join company events, and evolve through a shared simulation loop exposed through a FastAPI backend and a Vue 3 frontend.
 
-The formal SoftwareX submission release for this public artifact is `v1.1.0`.
+The formal SoftwareX submission release for this public artifact is `v1.2.0`.
 
-Permanent archive DOI: [10.5281/zenodo.20053671](https://doi.org/10.5281/zenodo.20053671). The archived artifact includes a Docker Compose one-command deployment path:
+Permanent archive DOI: [10.5281/zenodo.20053670](https://doi.org/10.5281/zenodo.20053670). The archived artifact includes a Docker Compose one-command deployment path:
 
 ```bash
 docker compose up --build
