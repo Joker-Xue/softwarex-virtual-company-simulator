@@ -151,6 +151,7 @@ async function setSimSpeed(speed: number) {
   height: 100%;
   gap: 0;
   overflow: hidden;
+  --panel-width: clamp(520px, 33.333vw, 720px);
 }
 
 /* ── Canvas Area with neon frame ── */
@@ -190,6 +191,8 @@ async function setSimSpeed(speed: number) {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
   margin-bottom: 12px;
   padding-bottom: 10px;
   border-bottom: 1px solid var(--border-dim);
@@ -203,11 +206,16 @@ async function setSimSpeed(speed: number) {
   text-transform: uppercase;
   color: var(--accent-cyan);
   text-shadow: 0 0 8px rgba(34, 211, 238, 0.4);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .header-controls {
   display: flex;
   align-items: center;
   gap: 14px;
+  flex-shrink: 0;
 }
 .speed-controls {
   display: flex;
@@ -219,6 +227,7 @@ async function setSimSpeed(speed: number) {
   font-size: 12px;
   color: var(--text-muted);
   margin-right: 4px;
+  white-space: nowrap;
 }
 .speed-btn {
   font-family: var(--font-mono);
@@ -251,6 +260,7 @@ async function setSimSpeed(speed: number) {
   font-size: 13px;
   color: var(--accent-rose);
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 .ws-status::before {
   content: '';
@@ -271,8 +281,10 @@ async function setSimSpeed(speed: number) {
 
 /* ── Glowing vertical divider ── */
 .panel-area {
-  width: 360px;
-  flex-shrink: 0;
+  width: var(--panel-width);
+  flex: 0 0 var(--panel-width);
+  min-width: 520px;
+  max-width: 720px;
   position: relative;
   background: var(--bg-card);
   backdrop-filter: blur(16px) saturate(1.3);

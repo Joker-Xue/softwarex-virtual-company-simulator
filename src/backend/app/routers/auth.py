@@ -1,4 +1,5 @@
-﻿import random
+﻿import os
+import random
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -22,6 +23,9 @@ from app.utils.security import (
 )
 
 router = APIRouter()
+
+REVIEWER_MODE = os.getenv("REVIEWER_MODE", "false").lower() == "true"
+REVIEWER_VERIFICATION_CODE = os.getenv("REVIEWER_VERIFICATION_CODE", "000000")
 
 
 class RegisterRequest(BaseModel):
@@ -65,7 +69,7 @@ async def send_verification_code(
     if recent.scalar_one_or_none():
         raise HTTPException(status_code=429, detail="Please wait 60 seconds before requesting another code")
 
-    token_value = str(random.randint(100000, 999999))
+    token_value = REVIEWER_VERIFICATION_CODE if REVIEWER_MODE else str(random.randint(100000, 999999))
     verification = EmailVerificationToken(
         email=request.email,
         token=token_value,
@@ -74,6 +78,12 @@ async def send_verification_code(
     )
     db.add(verification)
     await db.commit()
+
+    if REVIEWER_MODE:
+        return {
+            "message": "Reviewer verification code generated.",
+            "verification_code": token_value,
+        }
 
     try:
         await send_verification_email(request.email, token_value)

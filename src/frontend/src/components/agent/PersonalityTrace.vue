@@ -146,25 +146,25 @@ function timeAgo(ts: string) {
 
 /* Multipliers */
 .multipliers-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.mult-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: rgba(17,24,39,0.6); border: 1px solid var(--border-dim, rgba(56,189,248,0.08)); border-radius: 6px; }
-.mult-label { font-family: var(--font-body); font-size: 13px; color: var(--text-muted); }
-.mult-value { font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.mult-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-width: 0; padding: 8px 10px; background: rgba(17,24,39,0.6); border: 1px solid var(--border-dim, rgba(56,189,248,0.08)); border-radius: 6px; }
+.mult-label { font-family: var(--font-body); font-size: 13px; color: var(--text-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mult-value { font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--text-primary); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mult-value.boosted { color: var(--accent-cyan); text-shadow: 0 0 6px rgba(34,211,238,0.4); }
 .mult-value.career { color: var(--accent-violet); font-size: 13px; }
 
 /* Weight bars */
 .section-title { font-family: var(--font-body); font-weight: 600; font-size: 14px; color: var(--text-primary); margin-bottom: 8px; }
 .weight-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
-.weight-label { font-family: var(--font-body); font-size: 13px; color: var(--text-secondary); width: 36px; flex-shrink: 0; }
+.weight-label { font-family: var(--font-body); font-size: 13px; color: var(--text-secondary); width: 76px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .weight-track { flex: 1; height: 6px; background: rgba(34,211,238,0.08); border-radius: 3px; overflow: hidden; }
 .weight-fill { height: 100%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet)); border-radius: 3px; transition: width 0.5s ease; }
 .weight-pct { font-family: var(--font-mono); font-size: 13px; color: var(--accent-cyan); width: 36px; text-align: right; }
 
 /* Tendency */
 .tendency-section { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; background: rgba(17,24,39,0.5); border: 1px solid var(--border-dim, rgba(56,189,248,0.08)); border-radius: 6px; }
-.tend-row { display: flex; justify-content: space-between; align-items: center; }
-.tend-label { font-family: var(--font-body); font-size: 13px; color: var(--text-muted); }
-.tend-value { font-family: var(--font-mono); font-size: 13px; color: var(--text-primary); }
+.tend-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-width: 0; }
+.tend-label { font-family: var(--font-body); font-size: 13px; color: var(--text-muted); flex-shrink: 0; }
+.tend-value { font-family: var(--font-mono); font-size: 13px; color: var(--text-primary); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
 .tend-value.dim { color: var(--text-muted); }
 
 /* Timeline */
@@ -178,10 +178,10 @@ function timeAgo(ts: string) {
 
 .tl-icon { font-size: 18px; flex-shrink: 0; width: 24px; text-align: center; }
 .tl-content { flex: 1; min-width: 0; }
-.tl-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
-.tl-type { font-family: var(--font-mono); font-size: 12px; font-weight: 600; text-transform: uppercase; }
-.tl-time { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+.tl-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-width: 0; margin-bottom: 3px; }
+.tl-type { font-family: var(--font-mono); font-size: 12px; font-weight: 600; text-transform: uppercase; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tl-time { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
 .tl-text { font-family: var(--font-body); font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
 .tl-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-.tl-tag { font-family: var(--font-mono); font-size: 11px; color: var(--accent-cyan); background: rgba(34,211,238,0.06); border: 1px solid rgba(34,211,238,0.15); border-radius: 2px; padding: 1px 5px; }
+.tl-tag { font-family: var(--font-mono); font-size: 11px; color: var(--accent-cyan); background: rgba(34,211,238,0.06); border: 1px solid rgba(34,211,238,0.15); border-radius: 2px; padding: 1px 5px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 </style>

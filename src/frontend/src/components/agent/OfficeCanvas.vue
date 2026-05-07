@@ -27,6 +27,18 @@ const FRAME_INTERVAL = 1000 / TARGET_FPS
 const currentRooms = computed(() => getRoomsByFloor(store.currentFloor))
 const floorKeys = computed(() => Object.keys(FLOOR_LABELS).map(Number))
 
+type VisualRoomConfig = RoomConfig & { sourceRoom: RoomConfig }
+
+const FLOOR_VIEWPORTS: Record<number, {
+  source: { x: number; y: number; width: number; height: number }
+  target: { x: number; y: number; width: number; height: number }
+}> = {
+  2: {
+    source: { x: 20, y: 60, width: 520, height: 280 },
+    target: { x: 30, y: 58, width: 410, height: 430 },
+  },
+}
+
 const emit = defineEmits<{
   (e: 'enter-room', room: any): void
 }>()
@@ -217,8 +229,9 @@ function drawNamedSpots(c: CanvasRenderingContext2D, floor: number) {
   for (const [, spot] of Object.entries(NAMED_SPOTS)) {
     if (spot.floor !== floor) continue
     const color = SPOT_COLORS[spot.spot_type]
-    const x = spot.x
-    const y = spot.y
+    const visualPoint = toVisualPoint(spot.x, spot.y)
+    const x = visualPoint.x
+    const y = visualPoint.y
 
     c.save()
 
@@ -254,6 +267,78 @@ function drawNamedSpots(c: CanvasRenderingContext2D, floor: number) {
 
     c.restore()
   }
+}
+
+function drawFittedText(
+  c: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+) {
+  if (maxWidth <= 0) return
+  if (c.measureText(text).width <= maxWidth) {
+    c.fillText(text, x, y)
+    return
+  }
+  let fitted = text
+  while (fitted.length > 1 && c.measureText(fitted + '...').width > maxWidth) {
+    fitted = fitted.slice(0, -1)
+  }
+  c.fillText(fitted.length > 1 ? fitted + '...' : text.slice(0, 1), x, y)
+}
+
+function compactRoomName(name: string) {
+  const compactNames: Record<string, string> = {
+    Engineering: 'Eng',
+    Marketing: 'Mktg',
+    Operations: 'Ops',
+    'HR Department': 'HR',
+  }
+  return compactNames[name] || name
+}
+
+function getFloorViewport() {
+  return FLOOR_VIEWPORTS[store.currentFloor]
+}
+
+function toVisualPoint(x: number, y: number): { x: number; y: number } {
+  const viewport = getFloorViewport()
+  if (!viewport) return { x, y }
+  const sx = viewport.target.width / viewport.source.width
+  const sy = viewport.target.height / viewport.source.height
+  return {
+    x: viewport.target.x + (x - viewport.source.x) * sx,
+    y: viewport.target.y + (y - viewport.source.y) * sy,
+  }
+}
+
+function fromVisualPoint(x: number, y: number): { x: number; y: number } {
+  const viewport = getFloorViewport()
+  if (!viewport) return { x, y }
+  const sx = viewport.source.width / viewport.target.width
+  const sy = viewport.source.height / viewport.target.height
+  return {
+    x: viewport.source.x + (x - viewport.target.x) * sx,
+    y: viewport.source.y + (y - viewport.target.y) * sy,
+  }
+}
+
+function toVisualRoom(room: RoomConfig): VisualRoomConfig {
+  const topLeft = toVisualPoint(room.x, room.y)
+  const bottomRight = toVisualPoint(room.x + room.width, room.y + room.height)
+  return {
+    ...room,
+    x: topLeft.x,
+    y: topLeft.y,
+    width: bottomRight.x - topLeft.x,
+    height: bottomRight.y - topLeft.y,
+    sourceRoom: room,
+  }
+}
+
+function currentVisualRooms(): VisualRoomConfig[] {
+  return currentRooms.value.map(toVisualRoom)
 }
 
 function drawStatic() {
@@ -309,7 +394,8 @@ function drawStatic() {
   c.fillText(FLOOR_LABELS[store.currentFloor] || `${store.currentFloor}F`, w / 2, 42)
 
   // ── Draw rooms ──
-  for (const room of currentRooms.value) {
+  for (const sourceRoom of currentRooms.value) {
+    const room = toVisualRoom(sourceRoom)
     const rx = room.x
     const ry = room.y
     const rw = room.width
@@ -357,15 +443,18 @@ function drawStatic() {
     c.textBaseline = 'middle'
     c.fillText(ROOM_ICONS[room.type] || '□', rx + 12, ry + 17)
 
+    const compactHeader = rw < 145
     c.fillStyle = '#f1f5f9'
-    c.font = 'bold 14px "Microsoft YaHei", sans-serif'
-    c.fillText(room.name, rx + 36, ry + 17)
+    c.font = `${compactHeader ? 'bold 13px' : 'bold 14px'} "Microsoft YaHei", sans-serif`
+    drawFittedText(c, compactHeader ? compactRoomName(room.name) : room.name, rx + 36, ry + 17, Math.max(20, rw - (compactHeader ? 48 : 98)))
 
     // Department tag
-    c.fillStyle = 'rgba(148,163,184,0.7)'
-    c.font = '10px "JetBrains Mono", monospace'
-    c.textAlign = 'right'
-    c.fillText(room.department.toUpperCase(), rx + rw - 10, ry + 18)
+    if (!compactHeader) {
+      c.fillStyle = 'rgba(148,163,184,0.7)'
+      c.font = '10px "JetBrains Mono", monospace'
+      c.textAlign = 'right'
+      drawFittedText(c, room.department.toUpperCase(), rx + rw - 10, ry + 18, Math.max(24, rw - 52))
+    }
 
     // Door indicator (bottom center)
     const doorW = 20
@@ -377,7 +466,7 @@ function drawStatic() {
     c.strokeRect(doorX, ry + rh - 4, doorW, 4)
 
     // Furniture
-    const furnitureList = ROOM_FURNITURE[room.type] || []
+    const furnitureList = ROOM_FURNITURE[sourceRoom.type] || []
     for (const item of furnitureList) {
       drawFurniture(c, room, item)
     }
@@ -385,8 +474,8 @@ function drawStatic() {
 
   // ── Corridor decorations (small neon plants/lights) ──
   const plantPositions = [
-    { x: 300, y: 25 }, { x: 300, y: 575 },
-    { x: 25, y: 300 }, { x: 575, y: 300 },
+    { x: 300, y: 42 }, { x: 300, y: 558 },
+    { x: 42, y: 300 }, { x: 558, y: 300 },
   ]
   for (const p of plantPositions) {
     c.save()
@@ -410,24 +499,41 @@ function drawStatic() {
     { label: 'Rest', color: SPOT_COLORS.rest },
     { label: 'Meeting', color: SPOT_COLORS.meeting },
   ]
-  const legendX = w - 92
-  const legendStartY = h - 86
+  const legendFontSize = 15
+  const legendLineH = 23
+  c.font = `600 ${legendFontSize}px "Microsoft YaHei", sans-serif`
+  const legendPaddingX = 15
+  const legendPaddingY = 13
+  const legendDotGap = 17
+  const legendTextW = Math.ceil(Math.max(...legendItems.map(item => c.measureText(item.label).width)))
+  const legendW = Math.max(138, legendPaddingX * 2 + legendDotGap + legendTextW)
+  const legendH = legendPaddingY * 2 + legendItems.length * legendLineH
+  const legendBoxX = w - legendW - 12
+  const legendX = legendBoxX + legendPaddingX
+  const legendStartY = h - legendH + legendPaddingY - 12
   c.fillStyle = 'rgba(10,14,26,0.7)'
   c.beginPath()
-  c.roundRect(legendX - 8, legendStartY - 8, 95, 82, 6)
+  c.roundRect(legendBoxX, legendStartY - legendPaddingY, legendW, legendH, 8)
   c.fill()
-  c.strokeStyle = 'rgba(34,211,238,0.2)'
+  c.shadowColor = '#22d3ee'
+  c.shadowBlur = 8
+  c.strokeStyle = 'rgba(34,211,238,0.35)'
+  c.lineWidth = 1.4
   c.stroke()
+  c.shadowBlur = 0
   for (let i = 0; i < legendItems.length; i++) {
-    const ly = legendStartY + i * 15
+    const ly = legendStartY + i * legendLineH
     c.fillStyle = legendItems[i].color
+    c.shadowColor = legendItems[i].color
+    c.shadowBlur = 6
     c.beginPath()
-    c.arc(legendX, ly, 3, 0, Math.PI * 2)
+    c.arc(legendX, ly + 1, 4.5, 0, Math.PI * 2)
     c.fill()
+    c.shadowBlur = 0
     c.fillStyle = 'rgba(226,232,240,0.8)'
-    c.font = '10px "Microsoft YaHei", sans-serif'
     c.textAlign = 'left'
-    c.fillText(legendItems[i].label, legendX + 8, ly + 3)
+    c.textBaseline = 'middle'
+    drawFittedText(c, legendItems[i].label, legendX + 13, ly + 1, legendW - legendPaddingX * 2 - legendDotGap)
   }
 
   staticDirty = false
@@ -474,7 +580,7 @@ function draw() {
   }
 
   // Draw a hover highlight（dynamic，follow mouse）— neon highlight
-  for (const room of currentRooms.value) {
+  for (const room of currentVisualRooms()) {
     if (hoveredRoom === room.name) {
       ctx.save()
       ctx.fillStyle = 'rgba(34,211,238,0.12)'
@@ -516,8 +622,11 @@ function draw() {
 
     presentIds.add(id)
 
-    const targetX = agent.pos_x
-    const targetY = agent.pos_y % FLOOR_Y_OFFSET  // Decoding canvasy（Remove floor offset）
+    const sourceX = agent.pos_x
+    const sourceY = agent.pos_y % FLOOR_Y_OFFSET  // Decoding canvasy（Remove floor offset）
+    const visualPoint = toVisualPoint(sourceX, sourceY)
+    const targetX = visualPoint.x
+    const targetY = visualPoint.y
     const color = AVATAR_COLORS[agent.avatar_key] || '#6366f1'
 
     // --- Interpolate display position toward target ---
@@ -617,18 +726,19 @@ function handleClick(e: MouseEvent) {
   const rect = canvasRef.value.getBoundingClientRect()
   const scaleX = canvasRef.value.width / rect.width
   const scaleY = canvasRef.value.height / rect.height
-  const x = Math.round((e.clientX - rect.left) * scaleX)
-  const y = Math.round((e.clientY - rect.top) * scaleY)
+  const visualX = Math.round((e.clientX - rect.left) * scaleX)
+  const visualY = Math.round((e.clientY - rect.top) * scaleY)
 
   // Check if other Roles are clicked (use display positions for accurate hit-test)
   const allAgents = store.onlineAgents
   for (const agent of allAgents) {
     if (agent.id === store.myProfile.id) continue
     const disp = displayPositions.get(agent.id)
-    const ax = disp ? disp.x : agent.pos_x
-    const ay = disp ? disp.y : agent.pos_y
-    const ddx = ax - x
-    const ddy = ay - y
+    const fallback = toVisualPoint(agent.pos_x, agent.pos_y % FLOOR_Y_OFFSET)
+    const ax = disp ? disp.x : fallback.x
+    const ay = disp ? disp.y : fallback.y
+    const ddx = ax - visualX
+    const ddy = ay - visualY
     if (ddx * ddx + ddy * ddy < 400) {
       store.selectedAgent = agent
       return
@@ -636,7 +746,8 @@ function handleClick(e: MouseEvent) {
   }
 
   // Otherwise move
-  store.moveAgent(x, y)
+  const sourcePoint = fromVisualPoint(visualX, visualY)
+  store.moveAgent(Math.round(sourcePoint.x), Math.round(sourcePoint.y))
 }
 
 function handleMouseMove(e: MouseEvent) {
@@ -648,7 +759,7 @@ function handleMouseMove(e: MouseEvent) {
   const y = (e.clientY - rect.top) * scaleY
 
   hoveredRoom = ''
-  for (const room of currentRooms.value) {
+  for (const room of currentVisualRooms()) {
     if (x >= room.x && x <= room.x + room.width && y >= room.y && y <= room.y + room.height) {
       hoveredRoom = room.name
       break
@@ -664,9 +775,9 @@ function handleDblClick(e: MouseEvent) {
   const x = (e.clientX - rect.left) * scaleX
   const y = (e.clientY - rect.top) * scaleY
 
-  for (const room of currentRooms.value) {
+  for (const room of currentVisualRooms()) {
     if (x >= room.x && x <= room.x + room.width && y >= room.y && y <= room.y + room.height) {
-      emit('enter-room', room)
+      emit('enter-room', room.sourceRoom)
       return
     }
   }

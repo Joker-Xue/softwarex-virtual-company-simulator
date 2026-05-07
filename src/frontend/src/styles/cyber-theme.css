@@ -107,6 +107,11 @@
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   text-shadow: 0 0 6px rgba(34, 211, 238, 0.3);
   transition: all var(--duration-base) ease;
 }
@@ -158,6 +163,11 @@
   border-radius: 10px;
   border: 1px solid;
   letter-spacing: 0;
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .cyber-badge-cyan {
   color: var(--accent-cyan);
@@ -252,6 +262,10 @@
   letter-spacing: 0;
   text-transform: none;
   color: var(--text-primary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .cyber-header-tag {
   margin-left: auto;
@@ -262,6 +276,10 @@
   padding: 2px 7px;
   border-radius: 4px;
   border: 1px solid rgba(45, 212, 191, 0.18);
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .noise-overlay::before {

@@ -477,11 +477,12 @@ function enterCompany() {
   display: flex;
   align-items: flex-start;
   gap: 8px;
+  min-width: 0;
 }
 .impact-icon { font-size: 20px; flex-shrink: 0; }
-.impact-content { display: flex; flex-direction: column; gap: 2px; }
-.impact-label { font-size: 12px; color: var(--text-muted); font-family: var(--font-body); text-transform: uppercase; letter-spacing: 0.5px; }
-.impact-value { font-size: 15px; color: var(--text-primary); font-family: var(--font-body); }
+.impact-content { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.impact-label { font-size: 12px; color: var(--text-muted); font-family: var(--font-body); text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.impact-value { font-size: 15px; color: var(--text-primary); font-family: var(--font-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .impact-career { color: var(--accent-emerald); font-weight: 600; }
 .impact-bonus { color: var(--accent-amber); font-weight: 600; text-shadow: 0 0 6px rgba(251, 191, 36, 0.3); }
 
@@ -498,6 +499,7 @@ function enterCompany() {
   align-items: center;
   gap: 6px;
   font-size: 13px;
+  min-width: 0;
 }
 .dim-letter {
   font-family: var(--font-mono);
@@ -507,6 +509,8 @@ function enterCompany() {
   border-radius: 3px;
   background: rgba(100, 116, 139, 0.1);
   transition: all var(--duration-base) ease;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .dim-letter.active {
   color: var(--accent-cyan);
@@ -515,7 +519,7 @@ function enterCompany() {
   text-shadow: 0 0 6px rgba(34, 211, 238, 0.4);
 }
 .dim-vs { color: var(--text-muted); font-size: 11px; }
-.dim-effect { color: var(--text-secondary); font-family: var(--font-body); margin-left: auto; font-size: 13px; }
+.dim-effect { color: var(--text-secondary); font-family: var(--font-body); margin-left: auto; font-size: 13px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ═══ Form Sections ═══ */
 .form-section {
@@ -525,6 +529,7 @@ function enterCompany() {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
   font-family: var(--font-body);
   font-weight: 600;
   font-size: 16px;
@@ -663,6 +668,10 @@ function enterCompany() {
   letter-spacing: 0.5px;
   border: 1px solid;
   transition: all var(--duration-base) ease;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .points-badge.remaining {
   color: var(--accent-amber);
@@ -693,14 +702,18 @@ function enterCompany() {
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
 }
 .attr-label {
-  width: 56px;
+  width: 112px;
   font-family: var(--font-body);
   font-size: 15px;
   font-weight: 500;
   color: var(--text-secondary);
   flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .attr-value {
   width: 36px;

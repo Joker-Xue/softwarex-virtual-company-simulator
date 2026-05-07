@@ -1,10 +1,16 @@
 # Virtual Company Simulator for Career Planner
 
-[![DOI](https://zenodo.org/badge/1206044980.svg)](https://zenodo.org/badge/latestdoi/1206044980)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20053671.svg)](https://doi.org/10.5281/zenodo.20053671)
 
 This repository stage contains the virtual-company simulator and reproducibility assets prepared for a SoftwareX submission. The artifact focuses on an AI-driven office world in which MBTI-shaped agents work, socialize, join company events, and evolve through a shared simulation loop exposed through a FastAPI backend and a Vue 3 frontend.
 
-The formal SoftwareX submission release for this public artifact is `v1.0.1`.
+The formal SoftwareX submission release for this public artifact is `v1.1.0`.
+
+Permanent archive DOI: [10.5281/zenodo.20053671](https://doi.org/10.5281/zenodo.20053671). The archived artifact includes a Docker Compose one-command deployment path:
+
+```bash
+docker compose up --build
+```
 
 The public SoftwareX package should be curated from the simulator boundary documented in `docs/softwarex_submission_boundary.md`. This staging branch still lives inside the private monorepo so that the simulator can be stabilized, documented, and exported cleanly.
 
@@ -75,10 +81,10 @@ Canonical Docker URLs:
 - Backend: `http://localhost:8000`
 - OpenAPI docs: `http://localhost:8000/docs`
 
-Registration uses an email verification code. For the full SMTP-backed flow,
-copy the `SMTP_*` values from the shared full project `.env` into this
-repository's local `.env` before starting Docker. Do not commit real SMTP
-credentials.
+The public Docker path runs in reviewer mode by default. During registration,
+request a verification code and enter `000000`. For a real SMTP-backed flow,
+set `REVIEWER_MODE=false` and provide local `SMTP_*` values in `.env` before
+starting Docker. See `docs/REVIEWER_MODE.md` for the reviewer-mode note.
 
 ### 2. Run reviewer smoke checks
 
@@ -112,6 +118,13 @@ Copy `.env.example` to `.env` and fill in at least:
 - `SMTP_FROM`
 
 `SMTP_PASSWORD` should be the mailbox authorization code, not the mailbox login password.
+
+For public reviewer deployment without SMTP, keep:
+
+```env
+REVIEWER_MODE=true
+REVIEWER_VERIFICATION_CODE=000000
+```
 
 Keep `CORS_ORIGINS` on canonical localhost origins such as `http://localhost:5174`.
 

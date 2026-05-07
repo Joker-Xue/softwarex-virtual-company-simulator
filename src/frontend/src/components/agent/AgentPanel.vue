@@ -86,6 +86,7 @@ watch(() => store.selectedAgent, (agent) => {
 }
 .panel-tabs button {
   flex: 1;
+  min-width: 0;
   padding: 12px 4px;
   border: none;
   background: none;
@@ -94,6 +95,9 @@ watch(() => store.selectedAgent, (agent) => {
   font-family: var(--font-body);
   color: var(--text-muted);
   position: relative;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   transition: all var(--duration-base) ease;
 }
 .panel-tabs button:hover {

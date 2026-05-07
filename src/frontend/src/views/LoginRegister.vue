@@ -63,8 +63,13 @@ async function sendVerificationCode() {
   }
   sendingCode.value = true
   try {
-    await request.post('/api/auth/send-verification-code', { email: email.value })
-    ElMessage.success('Verification code sent. Please check your email')
+    const { data } = await request.post('/api/auth/send-verification-code', { email: email.value })
+    if (data?.verification_code) {
+      verificationCode.value = data.verification_code
+      ElMessage.success(`Reviewer mode code: ${data.verification_code}`)
+    } else {
+      ElMessage.success('Verification code sent. Please check your email')
+    }
     startCountdown()
   } catch (e: any) {
     ElMessage.error(extractApiError(e, 'Failed to send verification code'))
@@ -173,6 +178,7 @@ onBeforeUnmount(() => {
               {{ codeCountdown > 0 ? `${codeCountdown}s` : (sendingCode ? 'Sending' : 'Send') }}
             </button>
           </div>
+          <p class="reviewer-note">Reviewer mode is enabled. Use verification code <strong>000000</strong>.</p>
         </div>
 
         <div class="field">
@@ -291,6 +297,19 @@ onBeforeUnmount(() => {
 .mini-btn:disabled {
   opacity: .55;
   cursor: not-allowed;
+}
+
+.reviewer-note {
+  margin: 8px 0 0;
+  color: rgba(0,255,213,.78);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.reviewer-note strong {
+  color: #00ffd5;
+  font-family: 'Orbitron', monospace;
+  letter-spacing: 1px;
 }
 
 .captcha-box {

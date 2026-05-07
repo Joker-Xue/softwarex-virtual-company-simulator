@@ -407,8 +407,8 @@ onUnmounted(() => {
 
 /* ── Social Metrics ── */
 .metric-list { display: flex; flex-direction: column; gap: 14px; }
-.metric-item { display: flex; align-items: center; gap: 8px; }
-.metric-label { font-size: 14px; color: var(--text-muted); width: 70px; flex-shrink: 0; }
+.metric-item { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.metric-label { font-size: 14px; color: var(--text-muted); width: 104px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .metric-value {
   font-size: 14px; font-weight: 600; width: 40px; text-align: right;
   font-family: var(--font-mono);
@@ -542,9 +542,9 @@ onUnmounted(() => {
   color: var(--accent-violet); text-shadow: 0 0 8px rgba(167,139,250,0.4);
 }
 
-.lb-rank { width: 40px; text-align: center; font-family: var(--font-mono); }
-.lb-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lb-dept { width: 60px; text-align: center; color: var(--text-muted); }
+.lb-rank { width: 40px; text-align: center; font-family: var(--font-mono); flex-shrink: 0; }
+.lb-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-dept { width: 76px; text-align: center; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lb-level {
   width: 40px; text-align: center; color: var(--accent-violet);
   font-weight: 600; font-family: var(--font-mono);

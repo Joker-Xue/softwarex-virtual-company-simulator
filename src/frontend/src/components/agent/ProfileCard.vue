@@ -431,11 +431,12 @@ async function fetchSalaryInfo() {
   color: #fff; font-size: 22px; font-weight: 700; flex-shrink: 0;
   border: 2px solid rgba(255,255,255,0.15);
 }
-.header-info { flex: 1; }
+.header-info { flex: 1; min-width: 0; }
 .nickname {
   font-size: 20px; font-weight: 700; color: var(--text-primary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.meta { display: flex; gap: 8px; align-items: center; margin-top: 2px; }
+.meta { display: flex; gap: 8px; align-items: center; min-width: 0; margin-top: 2px; }
 .level-badge {
   font-family: var(--font-mono); font-size: 13px; padding: 1px 8px;
   border-radius: 8px; background: rgba(251,191,36,0.1);
@@ -443,11 +444,11 @@ async function fetchSalaryInfo() {
   border: 1px solid rgba(251,191,36,0.25);
   text-shadow: 0 0 6px rgba(251,191,36,0.3);
 }
-.dept { font-size: 14px; color: var(--text-muted); }
+.dept { font-size: 14px; color: var(--text-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mbti-tag { margin-top: 4px; }
 .attrs-section { display: flex; flex-direction: column; gap: 8px; }
-.attr-bar { display: flex; align-items: center; gap: 8px; }
-.bar-label { width: 48px; font-size: 14px; color: var(--text-muted); flex-shrink: 0; }
+.attr-bar { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.bar-label { width: 92px; font-size: 14px; color: var(--text-muted); flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bar-track { flex: 1; }
 .bar-fill { transition: width 0.3s; }
 .bar-val {
@@ -553,7 +554,7 @@ async function fetchSalaryInfo() {
   border-left-color: rgba(34,211,238,0.15);
 }
 .schedule-item {
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center; gap: 8px; min-width: 0;
   padding: 4px 8px; border-radius: var(--radius-sm);
   transition: all 0.2s;
 }
@@ -566,11 +567,12 @@ async function fetchSalaryInfo() {
   min-width: 42px; font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
-.schedule-activity { font-size: 15px; }
+.schedule-activity { font-size: 15px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .schedule-room-tag {
   font-size: 12px; padding: 0 6px; border-radius: 4px;
   background: rgba(34,211,238,0.06); color: var(--text-muted);
   border: 1px solid var(--border-dim); line-height: 18px;
+  max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .schedule-current-tag {
   font-size: 12px; padding: 0 6px; border-radius: 6px;
@@ -630,9 +632,9 @@ async function fetchSalaryInfo() {
 .mbti-influence { margin-top: 16px; padding: 12px; background: rgba(167,139,250,0.05); border: 1px solid rgba(167,139,250,0.15); border-radius: 6px; }
 .influence-title { font-family: var(--font-display); font-size: 13px; color: var(--accent-violet); letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase; }
 .influence-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.inf-item { display: flex; justify-content: space-between; padding: 4px 0; }
-.inf-label { font-family: var(--font-body); font-size: 13px; color: var(--text-muted); }
-.inf-value { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.inf-item { display: flex; justify-content: space-between; gap: 8px; min-width: 0; padding: 4px 0; }
+.inf-label { font-family: var(--font-body); font-size: 13px; color: var(--text-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inf-value { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--text-primary); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .inf-value.boosted { color: var(--accent-cyan); }
 .inf-value.career { color: var(--accent-violet); }
 </style>

@@ -221,6 +221,7 @@ const STATUS_TEXT: Record<string, string> = {
   border-radius: calc(var(--radius-md) - 2px);
   color: var(--text-muted); background: transparent;
   display: flex; align-items: center; justify-content: center; gap: 5px;
+  min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   transition: all var(--duration-base);
 }
 .nav-btn:hover { color: var(--accent-cyan); background: rgba(34,211,238,0.05); }
@@ -233,6 +234,7 @@ const STATUS_TEXT: Record<string, string> = {
   font-size: 12px; font-weight: 700; padding: 1px 5px;
   border-radius: 8px; background: rgba(34,211,238,0.15);
   color: var(--accent-cyan); font-family: var(--font-mono);
+  flex-shrink: 0;
 }
 .dot-badge {
   background: rgba(251,113,133,0.12); color: var(--accent-rose);
@@ -273,6 +275,7 @@ const STATUS_TEXT: Record<string, string> = {
   font-size: 14px; font-weight: 600; white-space: nowrap;
   display: flex; align-items: center;
   padding: 2px 8px; border-radius: 10px; border: 1px solid;
+  max-width: 128px; overflow: hidden; text-overflow: ellipsis;
 }
 .status-pending {
   color: var(--accent-amber); border-color: rgba(251,191,36,0.3);
@@ -295,9 +298,9 @@ const STATUS_TEXT: Record<string, string> = {
   border: 1.5px solid rgba(255,255,255,0.15);
 }
 .friend-info { flex: 1; min-width: 0; }
-.friend-name-row { display: flex; align-items: center; gap: 6px; }
-.friend-name { font-weight: 600; font-size: 16px; color: var(--text-primary); }
-.friend-level { font-size: 13px; color: var(--accent-violet); font-family: var(--font-mono); }
+.friend-name-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.friend-name { font-weight: 600; font-size: 16px; color: var(--text-primary); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.friend-level { font-size: 13px; color: var(--accent-violet); font-family: var(--font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .affinity-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
 .affinity-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
 .affinity-track { flex: 1; max-width: 120px; height: 6px; background: rgba(34,211,238,0.08); border-radius: 3px; overflow: hidden; }
@@ -307,8 +310,8 @@ const STATUS_TEXT: Record<string, string> = {
   box-shadow: 0 0 6px rgba(52,211,153,0.25); transition: width 0.6s var(--ease-out-expo);
 }
 .affinity-val { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); min-width: 20px; text-align: right; }
-.friend-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
-.compat-tag { font-size: 13px; cursor: default; }
+.friend-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; max-width: 96px; }
+.compat-tag { font-size: 13px; cursor: default; max-width: 100%; }
 
 /* Color variants */
 .cyber-btn-emerald { border-color: var(--accent-emerald); color: var(--accent-emerald); text-shadow: 0 0 6px rgba(52,211,153,0.3); }

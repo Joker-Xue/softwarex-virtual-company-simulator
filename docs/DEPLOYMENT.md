@@ -2,6 +2,8 @@
 
 This guide is written for SoftwareX reviewers and maintainers who need a reliable way to start the virtual-company simulator locally.
 
+Permanent archive DOI: [10.5281/zenodo.20053671](https://doi.org/10.5281/zenodo.20053671). The `v1.1.0` DOI release is intended to be run through the Docker one-command path below.
+
 ## Preferred Local Topology
 
 - Frontend host: `http://localhost:5174`
@@ -37,10 +39,10 @@ This starts the complete interactive stack:
 
 The Docker path is the recommended reviewer path for reproducing the full interactive system.
 
-Registration requires SMTP-backed email verification. Copy the shared
-`SMTP_*` values from the full project's local `.env` into this repository's
-local `.env` before starting Docker. Real SMTP credentials must stay local and
-must not be committed.
+The public Docker path runs in reviewer mode by default. During registration,
+request a verification code and enter `000000`. For a real SMTP-backed flow,
+set `REVIEWER_MODE=false` and provide local `SMTP_*` values in `.env` before
+starting Docker. See `docs/REVIEWER_MODE.md` for the reviewer-mode note.
 
 ## Manual Configuration
 
@@ -55,7 +57,14 @@ must not be committed.
    - `SMTP_USER`
    - `SMTP_PASSWORD`
    - `SMTP_FROM`
-3. Keep `CORS_ORIGINS` aligned with the canonical frontend origin:
+3. For public reviewer deployment without SMTP, keep:
+
+```env
+REVIEWER_MODE=true
+REVIEWER_VERIFICATION_CODE=000000
+```
+
+4. Keep `CORS_ORIGINS` aligned with the canonical frontend origin:
 
 ```env
 CORS_ORIGINS=http://localhost:5174,http://127.0.0.1:5174

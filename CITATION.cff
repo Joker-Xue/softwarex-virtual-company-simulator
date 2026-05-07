@@ -2,7 +2,9 @@ cff-version: 1.2.0
 title: Virtual Company Simulator for Career Planner
 message: If you use this software, please cite it using the metadata below.
 type: software
-version: 1.0.1
+version: 1.1.0
+doi: 10.5281/zenodo.20053671
+url: https://doi.org/10.5281/zenodo.20053671
 license: MIT
 abstract: >
   SoftwareX submission artifact for the Career Planner virtual-company
@@ -26,6 +28,8 @@ preferred-citation:
       given-names: Joker
     - name: Career Planner Team
   title: Virtual Company Simulator for Career Planner
-  version: 1.0.1
+  version: 1.1.0
+  doi: 10.5281/zenodo.20053671
+  url: https://doi.org/10.5281/zenodo.20053671
   year: 2026
   notes: SoftwareX submission artifact and reproducibility package.

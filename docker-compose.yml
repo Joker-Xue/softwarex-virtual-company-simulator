@@ -55,6 +55,8 @@ services:
       SMTP_FROM: ${SMTP_FROM:-}
       SMTP_DISPLAY_NAME: ${SMTP_DISPLAY_NAME:-Virtual Company Simulator}
       SMTP_USE_SSL: ${SMTP_USE_SSL:-true}
+      REVIEWER_MODE: ${REVIEWER_MODE:-true}
+      REVIEWER_VERIFICATION_CODE: ${REVIEWER_VERIFICATION_CODE:-000000}
     ports:
       - "8000:8000"
     depends_on:
