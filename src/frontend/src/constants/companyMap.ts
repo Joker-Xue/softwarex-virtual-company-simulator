@@ -1,0 +1,320 @@
+/**
+ * Company map configuration data
+ * Canvas size: 600 x 600 (show after zooming)
+ * Multiple floors: each floor 600x600，3rooms arranged horizontally
+ */
+
+export interface RoomConfig {
+  id: number
+  name: string
+  type: string
+  department: string
+  x: number
+  y: number
+  width: number
+  height: number
+  color: string
+  labelColor: string
+  floor: number
+}
+
+export const CANVAS_WIDTH = 600
+export const CANVAS_HEIGHT = 600
+
+/**
+ * Floor Y-coordinate encoding offset。
+ * pos_y = canvas_y + (floor - 1) * FLOOR_Y_OFFSET
+ * decoding：canvas_y = pos_y % FLOOR_Y_OFFSET，floor = Math.floor(pos_y / FLOOR_Y_OFFSET) + 1
+ * floor1: pos_y ∈ [0, 699]  floor2: pos_y ∈ [700, 1399]  floor3: pos_y ∈ [1400, 2099]
+ */
+export const FLOOR_Y_OFFSET = 700
+
+export const FLOOR_LABELS: Record<number, string> = {
+  1: '1F Lobby Floor',
+  2: '2F Office Floor',
+  3: '3F Management Floor',
+}
+
+export const ROOMS: RoomConfig[] = [
+  // ── 1F Lobby Floor ──
+  { id: 1, name: 'Lobby', type: 'lounge', department: 'general',
+    x: 20, y: 60, width: 260, height: 220, color: '#eef2ff', labelColor: '#374151', floor: 1 },
+  { id: 2, name: 'Cafe', type: 'cafeteria', department: 'general',
+    x: 320, y: 60, width: 260, height: 220, color: '#fff7ed', labelColor: '#9a3412', floor: 1 },
+  { id: 3, name: 'HR Department', type: 'office', department: 'hr',
+    x: 20, y: 340, width: 560, height: 220, color: '#faf5ff', labelColor: '#6b21a8', floor: 1 },
+  // ── 2F Office Floor ──
+  // left column(full height): Engineering | Middle column: Marketing(superior)/Product(Down) | Right column: Finance(superior)/Operations(Down)
+  { id: 4, name: 'Engineering', type: 'office', department: 'engineering',
+    x: 20, y: 60, width: 155, height: 280, color: '#eef2ff', labelColor: '#3730a3', floor: 2 },
+  { id: 5, name: 'Marketing', type: 'office', department: 'marketing',
+    x: 185, y: 60, width: 175, height: 130, color: '#fdf2f8', labelColor: '#9d174d', floor: 2 },
+  { id: 6, name: 'Product', type: 'office', department: 'product',
+    x: 185, y: 200, width: 175, height: 140, color: '#f0fdf4', labelColor: '#166534', floor: 2 },
+  { id: 7, name: 'Finance', type: 'office', department: 'finance',
+    x: 370, y: 60, width: 170, height: 130, color: '#ecfdf5', labelColor: '#065f46', floor: 2 },
+  { id: 8, name: 'Operations', type: 'office', department: 'operations',
+    x: 370, y: 200, width: 170, height: 140, color: '#fff7ed', labelColor: '#9a3412', floor: 2 },
+  // ── 3F Management Floor ──
+  { id: 9, name: 'Meeting Room', type: 'meeting', department: 'general',
+    x: 20, y: 60, width: 560, height: 160, color: '#eff6ff', labelColor: '#1e40af', floor: 3 },
+  { id: 10, name: 'Director Office', type: 'office', department: 'management',
+    x: 20, y: 280, width: 260, height: 260, color: '#fffbeb', labelColor: '#92400e', floor: 3 },
+  { id: 11, name: 'CEO Office', type: 'ceo_office', department: 'management',
+    x: 320, y: 280, width: 260, height: 260, color: '#fefce8', labelColor: '#854d0e', floor: 3 },
+]
+
+/** Room icon emoji for decoration */
+export const ROOM_ICONS: Record<string, string> = {
+  lounge: '🛋️',
+  cafeteria: '☕',
+  office: '💼',
+  meeting: '📋',
+  ceo_office: '👔',
+}
+
+/** Room furniture layout per type (relative positions inside room) */
+export interface FurnitureItem {
+  type: 'desk' | 'chair' | 'plant' | 'sofa' | 'table' | 'screen' | 'bookshelf' | 'coffee_machine'
+  rx: number  // relative x ratio (0-1) within room
+  ry: number  // relative y ratio (0-1) within room
+}
+
+export const ROOM_FURNITURE: Record<string, FurnitureItem[]> = {
+  lounge: [
+    { type: 'sofa', rx: 0.25, ry: 0.45 },
+    { type: 'sofa', rx: 0.75, ry: 0.45 },
+    { type: 'table', rx: 0.5, ry: 0.45 },
+    { type: 'plant', rx: 0.1, ry: 0.15 },
+    { type: 'plant', rx: 0.9, ry: 0.15 },
+  ],
+  cafeteria: [
+    { type: 'table', rx: 0.25, ry: 0.4 },
+    { type: 'table', rx: 0.75, ry: 0.4 },
+    { type: 'table', rx: 0.25, ry: 0.7 },
+    { type: 'table', rx: 0.75, ry: 0.7 },
+    { type: 'coffee_machine', rx: 0.5, ry: 0.15 },
+  ],
+  office: [
+    { type: 'desk', rx: 0.2, ry: 0.35 },
+    { type: 'desk', rx: 0.5, ry: 0.35 },
+    { type: 'desk', rx: 0.8, ry: 0.35 },
+    { type: 'desk', rx: 0.2, ry: 0.65 },
+    { type: 'desk', rx: 0.5, ry: 0.65 },
+    { type: 'desk', rx: 0.8, ry: 0.65 },
+    { type: 'plant', rx: 0.05, ry: 0.12 },
+  ],
+  meeting: [
+    { type: 'table', rx: 0.5, ry: 0.5 },
+    { type: 'chair', rx: 0.25, ry: 0.35 },
+    { type: 'chair', rx: 0.75, ry: 0.35 },
+    { type: 'chair', rx: 0.25, ry: 0.65 },
+    { type: 'chair', rx: 0.75, ry: 0.65 },
+    { type: 'screen', rx: 0.5, ry: 0.12 },
+  ],
+  ceo_office: [
+    { type: 'desk', rx: 0.5, ry: 0.35 },
+    { type: 'bookshelf', rx: 0.1, ry: 0.12 },
+    { type: 'bookshelf', rx: 0.9, ry: 0.12 },
+    { type: 'sofa', rx: 0.3, ry: 0.75 },
+    { type: 'plant', rx: 0.85, ry: 0.75 },
+  ],
+}
+
+/** Filter rooms by floor */
+export function getRoomsByFloor(floor: number): RoomConfig[] {
+  return ROOMS.filter(r => r.floor === floor)
+}
+
+export const CAREER_LEVELS: Record<number, { title: string; tasksRequired: number; xpRequired: number }> = {
+  0: { title: 'Intern', tasksRequired: 0, xpRequired: 0 },
+  1: { title: 'Junior Staff', tasksRequired: 5, xpRequired: 100 },
+  2: { title: 'Mid-level Staff', tasksRequired: 15, xpRequired: 350 },
+  3: { title: 'Senior Staff', tasksRequired: 30, xpRequired: 800 },
+  4: { title: 'Manager', tasksRequired: 50, xpRequired: 1500 },
+  5: { title: 'Director', tasksRequired: 80, xpRequired: 3000 },
+  6: { title: 'CEO', tasksRequired: 120, xpRequired: 5000 },
+}
+
+/** Dual career paths（Lv.4+）*/
+export const CAREER_PATHS: Record<string, Record<number, { title: string }>> = {
+  management: {
+    4: { title: 'Manager' },
+    5: { title: 'Director' },
+    6: { title: 'CEO' },
+  },
+  technical: {
+    4: { title: 'Technical Expert' },
+    5: { title: 'Principal Engineer' },
+    6: { title: 'CTO' },
+  },
+}
+
+export function getCareerTitle(level: number, path: string = 'management'): string {
+  if (level < 4) return CAREER_LEVELS[level]?.title || 'Unknown'
+  return CAREER_PATHS[path]?.[level]?.title || CAREER_LEVELS[level]?.title || 'Unknown'
+}
+
+export const DEPARTMENTS: Record<string, string> = {
+  management: 'Management Floor',
+  engineering: 'Engineering',
+  product: 'Product',
+  marketing: 'Marketing',
+  finance: 'Finance',
+  hr: 'HR Department',
+  operations: 'Operations',
+  general: 'Common Area',
+  unassigned: 'Unassigned',
+}
+
+/** Business Department that users can choose to join（Exclude Common Area and Unassigned） */
+export const SELECTABLE_DEPARTMENTS: Record<string, string> = {
+  engineering: 'Engineering',
+  product: 'Product',
+  marketing: 'Marketing',
+  finance: 'Finance',
+  hr: 'HR Department',
+  operations: 'Operations',
+}
+
+export const MBTI_TYPES = [
+  'INTJ', 'INTP', 'ENTJ', 'ENTP',
+  'INFJ', 'INFP', 'ENFJ', 'ENFP',
+  'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ',
+  'ISTP', 'ISFP', 'ESTP', 'ESFP',
+]
+
+export const AVATAR_KEYS = [
+  'default', 'avatar1', 'avatar2', 'avatar3', 'avatar4',
+  'avatar5', 'avatar6', 'avatar7', 'avatar8',
+]
+
+export const ACTION_LABELS: Record<string, string> = {
+  idle: 'Idle',
+  working: 'Working',
+  moving: 'Moving',
+  chatting: 'Chatting',
+  resting: 'Resting',
+  meeting: 'In Meeting',
+  work: 'Working',
+  chat: 'Chatting',
+  rest: 'Resting',
+}
+
+/**
+ * Semantic seat definition（Exactly aligned with app/engine/named_spots.py）
+ * spot_type:
+ *   anchor   - executive anchor positioning（CEO/DirectorExclusive）
+ *   work     - Ordinary desk
+ *   visitor  - Visitor's seat（in front of executive office）
+ *   rest     - Rest area（Cafe/Lobby）
+ *   meeting  - Meeting room seat
+ *   reception- Lobbyfront desk
+ */
+export type SpotType = 'anchor' | 'work' | 'visitor' | 'rest' | 'meeting' | 'reception'
+
+export interface NamedSpot {
+  x: number
+  y: number   // canvas y (before floor encoding)
+  floor: number
+  dept: string
+  spot_type: SpotType
+}
+
+/** The visual color corresponding to the seat type */
+export const SPOT_COLORS: Record<SpotType, string> = {
+  anchor:    '#f59e0b',  // Golden  executiveExclusive
+  work:      '#22d3ee',  // blue — desk
+  visitor:   '#a78bfa',  // Purple — Visitor's seat
+  rest:      '#fb923c',  // orange color — Rest area
+  meeting:   '#4ade80',  // Green  meeting chair
+  reception: '#f472b6',  // Pink  front desk
+}
+
+export const NAMED_SPOTS: Record<string, NamedSpot> = {
+  // 1F Lobby
+  lobby_reception:  { x: 150, y: 72,  floor: 1, dept: 'general',    spot_type: 'reception' },
+  lobby_sofa_left:  { x: 85,  y: 176, floor: 1, dept: 'general',    spot_type: 'rest' },
+  lobby_sofa_right: { x: 215, y: 176, floor: 1, dept: 'general',    spot_type: 'rest' },
+  lobby_table:      { x: 150, y: 176, floor: 1, dept: 'general',    spot_type: 'rest' },
+  // 1F Cafe
+  cafe_counter:  { x: 450, y: 118, floor: 1, dept: 'general', spot_type: 'rest' },
+  cafe_table_1:  { x: 385, y: 166, floor: 1, dept: 'general', spot_type: 'rest' },
+  cafe_table_2:  { x: 515, y: 166, floor: 1, dept: 'general', spot_type: 'rest' },
+  cafe_table_3:  { x: 385, y: 223, floor: 1, dept: 'general', spot_type: 'rest' },
+  cafe_table_4:  { x: 515, y: 223, floor: 1, dept: 'general', spot_type: 'rest' },
+  // 1F HR
+  hr_desk_1: { x: 132, y: 436, floor: 1, dept: 'hr', spot_type: 'work' },
+  hr_desk_2: { x: 300, y: 436, floor: 1, dept: 'hr', spot_type: 'work' },
+  hr_desk_3: { x: 468, y: 436, floor: 1, dept: 'hr', spot_type: 'work' },
+  hr_desk_4: { x: 132, y: 493, floor: 1, dept: 'hr', spot_type: 'work' },
+  hr_desk_5: { x: 300, y: 493, floor: 1, dept: 'hr', spot_type: 'work' },
+  hr_desk_6: { x: 468, y: 493, floor: 1, dept: 'hr', spot_type: 'work' },
+  hr_interview: { x: 300, y: 514, floor: 1, dept: 'hr', spot_type: 'visitor' },
+  // 2F Engineering
+  eng_desk_1: { x: 51,  y: 177, floor: 2, dept: 'engineering', spot_type: 'work' },
+  eng_desk_2: { x: 97,  y: 177, floor: 2, dept: 'engineering', spot_type: 'work' },
+  eng_desk_3: { x: 144, y: 177, floor: 2, dept: 'engineering', spot_type: 'work' },
+  eng_desk_4: { x: 51,  y: 252, floor: 2, dept: 'engineering', spot_type: 'work' },
+  eng_desk_5: { x: 97,  y: 252, floor: 2, dept: 'engineering', spot_type: 'work' },
+  eng_desk_6: { x: 144, y: 252, floor: 2, dept: 'engineering', spot_type: 'work' },
+  // 2F Marketing
+  marketing_desk_1: { x: 220, y: 125, floor: 2, dept: 'marketing', spot_type: 'work' },
+  marketing_desk_2: { x: 272, y: 125, floor: 2, dept: 'marketing', spot_type: 'work' },
+  marketing_desk_3: { x: 325, y: 125, floor: 2, dept: 'marketing', spot_type: 'work' },
+  marketing_desk_4: { x: 220, y: 155, floor: 2, dept: 'marketing', spot_type: 'work' },
+  marketing_desk_5: { x: 272, y: 155, floor: 2, dept: 'marketing', spot_type: 'work' },
+  marketing_desk_6: { x: 325, y: 155, floor: 2, dept: 'marketing', spot_type: 'work' },
+  // 2F Product
+  product_desk_1: { x: 220, y: 268, floor: 2, dept: 'product', spot_type: 'work' },
+  product_desk_2: { x: 272, y: 268, floor: 2, dept: 'product', spot_type: 'work' },
+  product_desk_3: { x: 325, y: 268, floor: 2, dept: 'product', spot_type: 'work' },
+  product_desk_4: { x: 220, y: 301, floor: 2, dept: 'product', spot_type: 'work' },
+  product_desk_5: { x: 272, y: 301, floor: 2, dept: 'product', spot_type: 'work' },
+  product_desk_6: { x: 325, y: 301, floor: 2, dept: 'product', spot_type: 'work' },
+  // 2F Finance
+  finance_desk_1: { x: 404, y: 125, floor: 2, dept: 'finance', spot_type: 'work' },
+  finance_desk_2: { x: 455, y: 125, floor: 2, dept: 'finance', spot_type: 'work' },
+  finance_desk_3: { x: 506, y: 125, floor: 2, dept: 'finance', spot_type: 'work' },
+  finance_desk_4: { x: 404, y: 155, floor: 2, dept: 'finance', spot_type: 'work' },
+  finance_desk_5: { x: 455, y: 155, floor: 2, dept: 'finance', spot_type: 'work' },
+  finance_desk_6: { x: 506, y: 155, floor: 2, dept: 'finance', spot_type: 'work' },
+  // 2F Operations
+  ops_desk_1: { x: 404, y: 268, floor: 2, dept: 'operations', spot_type: 'work' },
+  ops_desk_2: { x: 455, y: 268, floor: 2, dept: 'operations', spot_type: 'work' },
+  ops_desk_3: { x: 506, y: 268, floor: 2, dept: 'operations', spot_type: 'work' },
+  ops_desk_4: { x: 404, y: 301, floor: 2, dept: 'operations', spot_type: 'work' },
+  ops_desk_5: { x: 455, y: 301, floor: 2, dept: 'operations', spot_type: 'work' },
+  ops_desk_6: { x: 506, y: 301, floor: 2, dept: 'operations', spot_type: 'work' },
+  // 3F Meeting Room
+  meeting_chair_1: { x: 160, y: 135, floor: 3, dept: 'general', spot_type: 'meeting' },
+  meeting_chair_2: { x: 240, y: 135, floor: 3, dept: 'general', spot_type: 'meeting' },
+  meeting_chair_3: { x: 340, y: 135, floor: 3, dept: 'general', spot_type: 'meeting' },
+  meeting_chair_4: { x: 440, y: 135, floor: 3, dept: 'general', spot_type: 'meeting' },
+  meeting_chair_5: { x: 160, y: 175, floor: 3, dept: 'general', spot_type: 'meeting' },
+  meeting_chair_6: { x: 240, y: 175, floor: 3, dept: 'general', spot_type: 'meeting' },
+  meeting_chair_7: { x: 340, y: 175, floor: 3, dept: 'general', spot_type: 'meeting' },
+  meeting_chair_8: { x: 440, y: 175, floor: 3, dept: 'general', spot_type: 'meeting' },
+  // 3F Director Office
+  director_desk:      { x: 150, y: 390, floor: 3, dept: 'management', spot_type: 'anchor' },
+  director_visitor_1: { x: 72,  y: 459, floor: 3, dept: 'management', spot_type: 'visitor' },
+  director_visitor_2: { x: 150, y: 459, floor: 3, dept: 'management', spot_type: 'visitor' },
+  director_visitor_3: { x: 228, y: 459, floor: 3, dept: 'management', spot_type: 'visitor' },
+  // 3F CEO Office
+  ceo_desk:      { x: 450, y: 390, floor: 3, dept: 'management', spot_type: 'anchor' },
+  ceo_sofa:      { x: 398, y: 482, floor: 3, dept: 'management', spot_type: 'visitor' },
+  ceo_visitor_1: { x: 450, y: 482, floor: 3, dept: 'management', spot_type: 'visitor' },
+  ceo_visitor_2: { x: 500, y: 482, floor: 3, dept: 'management', spot_type: 'visitor' },
+}
+
+export const AVATAR_COLORS: Record<string, string> = {
+  default: '#6366f1',
+  avatar1: '#ec4899',
+  avatar2: '#f59e0b',
+  avatar3: '#10b981',
+  avatar4: '#3b82f6',
+  avatar5: '#8b5cf6',
+  avatar6: '#ef4444',
+  avatar7: '#14b8a6',
+  avatar8: '#f97316',
+}

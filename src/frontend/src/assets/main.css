@@ -1,0 +1,287 @@
+@import './base.css';
+@import './styles/variables.css';
+
+/* overall situation reset  override Vue scaffolding default style */
+#app {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+}
+
+body {
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+}
+
+a {
+  text-decoration: none;
+  color: var(--color-primary);
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--color-primary-dark);
+  background: none;
+}
+
+/* overall situation transition animation */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s ease;
+}
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Element Plus overall situation coverage  dark mode */
+.el-card {
+  border-radius: var(--radius-xl, 16px) !important;
+  border: 1px solid var(--color-border) !important;
+  background: rgba(20, 30, 50, 0.25) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: box-shadow 0.3s ease, transform 0.3s ease !important;
+  color: var(--color-text-primary) !important;
+}
+
+.el-card:hover {
+  box-shadow: var(--shadow-card-hover) !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+  transform: translateY(-4px) !important;
+}
+
+/* --- Unified button style system --- */
+.el-button {
+  transition: all 0.3s ease !important;
+}
+
+.el-button--primary {
+  background: linear-gradient(135deg, #409EFF 0%, #337ecc 100%) !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.35) !important;
+  transition: all 0.3s ease !important;
+}
+
+.el-button--primary:hover {
+  box-shadow: 0 6px 20px rgba(64, 158, 255, 0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+.el-button--primary:active {
+  transform: translateY(0) scale(0.98) !important;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.35) !important;
+}
+
+.el-button--success {
+  background: linear-gradient(135deg, #67C23A 0%, #529b2e 100%) !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.35) !important;
+  transition: all 0.3s ease !important;
+}
+
+.el-button--success:hover {
+  box-shadow: 0 6px 20px rgba(103, 194, 58, 0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+.el-button--success:active {
+  transform: translateY(0) scale(0.98) !important;
+  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.35) !important;
+}
+
+.el-button--warning {
+  background: linear-gradient(135deg, #E6A23C 0%, #cf8a2e 100%) !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(230, 162, 60, 0.35) !important;
+  transition: all 0.3s ease !important;
+}
+
+.el-button--warning:hover {
+  box-shadow: 0 6px 20px rgba(230, 162, 60, 0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+.el-button--warning:active {
+  transform: translateY(0) scale(0.98) !important;
+  box-shadow: 0 2px 8px rgba(230, 162, 60, 0.35) !important;
+}
+
+.el-button--danger {
+  background: linear-gradient(135deg, #F56C6C 0%, #c45656 100%) !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(245, 108, 108, 0.35) !important;
+  transition: all 0.3s ease !important;
+}
+
+.el-button--danger:hover {
+  box-shadow: 0 6px 20px rgba(245, 108, 108, 0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+.el-button--danger:active {
+  transform: translateY(0) scale(0.98) !important;
+  box-shadow: 0 2px 8px rgba(245, 108, 108, 0.35) !important;
+}
+
+.el-button.is-disabled,
+.el-button.is-disabled:hover,
+.el-button.is-disabled:active {
+  background: #a0a0a0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+/* overall situation Markdown rendering style */
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+  margin: 12px 0 8px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+.markdown-body h1 { font-size: 23px; }
+.markdown-body h2 { font-size: 21px; }
+.markdown-body h3 { font-size: 19px; }
+.markdown-body p { margin: 6px 0; line-height: 1.6; }
+.markdown-body ul, .markdown-body ol { padding-left: 20px; margin: 6px 0; }
+.markdown-body li { margin: 4px 0; line-height: 1.6; }
+.markdown-body code {
+  background: rgba(59, 130, 246, 0.12);
+  color: #60A5FA;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+}
+.markdown-body pre {
+  background: rgba(15, 23, 42, 0.8);
+  color: #E2E8F0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 8px 0;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+.markdown-body pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+.markdown-body strong { font-weight: 600; color: var(--color-text-primary); }
+.markdown-body blockquote {
+  border-left: 3px solid var(--color-primary);
+  padding-left: 12px;
+  margin: 8px 0;
+  color: var(--color-text-secondary);
+}
+
+/* --- Input focus effects --- */
+.el-input__wrapper:focus-within {
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.15) !important;
+  border-color: #409EFF !important;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease !important;
+}
+
+.el-select .el-input__wrapper:focus-within {
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.15) !important;
+  border-color: #409EFF !important;
+}
+
+.el-textarea__inner:focus {
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.15) !important;
+  border-color: #409EFF !important;
+}
+
+/* --- Page transition: fade-slide-up --- */
+.fade-slide-up-enter-active {
+  transition: all 0.3s ease-out;
+}
+.fade-slide-up-leave-active {
+  transition: all 0.2s ease-in;
+}
+.fade-slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.fade-slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* --- Loading / Skeleton shimmer animation --- */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.el-skeleton__item {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%) !important;
+  background-size: 200% 100% !important;
+  animation: shimmer 1.5s infinite !important;
+}
+
+/* --- Enhanced scrollbar beautification --- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(64, 158, 255, 0.3), rgba(129, 140, 248, 0.3));
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(64, 158, 255, 0.5), rgba(129, 140, 248, 0.5));
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* --- Table styling --- */
+.el-table {
+  border-radius: var(--radius-lg, 12px) !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+.el-table th.el-table__cell {
+  background: rgba(30, 41, 59, 0.6) !important;
+  color: var(--color-text-primary) !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+.el-table td.el-table__cell {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08) !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
+  background-color: rgba(64, 158, 255, 0.06) !important;
+}
+
+.el-table__body tr {
+  transition: background-color 0.2s ease !important;
+}
